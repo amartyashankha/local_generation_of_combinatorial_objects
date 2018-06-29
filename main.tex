@@ -1,0 +1,127 @@
+\def\conf{0}
+% * <themis.gouleakis@gmail.com> 2015-10-09T19:27:57.769Z:
+%
+% 
+%
+\def\icalp{0}
+\def\both{0}
+
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+
+
+\usepackage{graphicx,amsfonts,amsmath,amssymb,epsfig,hyperref,color}
+\usepackage{algorithm}
+\usepackage{pdfpages}
+\usepackage{enumitem}
+\usepackage{multirow}
+\usepackage{thm-restate}
+
+\usepackage{mathtools}
+
+\usepackage[noend]{algpseudocode}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\usepackage{verbatim}
+\usepackage{comment}
+\usepackage{hyperref}
+
+\usepackage{boxedminipage}
+\usepackage{fullpage}
+\usepackage{array}
+\usepackage[normalem]{ulem}
+
+\usepackage{relsize}
+\usepackage{amsthm}
+
+%\usepackage{amsmath,amssymb,amsthm}
+%\theoremstyle{definition}
+%\newtheorem{defn}{Definition}
+%\newtheorem{ques}{Question}
+
+%\theoremstyle{remark}
+%\newtheorem{obs}{Observation}
+%\newtheorem{rem}{Remark}
+
+%\theoremstyle{definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+\def\ll{\left}
+\def\rr{\right}
+\def\RR{\mathbb{R}}
+\def\ee{\mathbb{E}}
+\def\pp{\mathbb{P}}
+\def\bo{\mathcal{O}}
+\def\Bo{\mathlarger{\mathcal{O}}}
+\def\bt{\Theta}
+\def\polylog{\mathrm{polylog}\;}
+
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\SL}[2]{\sum\limits_{#1}^{#2}}
+\newcommand{\BSL}[2]{\mathlarger{\mathlarger{\sum}\limits_{#1}^{#2}}}
+\newcommand{\PL}[2]{\prod\limits_{#1}^{#2}}
+\newcommand{\BPL}[2]{\mathlarger{\mathlarger{\prod}\limits_{#1}^{#2}}}
+
+\newcommand{\anak}[1]{\todo[inline,color=green]{Anak: #1}}
+
+%\usepackage{hyperref}
+\usepackage{multirow}
+
+\usepackage[margin=10pt]{subfig}
+
+\usepackage{graphicx}
+\usepackage{colortbl}
+\newcommand{\lemautorefname}{Lemma}
+\usetikzlibrary{
+  shapes.multipart,
+  matrix,
+  positioning,
+  shapes.callouts,
+  shapes.arrows,
+  calc}
+
+
+\title{Distributed Density Estimation} 
+
+\date{}
+%\author{
+%Amartya Shankha Biswas
+%\thanks{MIT, Cambridge MA 02139.
+%E-mail: {\tt  asbiswas@mit.edu}.}
+%}
+
+
+\begin{document}
+
+
+\maketitle
+
+\section{Miscellaneous Results}
+\label{sec:miscellaneous_results}
+
+
+\input{MISC/domino}
+
+\input{MISC/permutation}
+
+\input{MISC/dyck}
+
+
+\bibliographystyle{alpha}
+
+\bibliography{bib}
+
+
+\end{document}
