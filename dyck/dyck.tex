@@ -1,0 +1,42 @@
+\subsection{Generating Dyck Paths}
+Our general recursive step is as follows.
+We consider a sequence of length $2S$ comprising of $2U$ up moves ($+1$) and $2D$ down moves ($-1$).
+Additionally, the sum of any initial sequence {\color{red} prefix?} canon be less than $k-1$.
+Without loss of generality, let's assume that $2D\le S$. If this were not the case,
+we could simply flip the sequence and negate the elements.
+This essentially means that the overall Dyck path is non-decreasing.
+
+\begin{lemma}
+$S-2D = \Bo(\log n\sqrt S) \implies U-D = \Bo(\log n\sqrt S)$
+\label{lem:dyck_var0}
+\end{lemma}
+
+We want to sample the height of this path after $S$ steps.
+This is the same as sampling the number of $(+1)$s that get assigned to the first half of the elements in the sequence.
+We define $p_d$ as the probability that exactly $D-d$ $(-1)$s get assigned to the first half.
+This means that exactly $U+d$ $(+1)$s get assigned to the first half.
+Consequently, the second half will contain exactly $D+d$ $(-1)$s and $U-d$ $(+1)$s.
+
+Let us first compute this probability.
+$$
+p_d = \frac{D_{left}\cdot D_{right}}{D_{tot}}
+$$
+Where $D_{left}$ denotes the number of valid starting sequences (first half)
+and $D_{right}$ denotes the number of valid ending sequences.
+Here, \textit{valid} means that each half sequence gets the appropriate number of ups and downs
+and the initial sums never drop below $1-k$.
+For, $D_{right}$, we will start the Dyck path from the end of the $2S$ sequence.
+In this case the invalidation threshold will be a different $k'$.
+This $k'$ is the final height of the $2S$ sequence. So, $k'=k+2U-2D = k+4S-2D$. We will use this fact extensively moving forward.
+
+Also, $D_{tot}$ is the total number of possible sequences of length $2S$ , given the initial conditions.
+This value is considered by constructing paths in the original direction i.e. the value of $k$ is the same.
+
+\subsection{The Simple Case}
+The problem of sampling reduces to the binomial sampling case when $k > \mathcal{O}(\log n)\sqrt S$ for some constant $c$.
+In this case, the we can simply approximate the probability as
+$$
+\frac{{{S}\choose{D-d}}\cdot{{S}\choose{D+d}}}{{{2S}\choose{2D}}}
+$$
+This is because the random paths will not have initial sums less than $1-k$ with high probability.
+Note that this uses the assumption that we have an increasing path.

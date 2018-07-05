@@ -1,0 +1,37 @@
+\section{Catalan Objects}%
+\label{sec:catalan_objects}
+
+
+\subsection{Dyck Paths}
+\label{sub:dyck_paths}
+
+
+Dyck paths are one interpretation of the Catalan numbers.
+Here, we will instead consider a more general form of Dyck Paths, which correspond to numbers in the \textit{Catalan Trapezoid}.
+
+A Dyck path can be constructed as a $1D$ random walk with $2n$ steps,
+where the ends of the walk are pinned to zero (Figure~\ref{fig:dyck}).
+This path also has the additional restriction that the walk can never reach negative values.
+The number of possible Dyck paths is the $n^{th}$ Catalan number --
+$$C_n = \frac{1}{n+1}\cdot {2n\choose n}$$
+We will attempt to support queries to a uniformly random instance of a Dyck path.
+Specifically, we will want to query the position of the $i^{th}$ index.
+
+\subsection{Catalan Trapezoid}
+First, we define Catalan trapezoids as presented in \cite{trap}.
+Let $C_k(n,m)$ be the $(n,m)^{th}$ entry of the Catalan trapezoid of order $k$, where $C_1(n,m)$ corresponds to the Catalan triangle.
+
+The interpretation is as follows. Consider a sequence of $n$ $(+1)$s and $m$ $(-1)$,
+such that the sum of any initial sub-string is not less than $1-k$.
+This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero.
+The total number of such paths is exactly $C_k(n,m)$.
+
+Now, we state a result from \cite{trap} without proof
+$$
+C_k(n,m)=
+\begin{cases}
+{n+m}\choose m &0\le m<k\\
+{{n+m}\choose{m}} - {{n+m}\choose{m-k}} &k\le m\le n+k-1\\
+0 &m>n+k-1
+\end{cases}
+$$

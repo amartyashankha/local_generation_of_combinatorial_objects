@@ -1,0 +1,62 @@
+\section{Random Coloring of a Graph}%
+\label{sec:random_coloring_of_a_graph}
+
+We wish to locally sample an uniformly random coloring of a graph.
+A $q$-coloring of a graph $G = (V, E)$ is a function $\sigma : V\rightarrow [q]$,
+such that for all $(u,v)\in E$, $\sigma_u \not= \sigma_v$.
+We will consider only bounded degree graphs, i.e. graphs with max degree $\le \Delta$.
+Otherwise, the coloring problem becomes NP-hard\todo{cite}.
+
+Using the technique of path-coupling, Vigoda \todo{cite} showed that for $q > 2\Delta$,
+one can sample an uniformly random coloring by using a MCMC algorithm.
+
+\subsection{Glauber Dynamics}%
+\label{sub:glauber_dynamics}
+
+The Markov Chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
+Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
+
+In each step of the Markov process, a pair $(v, c)\in V\times [q]$ is sampled uniformly at random.
+Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in a conflict with $v$'s neighbors,
+i.e. $c\not\in \left\{ X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $X_v^{t+1}\leftarrow c$.
+
+After running the MC for $T = \mathcal{O}(n\log n)$ steps we reach the stationary distribution ($\epsilon$ close),
+and the coloring is an uniformly random one.
+
+\subsection{Local Coloring Algortihm}%
+\label{sub:local_coloring_algortihm}
+
+Given a vertex $v$, the local-access generator has to output the color of $v$
+after running $T = \mathcal{O}(n\log n) = k\cdot n\log n$ steps of Glauber Dynamics where $k$ is a constant.
+For this algorithm to work, we will take $q > 2k\Delta\log n = \mathcal{O}(\Delta\log n)$.
+
+\subsection{Modified Glauber Dynamics}%
+\label{sub:modified_glauber_dynamics}
+
+Now we define a modified Markov Chain, with each step called an epoch.
+In the $i^{th}$ epoch, denoted by $\mathcal E_i$,
+\begin{itemize}
+    \item Pick a random permutation $\pi^{(i)}$ of the vertices $V$.
+    \item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$.
+    \item Perform the standard update using the pairs
+          $\left\langle (\pi^{(i)}_1, c_1), (\pi^{(i)}_2, c_2), \cdots, (\pi^{(i)}_n, c_n)\right\rangle$.
+\end{itemize}
+
+\begin{theorem}
+\label{thm:modified_mixing}
+After $k\log n$ epochs, the Markov Chain is mixed.
+\end{theorem}
+
+
+
+First we consider T iterations of the above MC, and the corresponding vertex and color samples.
+\[
+\left\langle (v_1, c_1), (v_2, c_2), (v_3, c_3), \cdots, (v_T, c_T)\right\rangle \thicksim_{\mathcal U} \left( V\times [q]\right)^T
+\]
+A position $i$ in the sequence is labeled \emph{``ACCEPT''} if at the $i^{th}$ step,
+$v_i$ was recolored to $c_i$ (no conflicts with neighbors).
+Otherwise, position $i$ is marked \emph{``REJECT''}.
+
+Given a vertex $v$, we consider all instances of $(v, *)$, where $*\in [q]$.
+Let the last such occurrence be $(v, c_t)$.
+We now need to compute whether position $i$ was marked \emph{``ACCEPT''} or \emph{``REJECT''}.
