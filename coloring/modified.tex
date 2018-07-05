@@ -1,0 +1,16 @@
+\subsection{Modified Glauber Dynamics}%
+\label{sub:modified_glauber_dynamics}
+
+Now we define a modified Markov Chain, with each step called an epoch.
+In the $i^{th}$ epoch, denoted by $\mathcal E_i$,
+\begin{itemize}
+    \item Pick a random permutation $\pi^{(i)}$ of the vertices $V$.
+    \item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$.
+    \item Perform the standard update using the pairs
+          $\left\langle (\pi^{(i)}_1, c_1), (\pi^{(i)}_2, c_2), \cdots, (\pi^{(i)}_n, c_n)\right\rangle$.
+\end{itemize}
+
+\begin{theorem}
+\label{thm:modified_mixing}
+After $k\log n$ epochs, the Markov Chain is mixed.
+\end{theorem}

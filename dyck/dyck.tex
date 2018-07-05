@@ -1,3 +1,57 @@
+\section{Catalan Objects and Dyck Paths}%
+\label{sec:catalan_objects}
+
+Dyck paths are one interpretation of the Catalan numbers.
+Here, we will instead consider a more general form of Dyck Paths, which correspond to numbers in the \textit{Catalan Trapezoid}.
+
+A Dyck path can be constructed as a $2n$ step random walk on the $\mathbb Z^2$ lattice,
+starting at the origin $(0,0)$ and ending at $(n, n)$ (Figure~\ref{fig:basic_dyck}).
+Each step in the walk moves one unit either along the positive $x$-axis or the positive $y$-axis.
+Given these restrictions, we would obtain a 1D random walk pinned to zero  on both sides.
+A Dyck path also has the additional restriction that for any position $(x, y)$ on the path, $y-x > 0$
+i.e. the walk is always on one side of the diagonal.
+
+The number of possible Dyck paths is the $n^{th}$ Catalan number --
+$$C_n = \frac{1}{n+1}\cdot {2n\choose n}$$
+We will attempt to support queries to a uniformly random instance of a Dyck path.
+Specifically, we will want to query the position of the $i^{th}$ index.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{dyck/basic_dyck_path.pdf}
+    \caption{Simple Dyck path from $(0, 0)$ to $(20, 20)$}
+    \label{fig:basic_dyck}
+\end{figure}
+
+
+\subsection{Catalan Trapezoids and Generalized Dyck Paths}
+First, we define Catalan trapezoids as presented in \cite{trap}.
+Let $C_k(n,m)$ be the $(n,m)^{th}$ entry of the Catalan trapezoid of order $k$, where $C_1(n,m)$ corresponds to the Catalan triangle.
+
+The interpretation is as follows:
+Consider a random walk from $(0,0)$ to $(m, n)$ ($n$ steps along the $y$-axis, and $m$ steps along the $x$-axis),
+such that for any position $(x, y)$ along the walk, $y-x > 1-k$ (Figure~\ref{fig:complex_dyck})
+i.e. the walk is always on one side of the shifted diagonal.
+The total number of such paths is exactly $C_k(n,m)$.
+For $k = 1$, we obtain the definition of the simple Dyck path (Figure~\ref{fig:basic_dyck}).
+
+Now, we state a result from \cite{trap} without proof
+$$
+C_k(n,m)=
+\begin{cases}
+{n+m}\choose m &0\le m<k\\
+{{n+m}\choose{m}} - {{n+m}\choose{m-k}} &k\le m\le n+k-1\\
+0 &m>n+k-1
+\end{cases}
+$$
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.7\textwidth]{dyck/complex_dyck_path.pdf}
+    \caption{Complex Dyck path from $(0, 0)$ to $(18, 20)$ with $k = 2$. Notice that the diagonal is shifted.}
+    \label{fig:complex_dyck}
+\end{figure}
+
 \subsection{Generating Dyck Paths}
 Our general recursive step is as follows.
 We consider a sequence of length $2S$ comprising of $2U$ up moves ($+1$) and $2D$ down moves ($-1$).
@@ -40,3 +94,5 @@ $$
 $$
 This is because the random paths will not have initial sums less than $1-k$ with high probability.
 Note that this uses the assumption that we have an increasing path.
+
+\input{dyck/calculations}
