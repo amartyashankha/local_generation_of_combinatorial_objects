@@ -1,8 +1,4 @@
 \def\conf{0}
-% * <themis.gouleakis@gmail.com> 2015-10-09T19:27:57.769Z:
-%
-% 
-%
 \def\icalp{0}
 \def\both{0}
 
@@ -73,6 +69,7 @@
 \newcommand{\BSL}[2]{\mathlarger{\mathlarger{\sum}\limits_{#1}^{#2}}}
 \newcommand{\PL}[2]{\prod\limits_{#1}^{#2}}
 \newcommand{\BPL}[2]{\mathlarger{\mathlarger{\prod}\limits_{#1}^{#2}}}
+\newcommand{\func}[1]{\textsc{#1}}
 
 \newcommand{\anak}[1]{\todo[inline,color=green]{Anak: #1}}
 
@@ -115,16 +112,18 @@ E-mail: {\tt  asbiswas@mit.edu}.}
 
 \input{domino}
 
-\input{permutation}
+%\input{permutation}
 
-\input{dyck/dyck}
+%\input{dyck/dyck}
 
-\input{coloring/coloring}
+%\input{coloring/coloring}
 
 
 \bibliographystyle{alpha}
 
 \bibliography{bib}
+
+\input{appendix/appendix}
 
 
 \end{document}

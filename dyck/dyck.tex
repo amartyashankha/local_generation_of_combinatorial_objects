@@ -4,34 +4,34 @@
 Dyck paths are one interpretation of the Catalan numbers.
 Here, we will instead consider a more general form of Dyck Paths, which correspond to numbers in the \textit{Catalan Trapezoid}.
 
-A Dyck path can be constructed as a $2n$ step random walk on the $\mathbb Z^2$ lattice,
-starting at the origin $(0,0)$ and ending at $(n, n)$ (Figure~\ref{fig:basic_dyck}).
-Each step in the walk moves one unit either along the positive $x$-axis or the positive $y$-axis.
+A Dyck path can be constructed as a $2n$ step one-dimensional random walk (Figure~\ref{fig:basic_dyck}).
+Each step in the walk moves one unit along the positive $x$-axis and one unit up or down the positive $y$-axis.
 Given these restrictions, we would obtain a 1D random walk pinned to zero  on both sides.
-A Dyck path also has the additional restriction that for any position $(x, y)$ on the path, $y-x > 0$
-i.e. the walk is always on one side of the diagonal.
+A Dyck path also has the additional restriction that the $y$-coordinate of any point on the random walk is $\ge 0$.
+i.e. the walk is always north of the origin.
 
 The number of possible Dyck paths is the $n^{th}$ Catalan number --
 $$C_n = \frac{1}{n+1}\cdot {2n\choose n}$$
 We will attempt to support queries to a uniformly random instance of a Dyck path.
-Specifically, we will want to query the position of the $i^{th}$ index.
+Specifically, we will want to answer queries of the form \func{Height}$(i)$, which returns the position of the path after $i$ steps.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{dyck/basic_dyck_path.pdf}
-    \caption{Simple Dyck path from $(0, 0)$ to $(20, 20)$}
+    \includegraphics[width=\textwidth]{dyck/basic_dyck_path.pdf}
+    \caption{Simple Dyck path with $n = 35$.}
     \label{fig:basic_dyck}
 \end{figure}
 
 
 \subsection{Catalan Trapezoids and Generalized Dyck Paths}
 First, we define Catalan trapezoids as presented in \cite{trap}.
-Let $C_k(n,m)$ be the $(n,m)^{th}$ entry of the Catalan trapezoid of order $k$, where $C_1(n,m)$ corresponds to the Catalan triangle.
+Let $C_k(n,m)$ be the $(n,m)^{th}$ entry of the Catalan trapezoid of order $k$,
+where $C_1(n,m)$ corresponds to the Catalan triangle.
 
-The interpretation is as follows:
-Consider a random walk from $(0,0)$ to $(m, n)$ ($n$ steps along the $y$-axis, and $m$ steps along the $x$-axis),
-such that for any position $(x, y)$ along the walk, $y-x > 1-k$ (Figure~\ref{fig:complex_dyck})
-i.e. the walk is always on one side of the shifted diagonal.
+The interpretation is as follows. Consider a sequence of $n$ up-steps and $m$ down-steps,
+such that the sum of any initial sub-string is not less than $1-k$.
+This means that we start our Dyck path at a height of $k-1$,
+and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
 The total number of such paths is exactly $C_k(n,m)$.
 For $k = 1$, we obtain the definition of the simple Dyck path (Figure~\ref{fig:basic_dyck}).
 
@@ -47,9 +47,9 @@ $$
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.7\textwidth]{dyck/complex_dyck_path.pdf}
-    \caption{Complex Dyck path from $(0, 0)$ to $(18, 20)$ with $k = 2$. Notice that the diagonal is shifted.}
-    \label{fig:complex_dyck}
+    \includegraphics[width=\textwidth]{dyck/complex_dyck_path.pdf}
+    \caption{Complex Dyck path with $n = 25$, $m = 22$ and $k = 3$.
+             Notice that the boundary is shifted.} \label{fig:complex_dyck}
 \end{figure}
 
 \subsection{Generating Dyck Paths}
@@ -70,29 +70,34 @@ This is the same as sampling the number of $(+1)$s that get assigned to the firs
 We define $p_d$ as the probability that exactly $D-d$ $(-1)$s get assigned to the first half.
 This means that exactly $U+d$ $(+1)$s get assigned to the first half.
 Consequently, the second half will contain exactly $D+d$ $(-1)$s and $U-d$ $(+1)$s.
+\todo{What is $d$ is negative?}
+
 
 Let us first compute this probability.
 $$
 p_d = \frac{D_{left}\cdot D_{right}}{D_{tot}}
 $$
-Where $D_{left}$ denotes the number of valid starting sequences (first half)
+Here, $D_{left}$ denotes the number of valid starting sequences (first half)
 and $D_{right}$ denotes the number of valid ending sequences.
 Here, \textit{valid} means that each half sequence gets the appropriate number of ups and downs
 and the initial sums never drop below $1-k$.
 For, $D_{right}$, we will start the Dyck path from the end of the $2S$ sequence.
 In this case the invalidation threshold will be a different $k'$.
-This $k'$ is the final height of the $2S$ sequence. So, $k'=k+2U-2D = k+4S-2D$. We will use this fact extensively moving forward.
+This $k'$ is the final height of the $2S$ sequence. So, $k'=k+2U-2D = k+4S-2D$.
+We will use this fact extensively moving forward.
 
-Also, $D_{tot}$ is the total number of possible sequences of length $2S$ , given the initial conditions.
-This value is considered by constructing paths in the original direction i.e. the value of $k$ is the same.
+Also, $D_{tot}$ is the total number of possible sequences of length $2S$, given the initial conditions.
+Note that in this case the threshold remains at $k$.
 
 \subsection{The Simple Case}
 The problem of sampling reduces to the binomial sampling case when $k > \mathcal{O}(\log n)\sqrt S$ for some constant $c$.
+This is because with high probability, will never dip below the threshold.
 In this case, the we can simply approximate the probability as
 $$
 \frac{{{S}\choose{D-d}}\cdot{{S}\choose{D+d}}}{{{2S}\choose{2D}}}
 $$
-This is because the random paths will not have initial sums less than $1-k$ with high probability.
-Note that this uses the assumption that we have an increasing path.
+This is because unconstrained random walks will not dip below the $1-k$ threshold with high probability.
+This problem was solved in \cite{huge} using $\mathcal O(poly(\log n))$ resources.
+%Note that this uses the assumption that we have an increasing path.
 
 \input{dyck/calculations}

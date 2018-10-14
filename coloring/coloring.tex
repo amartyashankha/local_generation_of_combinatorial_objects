@@ -32,7 +32,8 @@ For this algorithm to work, we will take $q > 2k\Delta\log n = \mathcal{O}(\Delt
 
 We can consider T iterations of the above MC, and the corresponding vertex and color samples.
 \[
-\left\langle (v_1, c_1), (v_2, c_2), (v_3, c_3), \cdots, (v_T, c_T)\right\rangle \thicksim_{\mathcal U} \left( V\times [q]\right)^T
+\left\langle (v_1, c_1), (v_2, c_2), (v_3, c_3), \cdots, (v_T, c_T)\right\rangle
+\thicksim_{\mathcal U} \left( V\times [q]\right)^T
 \]
 A position $i$ in the sequence is labeled \emph{``ACCEPT''} if at the $i^{th}$ step,
 $v_i$ was recolored to $c_i$ (no conflicts with neighbors).

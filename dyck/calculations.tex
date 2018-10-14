@@ -1,17 +1,17 @@
 \subsection{Path Segments Close to Zero}
 The problem arises when we $k <\mathcal{O}(\log n)\sqrt{S}$. In this case we need to compute the actual probability,
 Using the formula from \cite{trap}, we find that.
-\begin{align}
-D_{left} = {{S}\choose{D-d}}-{{S}\choose{D-d-k}} &&D_{right} = {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}
-\end{align}
-Here, $k' = k+2U-2D$, and so $k' = \Bo(\log n)\sqrt S$.\todo{prove using Lemma~\ref{lem:dyck_var0}}
+{\scriptsize
+    \begin{align}
+        D_{left} = {{S}\choose{D-d}}-{{S}\choose{D-d-k}}
+        &&D_{right} = {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}
+        &&D_{tot} = {{2S}\choose{2D}}-{{2S}\choose{2D-k}}
+    \end{align}
+}
+Here, $k' = k+2U-2D$, and so $k' = \Bo(\log n)\sqrt S$ (using Lemma~\ref{lem:dyck_var0}).
 
-Finally, we compute the total number of Dyck paths as
-$$
-D_{tot} = {{2S}\choose{2D}}-{{2S}\choose{2D-k}}
-$$
-
-Now, we are going to use the following Lemma from \cite{huge}.
+The final distribution we wish to sample from is given by $\{p_d\}_d$ where $p_d = \frac{D_{left}\cdot D_{right}}{D_{tot}}$.
+To acieve this, we will use the following Lemma from \cite{huge}.
 \begin{lemma}
 \label{lem:huge}
 Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
@@ -27,7 +27,7 @@ Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
 Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
 \end{lemma}
 
-In this process, we will first disregard all values of $d$ where $|d|>\Theta(\sqrt S)$.
+In this process, we will first disregard all values of $d$ where $|d|>\Theta(\log n\sqrt S)$.
 The probability mass associated with these values can be shown to be negligible \todo{bound variance of path}.
 
 Next, we will construct an appropriate $\{q_i\}$ and show that $p_d < \log^{\mathcal{O}(1)} n\cdot q_d$
@@ -38,54 +38,78 @@ q_d = \frac{{S\choose D-d}\cdot{S\choose D+d}}{{2S\choose 2D}} = \frac{{S\choose
 $$
 It is shown in \cite{huge} that this distribution is closely implementable.
 
-\begin{lemma}
-First we show that $D_{left} \le \frac{c_1\cdot k}{\sqrt{S}}\cdot{{S}\choose{D-d}}$ for some constant $c_1$.
-\end{lemma}
-\begin{proof}
-This involves some simple manipulations.
-\begin{align}
-D_{left} &= {{S}\choose{D-d}}-{{S}\choose{D-d-k}}\\
-&= {{S}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(S-D-d+k)(S-D-d+k-1)\cdots(S-D-d+1)}\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{S-D+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\sqrt{U})}{U+d+k}\right)^k\right]\\
-&\le \frac{k}{\Theta(\sqrt{S})}\cdot{{S}\choose{D-d}}
-\end{align}
-\end{proof}
+First, we consider the case where $k\cdot k'\le 2U+1$.
+In this case, we use loose bounds for $D_{left} < \binom{S}{D-d}$ and $D_{right} < \binom{S}{U-d}$.
+We also use the following lemma (proven in Section~\ref{sec:dyck_appendix}).
 
-\begin{lemma}
-Similarly, we show that $D_{right} < \frac{c_2\cdot k'}{\sqrt{S}}\cdot{{S}\choose{U-d}}$ for some constant $c_2$.
-\end{lemma}
-\begin{proof}
-\begin{align}
-D_{right} &= {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}\\
-&= {{S}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(S-U-d+k')(S-U-d+k'-1)\cdots(S-U-d+1)}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{S-U+d+k'}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\sqrt U)}{U+k+d}\right)^{k'}\right]\\
-&\le \frac{k'}{\Theta(\sqrt{S})}\cdot{{S}\choose{U-d}}
-\end{align}
-\end{proof}
+\begin{restatable}{lemma}{D_tot_far_boundary}
+\label{lem:D_tot_far_boundary}
+When $kk' > 2U + 1$, $D_{tot} > \frac 12\cdot \binom{2S}{2D}$.
+\end{restatable}
 
-Finally, we need to lower bound the value of $D_{tot}$.
+Combining the three bounds we obtain $p_d < \frac 12 q_d$.
+Intuitively, in this case the dyck boundary is far away, and therefore the number of possible paths
+is only a constant factor away from the number of unconstrained paths (no boundary).
 
-\begin{lemma}
-We claim that $D_{tot} < \frac{c_3\cdot k\cdot k'}{S}\cdot{{2S}\choose{2D}}$ for some constant $c_3$.
-\end{lemma}
+The case where the boundaries are closer (i.e. $k\cdot k' \le 2U+1$) is trickier,
+since the individual counts need not be close to the corresponding binomial counts.
+However, in this case we can still ensure that the sampling probability is within
+poly-logarithmic factors of the binomial sampling probability.
+We use the following lemmas (proven in Section~\ref{sec:dyck_appendix}).
+
+\begin{restatable}{lemma}{D_left_bound}
+\label{lem:D_left_bound}
+$D_{left} \le c_1 \frac{ k\cdot\log n}{\sqrt{S}}\cdot{{S}\choose{D-d}}$ for some constant $c_1$.
+\end{restatable}
+
+\begin{restatable}{lemma}{D_right_bound}
+\label{lem:D_right_bound}
+$D_{right} < c_2 \frac{k'\cdot log n}{\sqrt{S}}\cdot{{S}\choose{U-d}}$ for some constant $c_2$.
+\end{restatable}
+
+\begin{restatable}{lemma}{D_tot_near_boundary}
+\label{lem:D_tot_near_boundary}
+When $kk' \le 2U + 1$, $D_{tot} < c_3 \frac{k\cdot k'}{S}\cdot{{2S}\choose{2D}}$ for some constant $c_3$.
+\end{restatable}
+
+We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log^2 n)$.
+Now, we can apply Lemma~\ref{lem:huge} to sample the value of $d$,
+which gives us the height of the Dyck path at the midpoint of the two given points.
+
+\begin{theorem}
+\label{thm:dyck_midpoint_sampling}
+There is an algorithm that given two points at distance $a$ and $b$ (with $a < b$) along a Dyck path of length $2n$,
+with the guarantee that no position between $a$ and $b$ has been sampled yet,
+returns the height of the path halfway between $a$ and $b$.
+Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
+\end{theorem}
 \begin{proof}
-\begin{align}
-D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
-&= {{2S}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2S-2D+k)(2S-2D+k-1)\cdots(2S-2D+1)}\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2S-2D+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
-&\ge \frac{k\cdot k'}{\Theta(S)}\cdot{{2S}\choose{2D}}
-\end{align}
+If $b-a$ is even, we can set $S = (b-a)/2$.
+Otherwise, we first sample a single step from $a$ to $a+1$, and then set $S = (b-a-1)/2$.
+Since there are only two possibilities for a single step,
+we can explicitly compute an approximation of the probabilities, and then sample accordingly.
+Now, if $S > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
+to obtain a $\mathcal O(poly(\log n))$ algorithm.
+Otherwise, we sample each step induividually.
+Since there are only $2S = \Theta(\log^2 n)$ steps, the sampling is still efficient.
 \end{proof}
 
 \begin{theorem}
-We can now put these lemmas together to show that $p_d/q_d \le c = c_1\cdot c_2/c_3 = \Theta(1)$.
-This satisfies all the conditions of Lemma~\ref{lem:huge} from \cite{huge}.
-We simply need to set the accept probability less than $p_d/(c\cdot q_d)$.
+\label{thm:dyck_sampling}
+There is an algorithm that provides sample access to a Dyck path of length $2n$,
+by answering queries of the form \func{Height}$(x)$ with the correctly sampled height of the Dyck path at position $x$
+using only $\mathcal O(poly(\log n))$ resources per query.
 \end{theorem}
+\begin{proof}
+The algorithm maintains a successor-predecessor data structure (e.g. Van Emde Boas tree)
+to store all positions $x$ that have already been queried.
+Each newly queried position is added to this structure.
+Given a query \func{Height}$(x)$, the algorithm first finds the successor and predecessor
+(say $a$ and $b$) of $x$ among the alredy queried positions.
+This provides us the quarantee required to apply Theorem~\ref{thm:dyck_midpoint_sampling},
+which allows us to query the height at the midpoint of $a$ and $b$.
+We then binary search by updating either the successor or predecessor of $x$.
+Once the interval length becomes less than $\Theta(\log^2 n)$,
+we perform the full sampling (as in Theorem~\ref{thm:dyck_midpoint_sampling}) which provides us the height at position $x$.
+\end{proof}
+
