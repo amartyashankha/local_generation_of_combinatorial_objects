@@ -1,10 +1,7 @@
-\section{Domino Tiling}
+\section{Domino Tiling the $2\times n$ grid}
 We will consider the problem of tiling a square grid with dominos.
-This problem has a long histor and various importtant applications in statistical physics.
-Specifically, we will focus on the local generation of domino tilings from the uniform distribution.
-
-\subsection{$2\times n$ Domino Tiling}
-The simplest version of the problem is one where we are given a $2\times n$ grid (Figure~\ref{fig:dom2}.
+This problem has a long history and various importtant applications in statistical physics.
+Specifically, we will focus on the local generation of domino tilings of a $2\times n$ grid from the uniform distribution.
 The queries will be as an index, and the generator should report the orientation of the domino at the $i^{th}$ position in the grid.
 %\begin{figure}[htbp]
     %\centering
@@ -14,7 +11,6 @@ The queries will be as an index, and the generator should report the orientation
 %\end{figure}
 
 It is a well known result \todo{cite} that the number of tilings of a $2\times n$ grid is exactly $F_n$.
-
 To aid with generalization, we will instead allow the generator to respond with the splitting boundary of the current tiling instead.
 For example, in Figure~\ref{fig:b20}, the boundary is a vertical line at the specified position.
 In Figure~\ref{fig:b21}, the boundary is horizontal, indicating that there are two horizontal dominos at that location.
