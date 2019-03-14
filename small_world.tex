@@ -1,0 +1,152 @@
+\section{Local-Access Generators for Random Directed Graphs}
+\label{sec:small_world}
+
+In this section, we consider Kleinberg's Small-World model \cite{kleinberg, klein}
+where the probability that a \emph{directed} edge $(u,v)$ exists is $\min\{c/(\func{dist}(u,v))^2, 1\}$.
+Here, $\func{dist}(u,v)$ is the Manhattan distance between $u$ and $v$ on a $\sqrt n\times\sqrt n$ grid.
+We begin with the case where $c = 1$, then generalize to different values of $c = \log^{\pm\Theta(1)}(n)$. 
+We aim to support $\func{all-neighbors}$ queries using $\poly(\log n)$ resources. 
+This returns the entire list of out-neighbors of $v$.
+
+\subsection{Generator for $c=1$}
+
+%Let $X_{u,v}$ denote the Bernoulli indicator variable for the event that that $(u,v)$ exists; all $X_{u,v}$'s are independent, and unlike the undirected case, $X_{u,v}$ and $X_{v,u}$ are different random variables. Moreover, 
+Observe that since the graphs we consider here are directed, the answers to the $\func{all-neighbor}$ queries are all independent: each vertex may determine its out-neighbors independently.
+Given a vertex $v$, we consider a partition of all the other vertices of the graph into sets $\{\Gamma^v_1, \Gamma^v_2,\ldots\}$ by distance: $\Gamma^v_k = \{u: \func{dist}(v,u) = k\}$ contains all vertices at a distance $k$ from vertex $v$. Observe that $|\Gamma^v_k|\leq 4k = O(k)$. Then, the expected number of edges from $v$ to vertices in $\Gamma^v_k$ is therefore $|\Gamma^v_k|\cdot 1/k^2 = O(1/k)$.
+Hence, the expected degree of $v$ is at most $\sum_{k=1}^{2(\sqrt{n}-1)}O(1/k) = O(\log n)$.
+It is straightforward to verify that this bound holds with high probability (use Hoeffding's inequality).
+Since the degree of $v$ is small, in this model we can afford to perform \func{all-neighbors} queries instead of \func{next-neighbor} queries using an additional $\poly(\log n)$ resources.
+
+Nonetheless, internally in our generator, we sample for our neighbors one-by-one similarly to how we process \func{next-neighbor} queries.
+We perform our sampling in two phases.
+In the first phase, we sample a distance $d$, such that the next neighbor closest to $v$ is at distance $d$.
+We maintain $\LAST[v]$ to be the last sampled distance.
+In the second phase, we sample all neighbors of $v$ at distance $d$, under the assumption that there must be at least one such neighbor.
+For simplicity, we sample these neighbors as if there are \emph{full} $4d$ vertices at distance $d$ from $v$:
+some sampled neighbors may lie outside our $\sqrt n\times\sqrt n$ grid, which are simply discarded.
+As the running time of our generator is proportional to the number of generated neighbors,
+then by the bound on the number of neighbors, this assumption does not asymptotically worsen the performance of the generator.
+
+\subsubsection{Phase 1: Sample the distance $D$}
+Let $a = \LAST[v] + 1$, and let $\distr{D}(a)$ to denote the probability distribution of the distance where the next closest neighbor of $v$ is located, or $\bot$ if there is no neighbor at distance at most $2(\sqrt{n}-1)$.
+That is, if $D\sim\distr{D}(a)$ is drawn, then we proceed to Phase 2 to sample all neighbors at distance $D$.
+We repeat the process by sampling the next distance from $\distr{D}(a+D)$ and so on until we obtain $\bot$, at which point we return our answers and terminate.
+
+To sample the next distance, we perform a binary search: we must evaluate the CDF of $\distr{D}(a)$.
+The CDF is given by $\pp[D\leq d]$ where $D\sim\distr{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
+As usual, we compute the probability of the negation: there is \emph{no} neighbor at distance at most $d$.
+Recall that each distance $i$ has exactly $|\Gamma_i^v| = 4i$ vertices, and the probability of a vertex $u \in \Gamma_i^v$ is not a neighbor is exactly $1-1/i^2$.
+So, the probability that there is no neighbor at distance $i$ is $(1-1/i^2)^{4i}$.
+Thus, for $D\sim\distr{D}(a)$ and $d \leq 2(\sqrt{n}-1)$,
+\begin{align*}
+\pp[D\leq d] &= 1-\prod_{i=a}^{d} \left(1-\frac{1}{i^2}\right) = 1-\prod_{i=a}^{d} \left(\frac{(i-1)(i+1)}{i^2}\right)^{4i}
+=1-\left(\frac{(a-1)^{a}}{a^{a-1}}\cdot\frac{(d+1)^{d}}{d^{d+1}}\right)^4
+\end{align*}
+where the product enjoys telescoping as the denominator $(i^2)^{4i}$ cancels with $(i^2)^{4(i-1)}$ and $(i^2)^{4(i+1)}$ in the numerators of the previous and the next term, respectively.
+\iffalse
+\begin{align}
+F_a(b) = &\BPL{d=a}{b} \left[1-\frac{1}{d^2}\right] = \BPL{d=a}{b} \left[\frac{(d-1)(d+1)}{d^2}\right]^{4d} \\
+= & \frac{(a-1)^{a}\cancel{(a+1)^{a}}}{a^{2a}}\cdot\frac{a^{a+1}(a+2)^{a+1}}{\cancel{(a+1)^{2(a+1)}}}
+\cdot\frac{\cancel{(a+1)^{a+2}}(a+3)^{a+2}}{(a+2)^{2(a+2)}}\cdot\frac{(a+2)^{a+3}(a+4)^{a+3}}{(a+3)^{2(a+3)}}\cdot\\
+&\bullet\bullet\bullet
+\cdot\frac{(b-4)^{b-3}\cancel{(b-2)^{b-3}}}{(b-3)^{2(b-3)}}\cdot\frac{(b-3)^{b-2}(b-1)^{b-2}}{\cancel{(b-2)^{2(b-2)}}}
+\cdot\frac{\cancel{(b-2)^{b-1}}b^{b-1}}{(b-1)^{2(b-1)}}\cdot\frac{(b-1)^{b}(b+1)^{b}}{b^{2b}} \\
+= & \frac{(a-1)^{a}\cancel{(a+1)^{a}}}{a^{2a}}\cdot\frac{a^{a+1}\cancel{(a+2)^{a+1}}}{\cancel{(a+1)^{2(a+1)}}}
+\cdot\frac{\cancel{(a+1)^{a+2}}\cancel{(a+3)^{a+2}}}{\cancel{(a+2)^{2(a+2)}}}
+\cdot\frac{\cancel{(a+2)^{a+3}}\cancel{(a+4)^{a+3}}}{\cancel{(a+3)^{2(a+3)}}}\cdot\\
+&\bullet\bullet\bullet
+\cdot\frac{\cancel{(b-4)^{b-3}}\cancel{(b-2)^{b-3}}}{\cancel{(b-3)^{2(b-3)}}}
+\cdot\frac{\cancel{(b-3)^{b-2}}\cancel{(b-1)^{b-2}}}{\cancel{(b-2)^{2(b-2)}}}
+\cdot\frac{\cancel{(b-2)^{b-1}}b^{b-1}}{\cancel{(b-1)^{2(b-1)}}}\cdot\frac{\cancel{(b-1)^{b}}(b+1)^{b}}{b^{2b}} \\
+= & \frac{(a-1)^{a}}{a^{a-1}}\cdot\frac{(b+1)^{b}}{b^{b+1}} \\
+\implies & F_a(b) = 1 - \frac{(a-1)^{a}}{a^{a-1}}\cdot\frac{(b+1)^{b}}{b^{b+1}}
+\end{align}
+\fi
+This gives us a closed form for the CDF, which we can compute with $2^{-N}$ additive error in constant time (by our computation model assumption).
+Thus, we may sample for the distance $D\sim\distr{D}(a)$ with $O(\log n)$ time and one random $N$-bit word.
+
+\subsubsection{Phase 2: Sampling neighbors at distance $D$}
+After sampling a distance $D$, we now have to sample all the neighbors at distance $D$.
+We label the vertices in $\Gamma_D^v$ with unique indices in $\{1, \ldots, 4D\}$.
+Note that now each of the $4D$ vertices in $\Gamma_D^v$ is a neighbor with probability $1/D^2$.
+However, by Phase 1, this is conditioned on the fact that there is at least one neighbor among the vertices in $\Gamma_D^v$,
+which may be difficult to sample when $1/D^2$ is very small.
+We can emulate this na\"{i}vely by repeatedly sampling a ``block'', composing of the $4D$ vertices in $\Gamma_D^v$, by deciding whether each vertex is a neighbor of $v$ with uniform probability $1/D^2$ (i.e., $4D$ identical independent Bernoulli trials), and then discarding the entire block if it contains no neighbor. We repeat this process until we finally sample one block that contains at least one neighbor, and use this block as our output.
+
+For the purpose of making the sampling process more efficient, we view this process differently. Let us imagine that we are given an infinite sequence of independent Bernoulli variables, each with bias $1/D^2$.
+We then divide the sequence into contiguous blocks of length $4D$ each.
+Our task is to find the \emph{first} occurrence of success (a neighbor), then report the whole block hosting this variable.
+
+This first occurrence of a successful Bernoulli trial is given by sampling from the geometric distribution, $X\sim\distr{Geo}(1/D^2)$.
+Since the vertices in each block are labeled by $1, \ldots, 4D$, then this first occurrence has label $X' = {X\mathrm{\,mod\,}4D}$.
+By sampling $X\sim\distr{Geo}(1/D^2)$, the first $X'$ Bernoulli variables of this block is also implicitly determined. Namely, the vertices of labels $1, \ldots, X'-1$ are non-neighbors, and that of label $X'$ is a neighbor.
+The sampling for the remaining $4D-X'$ vertices can then be performed in the same fashion we sample for next neighbors in the $G(n,p)$ case: 
+repeatedly find the next neighbor by sampling from $\distr{Geo}(1/D^2)$, until the index of the next neighbor falls beyond this block.
+
+Thus at this point, we have sampled all neighbors in $\Gamma_D^v$. We can then update $\LAST[v] \leftarrow D$ and continue the process of larger distances.
+Sampling each neighbor takes $O(\log n)$ time and one random $N$-bit word; the resources spent sampling the distances is also bounded by that of the neighbors.
+As there are $O(\log n)$ neighbors with high probability, we obtain the following theorem.
+
+\begin{restatable}{theorem}{res:swm-thm}\label{thm-swm}
+There exists an algorithm that generates a random graph from Kleinberg's Small World model, where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
+using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+\end{restatable}
+
+\subsection{Generator for $c \neq 1$}
+
+Observe that to support different values of $c$ in the probability function $c/(\func{dist}(u,v))^2$, we do not have a closed-form formula for computing the CDF for Phase 1, whereas the process for Phase 2 remains unchanged. To handle the change in the probability distribution Phase 1, we consider the following, more general problem. Suppose that we have a process $P$ that, one-by-one, provide occurrences of successes from the sequence of independent Bernoulli trials with success probabilities $\langle p_1, p_2, \ldots \rangle$. We show how to construct a process $\mathcal{P}^c$ that provide occurrences of successes from Bernoulli trials with success probabilities $\langle c\cdot p_1, c\cdot p_2, \ldots\rangle$ (truncated down to $1$ as needed). For our application, we assume that $c$ is given in $N$-bit precision, there are $O(n)$ Bernoulli trials, and we aim for an error of $\frac{1}{\poly(n)}$ in the $L_1$-distance.
+
+\subsubsection{Case $c < 1$}
+We use rejection sampling in order to construct a new Bernoulli process.
+
+\begin{restatable}{lem}{res:small-c}
+Given a process $\mathcal{P}$ outputting the indices of successful Bernoulli trials with bias $\langle p_i\rangle$, there exists a process $\mathcal{P}^c$ outputting the indices of successful Bernoulli trials with bias $\langle c\cdot p_i\rangle$ where $c<1$,
+using one additional $N$-bit word overhead for each answer of $\mathcal{P}$.
+\end{restatable}
+\begin{proof}
+Consider the following rejection sampling process to generating the Bernoulli trials.
+In addition to each Bernoulli variable $X_i$ with bias $p_i$, we sample another coin-flip $C_i$ with bias $c$.
+Set $Y_i = X_i \cdot C_i$, then $\pp[Y_i = 1] = \pp[X_i = 1]\cdot\pp[C_i] = c\cdot p_i$, as desired.
+That is, we keep a success of a Bernoulli trial with probability $c$, or reject it with probability $1-c$.
+
+Now, we are already given the process $\mathcal{P}$ that ``handles'' $X_i$'s, generating a sequence of indices $i$ with $X_i = 1$.
+The new process $\mathcal{P}^c$ then only needs to handle the $C_i$'s. Namely, for each $i$ reported as success by $\mathcal{P}$, $\mathcal{P}^c$ flips a coin $C_i$ to see if it should also report $i$, or discard it.
+As a result, $\mathcal{P}^c$ can generate the indices of successful Bernoulli trials using only one random $N$-bit word overhead for each answer from $\mathcal{P}$.
+\end{proof}
+Applying this reduction to the distance sampling in Phase 1, we obtain the following corollary.
+\begin{restatable}{corollary}{res:small-c-corol}
+There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c<1$,
+using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+\end{restatable}
+
+\subsubsection{Case $c > 1$}
+
+Since we aim to sample with larger probabilities, we instead consider making $k\cdot c$ independent copies of each process $\mathcal{P}$, where $k>1$ is a positive integer.
+Intuitively, we hope that the probability that one of these process returns an index $i$ will be at least $c\cdot p_i$, so that we may perform rejection sampling to decide whether to keep $i$ or not.
+Unfortunately such a process cannot handle the case where $c\cdot p_i$ is large, notably when $c\cdot p_i > 1$ is truncated down to $1$, while there is always a possibility that none of the processes return $i$.
+
+\begin{restatable}{lem}{rem:large-c}
+Let $k>1$ be a constant integer. Given a process $\mathcal{P}$ outputting the indices of successful Bernoulli trials with bias $\langle p_i\rangle$, there exists a process $\mathcal{P}^c$ outputting the indices of successful Bernoulli trials with bias $\langle \min\{c\cdot p_i, 1\}\rangle$ where $c>1$ and $c \cdot p_i \leq 1-\frac{1}{k}$ for every $i$,
+using one additional $N$-bit word overhead for each answer of $k\cdot c$ independent copies of $\mathcal{P}$.
+\end{restatable}
+\begin{proof}
+By applying the following form of Bernoulli's inequality, we have
+\begin{align*}
+(1-p_{i})^{k\cdot c} \leq 1-\frac{k\cdot c\cdot p_{i}}{1+(k\cdot c-1)\cdot p_{i}}
+= 1-\frac{k\cdot c\cdot p_{i}}{1+k\cdot c\cdot p_{i}-p_{i}}
+\leq 1-\frac{k\cdot c\cdot p_{i}}{1+(k-1)} = 1-c\cdot p_{i}
+\end{align*}
+That is, the probability that at least one of the generators report an index $i$ is $1-(1-p_{i})^{k\cdot c} \geq c\cdot p_i$, as required.
+Then, the process $\mathcal{P}^c$ simply reports $i$ with probability $(c\cdot p_i) / (1-(1-p_{i})^{k\cdot c})$ or discard $i$ otherwise.
+Again, we only require $N$-bit of precision for each computation, and thus one random $N$-bit word suffices.
+\end{proof}
+
+In Phase 1, we may apply this reduction only when the condition $c \cdot p_i \leq 1-\frac{1}{k}$ is satisfied.
+For lower value of $p_i = 1/D^2$, namely for distance $D < \sqrt{c/(1-1/k)} = O(\sqrt{c})$, we may afford to sample the Bernoulli trials one-by-one as $c$ is $\poly(\log n)$.
+We also note that the degree of each vertex is clearly bounded by $O(\log n)$ with high probability, as its expectation is scaled up by at most a factor of $c$.
+Thus, we obtain the following corollary.
+\begin{restatable}{corollary}{res:large-c-corol}
+There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c = \poly(\log n)$,
+using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+\end{restatable}
+

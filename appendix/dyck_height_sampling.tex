@@ -1,0 +1,89 @@
+\subsection{Sampling the Height}%
+\label{sub:sampling_the_height}
+
+
+\todo{fix}
+\begin{itemize}
+    \item $d < c\cdot \sqrt S \log n$
+    \item $k < c\cdot \sqrt S \log n \implies U-D < c\cdot \sqrt S \log n$
+    \item $k' < c\cdot \sqrt S \log n$
+    \item $S > \log^2 n \implies \sqrt S \log n < S$
+\end{itemize}
+
+\begin{lemma}
+\label{lem:taylor_bound}
+For $x < 1$ and $k\ge 1$,
+\[
+1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2.
+\]
+\end{lemma}
+
+
+\DLeftBound*
+\begin{proof}
+This involves some simple manipulations.
+\begin{align}
+D_{left} &= {{S}\choose{D-d}}-{{S}\choose{D-d-k}}\\
+&= {{S}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(S-D-d+k)(S-D-d+k-1)\cdots(S-D-d+1)}\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{S-D+d+k}\right)^k\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\log n\sqrt{S})}{U+d+k}\right)^k\right]\\
+&\le \Theta \left( \frac{k\log n}{\sqrt{S}} \right) \cdot{{S}\choose{D-d}}
+\end{align}
+\end{proof}
+
+\DRightBound*
+\begin{proof}
+\begin{align}
+D_{right} &= {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}\\
+&= {{S}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(S-U-d+k')(S-U-d+k'-1)\cdots(S-U-d+1)}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{S-U+d+k'}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\log n\sqrt S)}{U+k+d}\right)^{k'}\right]\\
+&\le \Theta\left(\frac{k'\log n}{\sqrt{S}}\right)\cdot{{S}\choose{U-d}}
+\end{align}
+\end{proof}
+
+\begin{restatable}{lemma}{DTotalBasicBound}
+\label{lem:DTotalBasicBound}
+\todo{change statement}
+$D_{tot} \ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
+\end{restatable}
+\begin{proof}
+\begin{align}
+D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
+&= {{2S}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2S-2D+k)(2S-2D+k-1)\cdots(2S-2D+1)}\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2S-2D+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
+\end{align}
+\end{proof}
+
+\todo{Reference previous lemma}
+
+\DTotalFarBoundary*
+\begin{proof}
+When $kk' > 2U + 1 \implies k > \frac{2U+1}{k'}$,
+we will show that the above expression is greater than $\frac 12 \binom{2S}{2D}$.
+Defining $\nu = \frac{2U+1}{k'} > 1$, we see that $(1-\frac 1\nu)^k \le (1-\frac 1\nu)^\nu$.
+Since this is an increasing function of $\nu$ and since the limit of this function is $\frac 1e$,
+we conclude that
+\[
+1-\left(1 - \frac{k'}{2U+1}\right)^k > \frac 12
+\]
+\end{proof}
+
+\DTotalNearBoundary*
+\begin{proof}
+Now we bound the term $1-\left(1-\frac{k'}{2U+1}\right)^k$, given that $kk'\le 2U+1\implies\frac{kk'}{2U+1} \le 1$.
+Using Taylor expansion, we see that
+\begin{align}
+&1 - \left(1 - \frac{k'}{2U+1}\right)^k\\
+&\le \frac{kk'}{2U+1} - \frac{k(k-1)}{2}\cdot\frac{k'^2}{(2U+1)^2}\\
+&\le \frac{kk'}{2U+1} - \frac{k^2k'^2}{2(2U+1)^2}\\
+&\le \frac{kk'}{2U+1} \left(1 - \frac{kk'}{2(2U+1)}\right)\\
+&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(S)}\\
+\end{align}
+\end{proof}

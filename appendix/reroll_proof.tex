@@ -1,0 +1,76 @@
+\section{Further Analysis and Extensions of Algorithm~\ref{alg:oblivious-coin-toss}}
+\label{sec:reroll-cont}
+
+\subsection{Performance Guarantee}
+This section is devoted to showing the following lemma that bounds the required resources per query of Algorithm~\ref{alg:oblivious-coin-toss}. We note that we only require efficient computation of $\prod_{u \in [a,b]} (1-p_{v,u})$ (and not $\sum_{u \in [a,b]} p_{v,u}$), and that for the $G(n,p)$ model, the resources required for such computation is asymptotically negligible.
+
+\begin{restatable}{theorem}{res:ER-rand-iterations}\label{thm:ER-rand-iterations}
+Each execution of Algorithm~\ref{alg:oblivious-coin-toss} (the \func{next-neighbor} query), with high probability,
+\begin{itemize}
+\item terminates within $\bo(\log n)$ iterations (of its \textup{\textbf{repeat}} loop);
+\item computes $\bo(\log^2 n)$ quantities of $\prod_{u \in [a,b]} (1-p_{v,u})$;
+\item aside from the above computations, uses $\bo(\log^2 n)$ time, $\bo(\log n)$ random $N$-bit words, and $\bo(\log n)$ additional space.
+\end{itemize}
+\end{restatable}
+
+\begin{proof}
+We focus on the number of iterations as the remaining results follow trivially. This proof is rather involved and thus is divided into several steps.
+
+\paragraph{Specifying random choices} The performance of the algorithm depends on not only the random variables $X_{v,u}$'s, but also the unused coins $C_{v,u}$'s. We characterize the two collections of Bernoulli variables $\{X_{v,u}\}$ and $\{Y_{v,u}\}$ that cover all random choices made by Algorithm~\ref{alg:oblivious-coin-toss} as follows.
+
+\begin{itemize}
+\item Each $X_{v,u}$ (same as $X_{u,v}$) represents the result for the \emph{first} coin-toss corresponding to cells $\ADJ[v][u]$ and $\ADJ[u][v]$, which is the coin-toss obtained when $X_{v,u}$ becomes decided: either $C_{v,u}$ during a \func{next-neighbor}$(v)$ call when $\ADJ[v][u] = \PHI$, or $C_{v,u}$ during a \func{next-neighbor}$(u)$ call when $\ADJ[u][v] = \PHI$, whichever occurs first.
+This description of $X_{v,u}$ respects our invariant that, if the generation process is executed to completion, we will have $\ADJ[v][u]=X_{v,u}$ in all entries.
+\item Each $Y_{v,u}$ represents the result for the \emph{second} coin-toss corresponding to cell $\ADJ[v][u]$, which is the coin-toss $C_{v,u}$ obtained during a \func{next-neighbor}$(v)$ call when $X_{v,u}$ is already decided. In other words, $\{Y_{v,u}\}$'s are the coin-tosses that should have been skipped but still performed in Algorithm~\ref{alg:oblivious-coin-toss} (if they have indeed been generated). Unlike the previous case, $Y_{v,u}$ and $Y_{u,v}$ are two independent random variables: they may be generated during a \func{next-neighbor}$(v)$ call and a \func{next-neighbor}$(u)$ call, respectively.
+\end{itemize}
+As mentioned earlier, we allow any sequence of probabilities $p_{v,u}$ in our proof. The success probabilities of these indicators are therefore given by $\pp[X_{v,u}=\ONE] = \pp[Y_{v,u}=\ONE] = p_{v,u}$.
+
+%\anak{Consider improving paragraph below.}
+\paragraph{Characterizing iterations}
+Suppose that we compute \func{next-neighbor}$(v)$ and obtain an answer $u$. Then $X_{v,\LAST[v]+1} = \cdots = X_{v, u-1} = \ZERO$ as none of $u' \in (\LAST[v], u)$ is a neighbor of $v$. The vertices considered in the loop of Algorithm~\ref{alg:oblivious-coin-toss} that do not result in the answer $u$, are $u' \in (\LAST[v], u)$ satisfying $\ADJ[v][u'] = \ZERO$ and $Y_{v,u'} = \ONE$; we call the iteration corresponding to such a $u'$ a \emph{failed iteration}. Observe that if $X_{v,u'} = \ZERO$ but is undecided ($\ADJ[v][u'] = \PHI$), then the iteration is not failed, even if $Y_{v,u'} = \ONE$ (in which case, $X_{v,u'}$ takes the value of $C_{v,u'}$ while $Y_{v,u'}$ is never used). Thus we assume the worst-case scenario where all $X_{v,u'}$ are revealed: $\ADJ[v][u']=X_{v,u'}=\ZERO$ for all $u'\in(\LAST[v], u)$. The number of failed iterations in this case stochastically dominates those in all other cases.\footnote{There exists an adversary who can enforce this worst case. Namely, an adversary that first makes \func{next-neighbor} queries to learn all neighbors of every vertex except for $v$, thereby filling out the whole $\ADJ$ in the process. The claimed worst case then occurs as this adversary now repeatedly makes \func{next-neighbor} queries on $v$. In particular, a committee of $n$ adversaries, each of which is tasked to perform this series of calls corresponding to each $v$, can always expose this worst case.}
+
+Then, the upper bound on the number of failed iterations of a call \func{next-neighbor}$(v)$ is given by the maximum number of cells $Y_{v, u'} = 1$ of $u' \in(\LAST[v], u)$, over any $u \in(\LAST[v], n]$ satisfying $X_{v,\LAST[v]+1} = \cdots = X_{v,u} = \ZERO$. Informally, we are asking ''of all consecutive cells of $\ZERO$'s in a single row of $\{X_{v,u}\}$-table, what is the largest number of cells of $\ONE$'s in the corresponding cells of $\{Y_{v,u}\}$-table?''
+
+\paragraph{Bounding the number of iterations required for a fixed pair $(v, \LAST[v])$}
+We now proceed to bounding the number of iterations required over a sampled pair of $\{X_{v,u}\}$ and $\{Y_{v,u}\}$, from any probability distribution. For simplicity we renumber our indices and drop the index $(v,\LAST[v])$ as follows. Let $p_1, \ldots, p_L \in [0, 1]$ denote the probabilities corresponding to the cells $\ADJ[v][\LAST[v]+1 \ldots n]$ (where $L = n-\LAST[v]$), then let $X_1, \ldots, X_L$ and $Y_1, \ldots, Y_L$ be the random variables corresponding to the same cells on $\ADJ$.
+
+For $i=1, \ldots, L$, define the random variable $Z_i$ in terms of $X_i$ and $Y_i$ so that
+\begin{itemize}
+\item $Z_i = 2$ if $X_i = 0$ and $Y_i = 1$, which occurs with probability $p_i(1-p_i)$. \\
+This represents the event where $i$ is not a neighbor, and the iteration fails.
+\item $Z_i = 1$ if $X_i = Y_i = 0$, which occurs with probability $(1-p_i)^2$.\\
+ This represents the event where $i$ is not a neighbor, and the iteration does not fail.
+\item $Z_i = 0$ if $X_i = 1$, which occurs with probability $p_i$. \\
+This represents the event where $i$ is a neighbor.
+\end{itemize}
+
+For $\ell \in [L]$, define the random variable $M_\ell := \prod_{i=1}^\ell Z_i$, and $M_0 = 1$ for convenience. If $X_i = 1$ for some $i \in [1, \ell]$, then $Z_i = 0$ and $M_\ell = 0$. Otherwise, $\log M_\ell$ counts the number of indices $i \in [\ell]$ with $Y_i = 1$, the number of failed iterations. Therefore, $\log(\max_{\ell \in \{0, \ldots, L\}} M_\ell)$ gives the number of failed iterations this \func{next-neighbor}$(v)$ call.
+
+To bound $M_\ell$, observe that for any $\ell\in[L]$, $\mathbb{E}[Z_\ell] = 2p_\ell(1-p_\ell) + (1-p_\ell)^2 = 1 - p_\ell^2 \leq 1$ regardless of the probability $p_\ell \in [0, 1]$. Then, $\mathbb{E}[M_\ell] = \mathbb{E}[\prod_{i=1}^\ell Z_i] = \prod_{i=1}^\ell \mathbb{E}[Z_i] \leq 1$ because $Z_\ell$'s are all independent. By Markov's inequality, for any (integer) $r \geq 0$, $\Pr[\log M_\ell > r] = \Pr[M_\ell > 2^r] < 2^{-r}$. By the union bound, the probability that more than $r$ failed iterations are encountered is $\Pr[\log(\max_{\ell \in \{0, \ldots, L\}} M_\ell) > r] < L\cdot 2^{-r} \leq n\cdot 2^{-r}$.
+
+\paragraph{Establishing the overall performance guarantee}
+So far we have deduced that, for each pair of a vertex $v$ and its $\LAST[v]$, the probability that the call \func{next-neighbor}$(v)$ encounters more than $r$ failed iterations is less that $n \cdot 2^{-r}$, which is at most $n^{-c-2}$ for any desired constant $c$ by choosing a sufficiently large $r = \Theta(\log n)$. As Algorithm~\ref{alg:oblivious-coin-toss} may need to support up to $\Theta(n^2)$ \func{next-neighbor} calls, one corresponding to each pair $(v, \LAST[v])$, the probability that it ever encounters more than $O(\log n)$  failed iterations to answer a single \func{next-neighbor} query is at most $n^{-c}$. That is, with high probability, $O(\log n)$ iterations are required per \func{next-neighbor} call, which concludes the proof of Theorem~\ref{thm:ER-rand-iterations}.
+%For the $G(n,p)$ model, each iteration requires $O(\log n)$ time and random bits (for sampling), so this bound on the number of iterations implies that each \func{next-neighbor} call requires $O(\log^2 n)$ time, $O(1)$ additional space for the maintained data structure, and $O(\log^2 n)$ random bits with high probability. The former two offer an improvement over Algorithm~\ref{alg:exact-coin-toss}, but note also that the bounds of Algorithm~\ref{alg:exact-coin-toss} holds deterministically.
+\end{proof}
+
+\subsection{Supporting \func{vertex-pair} Queries} \label{sec:ER-pair}
+
+We extend our generator (Algorithm~\ref{alg:oblivious-coin-toss}) to support the \func{vertex-pair} queries: given a pair of vertices $(u, v)$, decide whether there exists an edge $\{u, v\}$ in the generated graph. To answer a \func{vertex-pair} query, we must first check whether the value $X_{u,v}$ for $\{u, v\}$ has already been assigned, in which case we answer accordingly. Otherwise, we must make a coin-flip with the corresponding bias $p_{u,v}$ to assign $X_{u,v}$, deciding whether $\{u, v\}$ exists in the generated graph. If we maintained the full $\ADJ$ as done in the na\"{i}ve Algorithm~\ref{alg:naive}, we would have been able to simply set $\ADJ[u][v]$ and $\ADJ[v][u]$ to this new value. However, our more efficient Algorithm~\ref{alg:oblivious-coin-toss} that represents $\ADJ$ compactly via $\LAST$ and $P_v$'s cannot record arbitrary modifications to $\ADJ$.
+
+Observe that if we were to apply the trivial implementation of \func{vertex-pair} in Algorithm~\ref{alg:naive}, then by Lemma~\ref{lem:cond-0}, $\LAST$ and $P_v$'s will only fail capture the state $\ADJ[v][u] = \ZERO$ when $u > \LAST[v]$ and $v > \LAST[u]$. Fortunately, unlike \func{next-neighbor} queries, a \func{vertex-pair} query can only set one cell $\ADJ[v][u]$ to $\ZERO$ per query, and thus we may afford to store these changes explicitly.\footnote{The disadvantage of this approach is that the generator may allocate more than $\Theta(m)$ space over the entire graph generation process, if \func{vertex-pair} queries generate many of these $\ZERO$'s.} To this end, we define the set $Q = \{\{u,v\}: X_{u,v}\textrm{ is assigned to }\ZERO \textrm{ during a \func{vertex-pair} query}\}$, maintained as a hash table. Updating $Q$ during \func{vertex-pair} queries is trivial: we simply add $\{u,v\}$ to $Q$ before we finish processing the query if we set $\ADJ[u][v]=\ZERO$. Conversely, we need to add $u$ to $P_v$ and add $v$ to $P_u$ if the \func{vertex-pair} query sets $\ADJ[u][v]=\ONE$ as usual, yielding the following observation. It is straightforward to verify that each \func{vertex-pair} query requires $O(\log n)$ time, $O(1)$ random $N$-bit word, and $O(1)$ additional space per query.
+
+\begin{restatable}{lem}{cond-q}\label{lem:cond-0-q}
+The data structures $\LAST$, $P_v$'s and $Q$ together provide a succinct representation of $\ADJ$ when \func{next-neighbor} queries (modified Algorithm~\ref{alg:oblivious-coin-toss}) and \func{vertex-pair} queries (modified Algorithm~\ref{alg:naive}) are allowed. In particular, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v$. Otherwise, $\ADJ[v][u]=\ZERO$ if $u <\LAST[v]$, $v < \LAST[u]$, or $\{v,u\} \in Q$. In all remaining cases, $\ADJ[v][u]=\PHI$.
+\end{restatable}
+
+We now explain other necessary changes to Algorithm~\ref{alg:oblivious-coin-toss}. In the implementation of \func{next-neighbor}, an iteration is not failed when the chosen $X_{v,u}$ is still undecided: $\ADJ[v][u]$ must still be $\phi$. Since $X_{v,u}$ may also be assigned to $\ZERO$ via a \func{vertex-pair}$(v,u)$ query, we must also consider an iteration where $\{v,u\} \in Q$ failed. That is, we now require one additional condition $\{v,u\} \notin Q$ for termination (which only takes $O(1)$ time to verify per iteration). As for the analysis, aside from handling the fact that $X_{v,u}$ may also become decided during a \func{vertex-pair} call, and allowing the states of the algorithm to support \func{vertex-pair} queries, all of the remaining analysis for correctness and performance guarantee still holds. 
+
+
+Therefore, we have established that our augmentation to Algorithm~\ref{alg:oblivious-coin-toss} still maintains all of its (asymptotic) performance guarantees for \func{next-neighbor} queries, and supports \func{vertex-pair} queries with complexities as specified above, concluding the following corollary.
+We remark that, as we do not aim to support \func{random-neighbor} queries, this simple algorithm here provides significant improvement over the performance of \func{random-neighbor} queries (given in Corollary~\ref{cor:random_neighbor_time}).
+
+\begin{restatable}{corollary}{res:oblivious-thm}\label{cor:oblivious-alg}
+Algorithm~\ref{alg:oblivious-coin-toss} can be modified to allow an implementation of \func{vertex-pair} query as explained above, such that the resource usages per query still asymptotically follow those of Theorem~\ref{thm:ER-rand-iterations}.
+\end{restatable} 
+
+

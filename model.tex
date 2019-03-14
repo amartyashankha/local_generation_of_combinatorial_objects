@@ -1,0 +1,68 @@
+\section{Preliminaries}
+\label{sec:model}
+\subsection{Local-Access Generators}
+\label{sec:oracle_model}
+
+We consider the problem of locally generating random graphs $G = (V,E)$ drawn from the desired families of simple unweighted graphs, undirected or directed. We denote the number of vertices $n = |V|$, and refer to each vertex simply via its unique ID from $[n]$. For undirected $G$, the set of neighbors of $v \in V$ is defined as $\Gamma(v) = \{u \in V: \{v,u\} \in E\}$; denote its degree by $\deg(v) = |\Gamma(v)|$.
+Inspired by the goals and results of \cite{reut}, we define a model of local-access generators as follows.
+\begin{definition}
+A \emph{local-access generator} of a random graph $G$ sampled from a distribution $\distr{D}$,
+is a data structure that provides access to $G$ by answering various types of
+\emph{supported queries}, while satisfying the following:
+%For clarity, we assume that the generator is invoked until its entire graph $G$ is exposed.
+%The local-access generator for a probability distribution $\distr{D}$ of the desired random graph model must satisfy the following properties:
+\begin{itemize}
+\item \textbf{Consistency.} The responses of the local-access generator to all probes throughout the entire execution must be consistent with a single graph $G$.
+\item \textbf{Distribution equivalence.} 
+The random graph $G$ provided by the generator must be sampled from some distribution $\distr{D}'$
+that is $\epsilon$-close to the desired distribution $\distr{D}$ in the $L_1$-distance.
+In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
+As for \func{random-neighbor}$(v)$, the distribution from which a neighbor is returned
+must be $\epsilon$-close to the uniform distribution over neighbors of $v$
+with respect to the sampled random graph $G$ (w.h.p $1-n^{-c}$ for each query).
+\item \textbf{Performance.} The resources, consisting of (1) computation time, (2) additional random bits required, and (3) additional space required, in order to compute an answer to a single query and update the data structure, must be sub-linear, preferably $\poly(\log n)$.
+\end{itemize}
+\end{definition}
+In particular, we allow queries to be made adversarially and non-deterministically. The adversary has full knowledge of the generator's behavior and its past random bits.
+
+For ease of presentation, we allow generators to create graphs with self-loops.
+When self-loops are not desired, it is sufficient to add a wrapper function that simply re-invokes \func{next-neighbor}$(v)$ or \func{random-neighbor}$(v)$ when the generator returns $v$.
+
+
+\paragraph{Supported Queries in our Model} 
+For undirected graphs, we consider queries of the following forms.
+now we might want to do \func{next-neighbor} first for consistency.
+\begin{itemize}
+\item \func{next-neighbor}$(v)$: The generator returns the neighbor of $v$ with the lowest ID that has not been returned during the execution of the generator so far. If all neighbors of $u$ have already been returned, the generator returns $n+1$.
+\item \func{random-neighbor}$(v)$: The generator returns a neighbor of $v$ uniformly at random (with probability $1/\deg(v)$ each). If $v$ is isolated, $\bot$ is returned.
+\item \func{vertex-pair}$(u,v)$: The generator returns either $\ONE$ or $\ZERO$, indicating whether $\{u,v\}\in E$ or not.
+\item \func{all-neighbors}$(v)$: The generator returns the entire list of out-neighbors of $v$. We may use this query for relatively sparse graphs, specifically in the Small-World model.
+\end{itemize}
+
+\subsection{Random Graph Models}
+\label{sec:graph_model}
+
+\paragraph{Erd\"{o}s-R\'{e}nyi Model}
+We consider the $G(n, p)$ model: each edge $\{u,v\}$ exists independently with probability $p \in [0, 1]$.
+Note that $p$ is not assumed to be constant, but may be a function of $n$.
+
+\paragraph{Stochastic Block Model}
+This model is a generalization of the Erd\"{o}s-R\'{e}nyi Model. The vertex set $V$ is partitioned into $r$ communities $C_1, \ldots, C_r$. The probability that the edge $\{u,v\}$ exists is $p_{i,j}$ when $u\in C_i$ and $v\in C_j$, where the probabilities are given as an $r\times r$ symmetric matrix $\matr{P} = [p_{i,j}]_{i,j \in [r]}$.
+We assume that we are given explicitly the distribution $\distr{R}$ over the communities, and
+each vertex is assigned its community according to $\distr{R}$ independently at random.\footnote{Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$ are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}
+%The main difficulty here is being able to compute the uniformly sampled assignment of vertices to communities on-the-fly.
+
+\paragraph{Small-World Model}
+In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$. Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$, and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$. Here, $c$ is an indicator of the number of long range directed edges present at each vertex. A common choice for $c$ is given by normalizing the distribution so that there is exactly one directed edge emerging from each vertex ($c = \Theta(1/\log n)$).
+We will however support a range of values of $c=\log^{\pm\Theta(1)}n$.
+While not explicitly specified in the original model description of \cite{kleinberg}, we assume that the probability is rounded down to $1$ if $c/(\func{dist}(u,v))^{2} > 1$.
+
+
+\subsection{Miscellaneous}
+
+\paragraph{Arithmetic operations} Let $N$ be a sufficiently large number of bits required to maintain a multiplicative error of at most a $\frac{1}{\poly(n)}$ factor over $\poly(n)$ elementary computations ($+, -, \cdot, /, \exp$).\footnote{In our application of $\exp$, we only compute $a^b$ for $b \in \mathbb{Z}^+$ and $0 < a \leq 1+\Theta(\frac{1}{b})$, where $a^b = \Bo(1)$. For this, $N=\Bo(\log n)$ bits are sufficient to achieve the desired accuracy, namely an additive error of $n^{-c}$.} We assume that each elementary operation on words of size $N$ bits can be performed in constant time. Likewise, a random $N$-bit integer can be acquired in constant time. We assume that the input is also given with $N$-bit precision. %Any other non-trivial operations will be justified later.
+
+\paragraph{Sampling via a CDF}\label{para:CDF}
+Consider a probability distribution $\distr{X}$ over $O(n)$ consecutive integers, whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
+Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is
+$\frac{1}{\poly(n)}$-close to $\distr{X}$ in $L_1$-distance.\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\pp[X\leq x] \geq r$.}

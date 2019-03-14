@@ -1,102 +1,81 @@
 \section{Dyck Path Generator}%
 \label{sec:dyck_appendix}
 
-\subsection{Assumptions}%
-\todo{fix}
-\label{sec:assumptions}
-\begin{itemize}
-    \item $d < c\cdot \sqrt S \log n$
-    \item $k < c\cdot \sqrt S \log n \implies U-D < c\cdot \sqrt S \log n$
-    \item $k' < c\cdot \sqrt S \log n$
-    \item $S > \log^2 n \implies \sqrt S \log n < S$
-\end{itemize}
+\subsection{Dyck Path Boundaries and Deviations}%
+\label{sub:dyck_path_boundaries_and_deviations}
+Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$ that comprises of $U$ up-steps and $D$ down-steps
+with $U + D = 2S$, such that the sum of any initial sub-string is not less than $1-k$ for some valid $U, D, k < n$.
+This means that we start our Dyck path at a height of $k-1$,
+and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
 
 \begin{lemma}
-\label{lem:taylor_bound}
-For $x < 1$ and $k\ge 1$,
-\[
-1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2.
-\]
+\label{lem:}
+Both $|S-U|$ and $|S-D|$ are $\mathcal O(\log n\sqrt S)$ with high probability.
 \end{lemma}
-
-
-\begin{restatable}{lemma}{D_left_bound}
-\label{lem:D_left_bound}
-$D_{left} \le c_1 \frac{ k\cdot\log n}{\sqrt{S}}\cdot{{S}\choose{D-d}}$ for some constant $c_1$.
-\end{restatable}
 \begin{proof}
-This involves some simple manipulations.
-\begin{align}
-D_{left} &= {{S}\choose{D-d}}-{{S}\choose{D-d-k}}\\
-&= {{S}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(S-D-d+k)(S-D-d+k-1)\cdots(S-D-d+1)}\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{S-D+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\log n\sqrt{S})}{U+d+k}\right)^k\right]\\
-&\le \Theta \left( \frac{k\log n}{\sqrt{S}} \right) \cdot{{S}\choose{D-d}}
-\end{align}
+
+\end{proof}
+\begin{lemma}
+\label{lem:}
+There exists a constant $c$ such that if $k > c\log n\sqrt S$, then the distribution of paths sampled without a boundary
+(normal random walks) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
+\end{lemma}
+\begin{proof}
+
 \end{proof}
 
-\begin{restatable}{lemma}{D_right_bound}
-\label{lem:D_right_bound}
-$D_{right} < c_2 \frac{k'\cdot log n}{\sqrt{S}}\cdot{{S}\choose{U-d}}$ for some constant $c_2$.
-\end{restatable}
-\begin{proof}
-\begin{align}
-D_{right} &= {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}\\
-&= {{S}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(S-U-d+k')(S-U-d+k'-1)\cdots(S-U-d+1)}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{S-U+d+k'}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\log n\sqrt S)}{U+k+d}\right)^{k'}\right]\\
-&\le \Theta\left(\frac{k'\log n}{\sqrt{S}}\right)\cdot{{S}\choose{U-d}}
-\end{align}
-\end{proof}
 
-\begin{restatable}{lemma}{D_tot_bound}
-\label{lem:D_tot_bound}
-\todo{change statement}
-$D_{tot} \ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
-\end{restatable}
-\begin{proof}
-\begin{align}
-D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
-&= {{2S}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2S-2D+k)(2S-2D+k-1)\cdots(2S-2D+1)}\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2S-2D+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
-\end{align}
-\end{proof}
-
-\todo{Reference previous lemma}
-
-\begin{restatable}{lemma}{D_tot_far_boundary}
-\label{lem:D_tot_far_boundary}
-When $kk' > 2U + 1$, $D_{tot} > \frac 12\cdot \binom{2S}{2D}$.
-\end{restatable}
-\begin{proof}
-When $kk' > 2U + 1 \implies k > \frac{2U+1}{k'}$,
-we will show that the above expression is greater than $\frac 12 \binom{2S}{2D}$.
-Defining $\nu = \frac{2U+1}{k'} > 1$, we see that $(1-\frac 1\nu)^k \le (1-\frac 1\nu)^\nu$.
-Since this is an increasing function of $\nu$ and since the limit of this function is $\frac 1e$,
-we conclude that
+\subsection{Computing Probabilities}%
+\label{sub:computing_probabilities}
+We start with Stirling's approximation which states that
 \[
-1-\left(1 - \frac{k'}{2U+1}\right)^k > \frac 12
+m! = \sqrt{2\pi m}\left( \frac me\right)^m\left( 1 + \mathcal O\left( \frac 1m\right)\right)\\
 \]
+We will also use the logarithm approximation when a better approximation is required:
+\begin{align}
+    \label{eq:log_factorial_approximation}
+\log (m!) = m\log m -m + \frac 12 \log(2\pi m) + \frac{1}{12m} - \frac{1}{360m^3} + \frac{1}{1260m^5} - \cdots
+\end{align}
+
+Oracle for estimating probabilities:
+\begin{lemma}
+\label{lem:probability_approximation_oracle}
+\todo{Point to section referencing the left right/ total.}
+
+Given a probability expression of the form $p_d = \frac{D_{left}\cdot D_{right}}{D_{total}}$ and a parameter $n$,
+there exists a $\poly(\log n)$ time oracle that returns a $\left( 1\pm 1/n^2\right)$
+multiplicative approximation to $p_d$.% as long as $p_d > 1/n^2$.
+\end{lemma}
+\begin{proof}
+We first compute a $1/n^2$ \emph{additive} approximation to $\log p_d$.
+Note that this is possible because $\log p_d$ can be written as a sum of logarithms of factorials \todo{Not obvious how}.
+So, we can use the series expansion from Equation~\ref{eq:log_factorial_approximation} up to $\mathcal O(\log n)$ terms.
+
+Now, we can exponentiate the approximation to obtain
+$p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
 \end{proof}
 
-\begin{restatable}{lemma}{D_tot_near_boundary}
-\label{lem:D_tot_near_boundary}
-When $kk' \le 2U + 1$, $D_{tot} < c_3 \frac{k\cdot k'}{S}\cdot{{2S}\choose{2D}}$ for some constant $c_3$.
-\end{restatable}
-\begin{proof}
-Now we bound the term $1-\left(1-\frac{k'}{2U+1}\right)^k$, given that $kk'\le 2U+1\implies\frac{kk'}{2U+1} \le 1$.
-Using Taylor expansion, we see that
+
+\subsection{Approximating Close-to-Central Binomial Coefficients}%
+\label{sub:approximating_close_to_central_binomial_coefficients}
+This immediately gives us an asymptotic formula for the central binomial coefficient as:
+\[
+\binom{n}{n/2} = \sqrt{\frac{2}{\pi n}}2^n\left( 1 + \mathcal O\left( \frac 1n\right)\right)
+\]
+
+\todo{Cite Asymptopia}
+Now, we consider a ``off-center'' Binomial coefficient $\binom{n}{k}$ where $k = \frac{n+c\sqrt n}{2}$.
+We consider the ratio: $R = \binom{n}{k}/\binom{n}{n/2}$:
 \begin{align}
-&1 - \left(1 - \frac{k'}{2U+1}\right)^k\\
-&\le \frac{kk'}{2U+1} - \frac{k(k-1)}{2}\cdot\frac{k'^2}{(2U+1)^2}\\
-&\le \frac{kk'}{2U+1} - \frac{k^2k'^2}{2(2U+1)^2}\\
-&\le \frac{kk'}{2U+1} \left(1 - \frac{kk'}{2(2U+1)}\right)\\
-&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(S)}\\
+R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
+= \frac{(n/2)!(n/2)!}{k!(n-k)!} = \mathlarger\prod\limits_{i=1}^{c\sqrt n/2}\frac{n/2-i+1}{n/2+i}\\
+\implies \log R &= \mathlarger\sum\limits_{i=1}^{c\sqrt n/2}\log\left(\frac{n/2-i+1}{n/2+i} \right)\\
+&= \mathlarger\sum\limits_{i=1}^{c\sqrt n/2} - \frac{4i}{n} + \mathcal O\left( \frac{i^2}{n^2}\right)
+= - \frac{c^2n}{2n} + \mathcal O\left( \frac{(c\sqrt n)^3}{n^2}\right)
+= - \frac{c^2}{2} + \mathcal O\left( \frac{c^3}{\sqrt n}\right)\\
+\implies \binom{n}{k} &= \binom{n}{n/2} e^{-c^2/2}exp\left( \mathcal O(c^3/\sqrt n)\right)
 \end{align}
-\end{proof}
+
+
+\input{appendix/dyck_height_sampling}
+\input{appendix/dyck_first_return_sampling}

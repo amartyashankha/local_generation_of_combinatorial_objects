@@ -1,0 +1,125 @@
+\subsection{Undirected Graphs}
+\label{sec:undirected_graphs}
+
+In Section~\ref{sec:undirected} we construct local access generators for the generic
+class of undirected graphs
+with {\em independent edge probabilities} $\left\{ p_{u,v} \right\}_{u,v\in V}$,
+where $p_{u,v}$ denote the probability that there is an edge between $u$ and $v$.
+Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
+We assume that we can compute various values pertaining to consecutive
+edge probabilities for the class of graphs, as detailed below.
+We then show that such values can be computed for graphs
+generated according to the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model
+and the Stochastic Block model.
+
+\paragraph{\func{next-neighbor} Queries}
+\label{par:next_neighbor_queries}
+We note that the next neighbor of a vertex can be found trivially by generating consecutive
+entries of the adjacency matrix, but for small edge probabilities $p_{u,v} = o(1)$
+this implementation can be too slow.  In our algorithms, we achieve speed-up by sampling multiple 
+neighbor values at once for a given vertex $u$; more specifically,  
+we sample for the number of ``non-neighbors'' preceding
+the next neighbor.
+To do this, we assume that we have access to
+an oracle which can estimate the ``skip'' probabilities 
+$F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
+where $F(v,a,b)$ is the probability that $v$ 
+has no neighbors in the range $[a,b]$.
+We later show that it is possible to compute this quantity efficiently
+for the $G(n,p)$ and Stochastic block models.
+
+A main difficulty in our setup, as compared to \cite{reut},
+arises from the fact that our graph is undirected, and thus
+we must design a data structure that ``informs'' all (potentially $\Theta(n)$) non-neighbors once we decide on the query vertex's next neighbor.
+%Unlike in the case of directed graphs, each $\func{next-neighbor}$ query
+%can affect the probabilities of a large number of other vertices.
+More concretely, if $u'$ is sampled as the next neighbor of $v$ after its previous neighbor $u$,
+we must maintain consistency in subsequent steps
+by ensuring that none of the vertices in the range $(u,u')$
+return $v$ as a neighbor. This update will become even more complicated as we later handle \func{random-neighbor} queries, where we may generate non-neighbors at random locations.
+
+In Section~\ref{sec:ER-rand}, we present a very simple randomized generator
+(Algorithm~\ref{alg:oblivious-coin-toss}) that supports \func{next-neighbor}
+queries efficiently, albeit the analysis of its performance is rather complicated.
+We remark that this approach may be extended to support \func{vertex-pair} queries with superior performance (given that we do not to support \func{random-neighbor} queries) and to provide deterministic resource usage guarantee -- the full analysis can be found in Section~\ref{sec:reroll-cont} and \ref{sec:ER-det}, respectively.
+
+\paragraph{\func{random-neighbor} Queries}
+\label{par:random_neighbor_queries}
+We provide efficient \func{random-neighbor} queries (Section~\ref{sec:buckets}).
+The ability to do so is surprising.  First, note that after performing a \func{random-neighbor} query
+all other conditional probabilities will be affected in a non-trivial way.
+\footnote{Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
+such that vertices will have $\tilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
+After $\tilde{\mathcal{O}}(\sqrt n)$ \func{random-neighbor} queries,
+we will have uncovered all the neighbors (w.h.p.),
+so that the conditional probability of the remaining
+$\Theta(n)$ edges should now be close to zero.}
+This requires a way of implicitly keeping track of all the resulting changes.
+Second, we can sample a \func{random-neighbor} with the correct probability $1/\deg(v)$,
+even though we do not sample or know the degree of the vertex.
+
+We formulate a {\em bucketing approach} (Section~\ref{sec:buckets})
+which samples multiple consecutive edges at once, in such a way
+that the conditional probabilities of the unsampled edges
+remain independent and ``well-behaved'' during subsequent queries.
+For each vertex $v$, we divide the vertex set (potential neighbors) or $v$ into consecutive ranges (buckets),
+so that each bucket contains, in expectation, roughly the same number of neighbors
+$\sum^{b}_{u=a} p_{v,u}$ (which we must be able to compute efficiently).
+The subroutine of \func{next-neighbor} may be applied to sample the neighbors within a bucket in expected constant time.
+Then, one may obtain a random neighbor of $v$ by picking a random neighbor from a random bucket;
+probabilities of picking any neighbors may be normalized to the uniform distribution via rejection sampling,
+while stilling yielding $\poly(\log n)$ complexities overall.
+This bucketing approach also naturally leads to our data structure that requires
+constant space for each bucket and for each edge, using $\Theta(n+m)$ overall memory requirement.
+The \func{vertex-pair} queries are implemented by sampling the relevant bucket.
+
+We now consider the application of our construction above to actual random graph models,
+where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{v,u})$
+and $\sum^{b}_{u=a} p_{v,u}$ can be computed efficiently.
+This holds trivially for the $G(n,p)$ model via closed-form formulas,
+but requires an additional back-end data structure for the Stochastic Block models.
+
+\paragraph{Erd\"{o}s-R\'{e}nyi}
+\label{par:erdos_renyi}
+In Section~\ref{sec:app_er}, we apply our construction to random $G(n,p)$ graphs for
+arbitrary $p$, and obtain
+$\func{vertex-pair}$, $\func{next-neighbor}$, and $\func{random-neighbor}$ queries,
+using polylogarithmic resources (time, space and random bits) per query.
+We remark that, while $\Omega(n+m) = \Omega(p n^2)$ time and space
+is clearly necessary to generate and represent a full random graph,
+our implementation supports local-access via all three types of queries, 
+and yet can generate a full graph in $\widetilde{O}(n+m)$ time and space (Corollary~\ref{thm:er-optimal}),
+which is tight up to polylogarithmic factors.
+
+%{\color{red}
+\paragraph{Stochastic Block Model}
+\label{par:stochastic_block_model}
+We generalize our construction to the Stochastic Block Model.
+In this model, the vertex set is partitioned into $r$ \emph{communities}
+$\left\{ C_1, \ldots, C_r \right\}$.
+The probability that an edge exists depends on the communities of its endpoints:
+if $u\in C_i$ and $v \in C_j$, then $\{u,v\}$ exists with probability $p_{i,j}$,
+given in an $r\times r$ matrix $\matr{P}$.
+As communities in the observed data are generally unknown a priori,
+and significant research has been devoted to designing efficient algorithm
+for community detection and recovery,
+these studies generally consider the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms (see e.g., \cite{mossel2015reconstruction}).
+Thus, in this work, we aim to construct generators for this important case, where the community assignment of vertices are independently sampled from some given distribution $\distr{R}$.
+%}
+
+Our approach is, as before, to sample for the next neighbor or a random neighbor directly,
+although our result does not simply follow closed-form formulas,
+as the probabilities for the potential edges now depend
+on the communities of endpoints.
+To handle this issue, we observe that it is sufficient to efficiently count
+the number of vertices of each community in any
+range of contiguous vertex indices.
+We then design a data structure extending a construction of \cite{huge},
+which maintain these counts for ranges of vertices,
+and ``sample'' the partition of their counts only on an as-needed basis.
+This extension results in an efficient technique to sample counts
+from the \emph{multivariate hypergeometric distribution} (Section~\ref{sec:partition}).
+This sampling procedure may be of independent interest.
+For $r$ communities, this yields an implementation with
+$ \mathcal{O}(r\cdot \poly(\log n))$ overhead in required resources for each operation.
+This upholds all previous polylogarithmic guarantees when $r = \poly(\log n)$.

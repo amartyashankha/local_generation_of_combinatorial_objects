@@ -1,0 +1,51 @@
+\begin{abstract}
+
+Consider a computation  on  a massive random graph: 
+Does one need to generate the whole random graph up front,
+prior to performing the computation?
+Or, is it possible to provide an oracle to answer queries to the random graph
+''on-the-fly'' in a much more efficient manner overall?
+That is, to provide a \emph{local access generator}
+which incrementally constructs the random graph locally, at the queried portions,
+in a manner consistent with the random graph model and all previous choices.
+Local access generators can be useful when studying
+the local behavior of specific random graph models.
+Our goal is to design local access generators whose
+required resource overhead for answering each query
+is significantly more efficient than generating the whole random graph.
+
+Our results focus on undirected graphs with independent edge probabilities, that is,
+each edge is chosen as an independent Bernoulli random variable.
+We provide a general implementation for generators in this model.
+Then, we use this construction to obtain the first efficient local implementations
+for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, and the Stochastic Block model.
+
+As in previous local-access implementations for random graphs, we support
+\textsc{vertex-pair}, \textsc{next-neighbor} queries, and \textsc{all-neighbors} queries.
+In addition, we introduce a new \textsc{random-neighbor} query.
+We also give the first local-access generation procedure for \textsc{all-neighbors}
+queries in the (sparse and directed) Kleinberg's Small-World model.
+Note that, in the sparse case, an \textsc{all-neighbors} query
+can be used to simulate the other types of queries efficiently.
+All of our generators require no pre-processing time, and answer each query
+using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
+
+%rr Such an oracle for local access to the random
+%graph can be useful when one only needs to query a small portion
+%Local access is extensively used in sub-linear time algorithms and local algorithms,
+%where the algorithms inspect the input graph by interacting with the oracle:
+%optimizing the time per query (without any preprocessing overhead)
+%would lead to more efficient implementations over random graphs.
+
+%rr We give the first local-access procedures that 
+%Our construction provides the first local-access generators for the
+%Erd\"{o}s-R\'{e}nyi model ($G(n,p)$) and the Stochastic Block model,
+%and also the first generators for \emph{dense graphs}.
+%We support all three query types.
+%\textcolor{red}{
+%Note that in sparse graphs, an \textsc{all-neighbors} query provides all three.
+%}
+
+\end{abstract}
+
+\newpage

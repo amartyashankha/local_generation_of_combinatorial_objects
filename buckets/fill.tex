@@ -1,0 +1,133 @@
+\subsection{Implementation of \func{fill}}
+\label{sec:fill_implement}
+
+\begin{algorithm}[H]
+\caption{Sampling in a Bucket}
+\begin{algorithmic}
+\Procedure{fill}{$v,i$}
+\State{$(a,b) \gets B^{(i)}_j$}
+%	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
+%    \For{$b$ in $P_v^{(i)}\cup\{\END(v,i)\}$}
+        \Repeat
+            \State{\textbf{sample} $u\sim\distr{F}(v,a,b)$}
+            \State{$B_u^{(j)} \gets$ $u$'s bucket containing $v$}
+%            \State{$j\gets \BUCKET(u,v)$}
+            \If{$B_u^{(j)}$ is not \filled}
+                \State{$P_v^{(i)}\gets P_v^{(i)}\cup\{u\}$}
+                \State{$P_u^{(j)}\gets P_u^{(j)}\cup\{v\}$}
+            \EndIf
+            \State{$a \gets u$}
+        \Until{$a \ge b$}
+        \State{\textbf{mark} $B_u^{(j)}$ as \filled}
+%        \State \Return $P_v^{(i)}$
+%    \EndFor
+\EndProcedure
+\end{algorithmic}
+\label{alg:fill}
+\end{algorithm}
+
+Lastly, we describe the implementation of the $\func{fill}$ procedure, employing the approach of skipping non-neighbors, as developed for Algorithm~\ref{alg:oblivious-coin-toss}. We aim to simulate the following process: perform coin-tosses $C_{v,u}$ with probability $p_{v,u}$ for every $u \in B_v^{(i)}$ and update $\ADJ[v][u]$'s according to these coin-flips unless they are decided (i.e., $\ADJ[v][u] \neq \PHI$). We directly generate a sequence of $u$'s where the coins $C_{v,u} = \ONE$, then add $u$ to $P_v$ and vice versa if $X_{v,u}$ has not previously been decided. Thus, once $B_v^{(i)}$ is \filled, we will obtain $P_v^{(i)} = \Gamma^{(i)}(v)$ as desired.
+
+As discussed in Section~\ref{sec:ER-rand}, while we have recorded all occurrences of $\ADJ[v][u]=\ONE$ in $P_v^{(i)}$, we need and efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss}, $\LAST$ serves this purpose by showing that $\ADJ[v][u]$ for all $u \leq \LAST[v]$ are decided as shown in Lemma~\ref{lem:cond-0}. Here instead, with our bucket structure, we maintain a single bit marking whether each bucket is \filled~or \unfilled: a \filled~bucket implies that $\ADJ[v][u]$ for all $u \in B_v^{(i)}$ are decided. The bucket structure along with mark bits, unlike $\LAST$, are capable of handling intermittent ranges of intervals, namely buckets, which is sufficient for our purpose, as shown in the following lemma. This yields the implementation Algorithm~\ref{alg:fill} for the $\func{fill}$ procedure fulfilling the requirement previously given in Section~\ref{sec:bucket_filling}. 
+
+\begin{restatable}{lem}{cond}\label{lem:cond-0-fill}
+The data structures $P_v^{(i)}$'s and the bucket marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B_v^{(i)}$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B_v^{(i)}$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
+\end{restatable}
+\begin{proof}
+The condition for $\ADJ[v][u]=\ONE$ still holds by constuction. Otherwise, observe that $\ADJ[v][u]$ becomes decided precisely during a \func{fill}$(v,i)$ or a \func{fill}$(u,j)$ operation, which thereby marks one of the corresponding buckets as \filled.
+\end{proof}
+
+
+%More formally, let $u \in B_v^{(i)}$ and $v \in B_u^{(j)}$. Similarly to For $\ADJ[v][u] \neq \ONE$ (i.e., $u \notin B_v^{(i)}$ and $v \notin B_u^{(i)}$), we maintain the following invariant: $\ADJ[v][u]\neq \PHI$ if and only if at least one of $B_v^{(i)}$ or $B_u^{(j)}$ is \filled. Ensuring this invariant is very simple for Algorithm~\ref{alg:random}: fill an entire bucket at a time. Thus, we obtain the following criteria for computing $\ADJ[v][u]$ while filling $B_v^{(i)}$: if $u \in P_v$ then $\ADJ[v][u]=\ONE$; else if $B_u^{(j)}$ is \filled~then $\ADJ[v][u] = \ZERO$; else $\ADJ[v][u] = \PHI$.
+Note that $P_v^{(i)}$'s, maintained by our generator, are initially empty but may not still be empty at the beginning of the \func{fill} function call. These $P_v^{(i)}$'s are again instantiated and stored in a dictionary once they become non-empty.
+Further, observe that the coin-flips are simulated independently of the state of $P_v^{(i)}$, so the number of iterations of Algorithm~\ref{alg:fill} is the same as the number of coins $C_{v,u} = \ONE$ which is, in expectation, a constant (namely $\sum_{u\in B_v^{(i)}} \pp[C_{v,u}=\ONE] = \sum_{u\in B_v^{(i)}} p_{v,u} \leq L+1$). % at most $M = O(\log n)$ with high probability (over the entire process of filling all $O(n^2)$ buckets throughout the iteration of the generator).
+%Identifying $B_u^{(j)}$ containing $v$ requires a binary search, adding $O(\log n)$ time per iteration.
+
+
+
+By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B_v^{(i)}$, or for the value $u$ from the CDF of $\distr{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
+
+\begin{restatable}{lem}{fill_time}
+\label{lem:fill_time}
+Each execution of Algorithm~\ref{alg:fill} (the \func{fill} operation) on an \unfilled~bucket $B_v^{(i)}$, in expectation:
+\begin{itemize}
+\item terminates within $\bo(1)$ iterations (of its \textup{\textbf{repeat}} loop);
+\item computes $\bo(\log n)$ quantities of $\prod_{u \in [a,b]} (1-p_{v,u})$ and $\sum_{u\in[a,b]} p_{v,u}$ each;
+\item aside from the above computations, uses $\bo(\log n)$ time, $\bo(1)$ random $N$-bit words, and $\bo(1)$ additional space.
+\end{itemize}
+\end{restatable}
+
+Observe that the number of iterations required by Algorithm~\ref{alg:fill} only depends on its random coin-flips and independent of the state of the algorithm.
+Combining with Lemma~\ref{lem:rand_gen_fast}, we finally obtain polylogarithimc resource bound for our implementation of $\func{random-neighbor}$.
+
+\begin{restatable}{corollary}{random_neighbor_time}
+\label{cor:random_neighbor_time}
+Each execution of Algorithm~\ref{alg:random} (the \func{random-neighbor} query), with high probability,
+\begin{itemize}
+\item terminates within $\bo(\log^2 n)$ iterations (of its \textup{\textbf{repeat}} loop);
+\item computes $\bo(\log^3 n)$ quantities of $\prod_{u \in [a,b]} (1-p_{v,u})$ and $\sum_{u\in[a,b]} p_{v,u}$ each;
+\item aside from the above computations, uses $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space.
+\end{itemize}
+\end{restatable}
+
+\paragraph{Extension to other query types}
+We finally extend our algorithm to support other query types as follows.
+\begin{itemize}
+\item \func{vertex-pair}(u,v): We simply need to make sure that Lemma~\ref{lem:cond-0-fill} holds, so we first apply \func{fill}$(u,j)$ on bucket $B_u^{(j)}$ containing $v$ (if needed), then answer accordingly.
+\item \func{next-neighbor}(v): We maintain $\LAST$, and keep invoking \func{fill} until we find a neighbor. Recall that by Lemma~\ref{lem:empty_bucket}, the probability that a particular bucket is empty is a small constant. Then with high probability, there exists no $\omega(\log n)$ \emph{consecutive} empty buckets $B_v^{(i)}$'s for any vertex $v$, and thus \func{next-neighbor} only invokes up to $\bo(\log n)$ calls to \func{fill}.
+\end{itemize}
+
+We summarize the results so far with through the following theorem.
+
+\begin{restatable}{theorem}{res:grand}
+\label{thm:grand}
+Under the assumption of
+\begin{enumerate}
+\item perfect-precision arithmetic, including the generation of random real numbers in $[0, 1)$, and 
+\item the quantities $\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ of the random graph family can be computed with perfect precision in logarithmic time, space and random bits,
+\end{enumerate}
+there exists a local-access generator for the random graph family that supports \func{random-neighbor}, \func{vertex-pair} and \func{next-neighbor} queries that uses polylogarithmic running time, additional space, and random words per query.
+\end{restatable} 
+Between these two assumptions, we first remove the assumption of perfect-precision arithmetic in the upcoming Section~\ref{sec:remove-perfect}.
+Later in Section~\ref{sec:applications}, we show applications of our generator to the $G(n,p)$ model,
+and the Stochastic Block model under random community assignment, by providing formulas and by constructing data structures for computing the quantities specified in the second assumption, respectively.
+%The new idea in Section~\ref{sec:applications} is a procedure to sample from the 
+%multivariate hypergeometric distribution (Section~\ref{sec:partition}).
+
+\iffalse
+In this section, we describe the implementation of the $\func{fill}$ procedure.
+We may use a set $F_v\subseteq [n]$ to store the bucket indices $i$
+(corresponding to $B_v^{(i)}$) that have already been filled.
+Initially, $F_v$ is empty for all $v$.
+We will also maintain the set $P_v^{(i)}$
+(defined in Section~\ref{sec:bucket_partition})
+which stores all the neighbors of $v$ in bucket $i$. For an unfilled bucket,
+this set contains only the indirectly exposed neighbors of $v$.
+
+We will use the skip-sampling procedure outlined in Algorithm~\ref
+{alg:oblivious-coin-toss}, in order to find the remaining entries in $P_v^{(i)}$.
+We do this by dividing up the bucket into intervals
+separated by the existing (indirectly uncovered) values in $P_v^{(i)}$.
+For each of these intervals $[a,b)$, we sample $u\sim\distr{F}(v,a,b)$
+repeatedly until $u \ge b$, each time setting $a\leftarrow u$.
+For each sampled $u$, if $A[u][v] = \phi$, we add $u$ to $P_v^{(i)}$.
+We also have to add $v$ to $P_u^{(j)}$ (where $v\in B_u^{(j)}$).
+Finally, after we have processed all the intervals, we add the index $i$ to $F_v$,
+indicating that the $i^{th}$ bucket has been filled.
+
+The only tricky part is identifying whether $A[u][v]$
+has already been sampled to be $\ZERO$.
+This is only possible if $F_u$ contains the bucket $j$, (where $v\in B_u^{(j)}$),
+i.e. the bucket of vertex $u$ containing $v$ has already been filled.
+Note that since $u\not\in P_v^{(i)}$, we have $A[u][v]\not=1$.
+So, $A[u][v]$ was sampled to be $\ZERO$.
+\begin{restatable}{lem}{fill-correct}
+\label{lem:fill_correct}
+Algorithm~\ref{alg:fill} samples the neighbors in $B_v^{(i)}$,
+from the correct distribution.
+\end{restatable}
+\begin{proof}
+Coins \ldots
+\end{proof}
+\fi
+

@@ -1,0 +1,40 @@
+\section{Additional related work}
+\label{sec:related_work}
+
+\paragraph{Random graph models}
+The Erd\"{o}s-R\'{e}nyi model, given in \cite{er}, is one of the most simple theoretical random graph model,
+yet more specialized models are required to capture properties of real-world data.
+The Stochastic Block model (or the planted partition model) was proposed in \cite{holland} originally for modeling social networks;
+nonetheless, it has proven to be an useful general statistical model in numerous fields,
+including recommender systems \cite{rec0,rec1}, medicine \cite{med0}, social networks \cite{social0,social1},
+molecular biology \cite{bio0,bio1}, genetics \cite{gene0,gene1,gene2}, and image segmentation \cite{img0}.
+Canonical problems for this model are the community detection and community recovery problems:
+some recent works include \cite{chin2015stochastic,mossel2015reconstruction,abbe2015community,abbe2016exact};
+see e.g., \cite{abbe} for survey of recent results.
+The study of Small-World networks is originated in \cite{watts1998collective} has frequently been observed,
+and proven to be important for the modeling of many real world graphs such as social networks \cite{small0, small1},
+brain neurons \cite{bassett2006small}, among many others.
+Kleinberg's model on the simple lattice topology (as considered in this paper) imposes a geographical that allows navigations,
+yielding important results such as routing algorithms (decentralized search) \cite{kleinberg, klein}.
+See also e.g., \cite{newman2000models} and Chapter 20 of \cite{easley2010networks}.
+
+\paragraph{Generation of random graphs}
+The problem of local-access implementation of random graphs has been considered in the aforementioned work \cite{huge_old,sparse,reut},
+as well as in \cite{mansour2012converting} that locally generates out-going edges on bipartite graphs while minimizing the maximum in-degree.
+The problem of generating full graph instances for random graph models have been frequently considered in many models of computations,
+such as sequential algorithms \cite{milo2003uniform,er_gen,nobari2011fast,miller2011efficient},
+and the parallel computation model \cite{alam2017parallel}.
+
+\paragraph{Query models}
+In the study of sub-linear time graph algorithms where reading the entire input is infeasible,
+it is necessary to specify how the algorithm may access the input graph,
+normally by defining the type of queries that the algorithm may ask about the input graph;
+the allowed types of queries 
+can greatly affect the performance of the algorithms.
+While \func{next-neighbor} query is only recently considered in \cite{reut},
+there are other query models providing a neighbor of a vertex,
+such as asking for an entry in the adjacency-list representation \cite{goldreich1997property},
+or traversing to a random neighbor \cite{brautbar2010local}. On the other hand,
+the
+\func{vertex-pair} query is common in the study of dense graphs as accessing the adjacency matrix representation \cite{goldreich1998property}.
+The \func{all-neighbors} query has recently been explicitly considered in local algorithms \cite{feige2017probe}.

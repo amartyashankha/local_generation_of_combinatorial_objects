@@ -1,0 +1,67 @@
+\subsection{Final Generator via the Bucketing Approach}
+\label{sec:buckets}
+
+We now resolve both of the above issues via the bucketing approach, allowing our generator to support all remaining types of queries.
+We begin this section by focusing first on \func{random-neighbor} queries, then extend the construction to the remaining ones. In order to handle \func{random-neighbor}$(v)$,
+we divide the neighbors of $v$ into \emph{buckets} $B_v = \{ B_v^{(1)}, B_v^{(2)},\ldots\}$,
+so that each bucket contains, in expectation, roughly the same number of neighbors of $v$.
+We may then implement \func{random-neighbor}$(v)$ by randomly selecting a bucket $B_v^{(i)}$,
+fill in entries $\ADJ[v][u]$ for $u \in B_v^{(i)}$ with $\ONE$'s and $\ZERO$'s, then report a random neighbor from this bucket.
+As the bucket size may be too large when the probabilities are small, instead of using a linear scan, our \func{fill} subroutine will be implemented with the \func{next-neighbor} subroutine in Algorithm~\ref{alg:oblivious-coin-toss} previously developed in Section~\ref{sec:ER-rand}.
+Since the number of iterations required by this subroutine is roughly proportional to the number of neighbors, we choose to allocate a constant number of neighbors in expectation to each bucket: with constant probability the bucket contains some neighbors, and with high probability it has at most $O(\log n)$ neighbors.
+
+Nonetheless, as the actual number of neighbors appearing in each bucket may be different, we balance out these discrepancies by performing \emph{rejection sampling}, equalizing the probability of choosing any neighbor implicitly, again without the knowledge of $\deg(v)$ as previously done in Section~\ref{sec:ER-naive}.
+Leveraging the fact that the maximum number of neighbors in any bucket is $\Bo(\log n)$, we show not only that the probabability of success in the rejection sampling process is at least $1/\poly(\log n)$, but the number of iterations required by \func{next-neighbor} is also bounded by $\poly(\log n)$, achieving the overall $\poly(\log n)$ complexities.
+Here in this section, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices, $\sum_{u=a}^b p_{v,u}$, can be computed efficiently.
+
+\subsubsection{Partitioning into buckets}
+\label{sec:bucket_partition}
+More formally, we fix some sufficiently large constant $L$,
+and assign the vertex $u$ to the $\lceil\sum^{u}_{i=1} p_{v,i}/L\rceil^\textrm{th}$ bucket of $v$.
+%So the total number of buckets is $|B_v| = \lceil\sum^{n}_{i=1} p_{v,i}/L\rceil$.
+Essentially, each bucket represents a contiguous range of vertices,
+where the expected number of neighbors of $v$ in the bucket is (mostly) in the range $[L-1,L+1]$
+(for example, for $G(n,p)$, each bucket contains roughly $L/p$ vertices).
+Let us define $\Gamma^{(i)}(v) = \Gamma(v) \cap B_v^{(i)}$,
+the actual neighbors appearing in bucket $B^{(i)}_v$.
+Our construction ensures that $\ee \left[|\Gamma^{(i)}(v)|\right] < L+1$ for every bucket,
+and $\ee\left[|\Gamma^{(i)}(v)|\right] > L-1$ for every $i < |B_v|$
+(i.e., the condition holds for all buckets but possibly the last one).
+
+Now, we show that with high probability, all the bucket sizes $|\Gamma^{(i)}(v)|=\mathcal{O}(\log n)$, and at least a $1/3$-fraction of the buckets are non-empty (i.e., $|\Gamma^{(i)}(v)|>0$), via the following lemmas.
+
+\begin{restatable}{lem}{max-bucket-size}
+\label{lem:max_bucket_size}
+With high probability, the number of neighbors in every bucket, $|\Gamma^{(i)}(v)|$, is at most $ \mathcal{O}(\log n)$.
+\end{restatable}
+\begin{proof}
+Fix a bucket $B_v^{(i)}$, and consider the Bernoulli RVs $\left\{ X_{v,u}\right\}_{u\in B_v^{(i)}}$.
+The expected number of neighbors in this bucket is
+$ \textstyle\mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{v,u} \right] < L+1$.
+Via the Chernoff bound,
+$$
+\mathbb{P} \left[ |\Gamma^{(i)}(v)|> (1+3c\log n)\cdot L \right]
+\le e^{-\frac{3c\log n\cdot L}{3}} = n^{-\Theta(c)}
+$$
+for any constant $c > 0$.
+\end{proof}
+
+\begin{restatable}{lem}{empty-bucket}
+\label{lem:empty_bucket}
+With high probability, for every $v$ such that $|B_v| = \Omega(\log n)$ (i.e., $\ee\left[|\Gamma(v)|\right] = \Omega(\log n)$), at least a $1/3$-fraction of the buckets $\{B_v^{(i)}\}_{i\in[|B_v|]}$ are non-empty.
+\end{restatable}
+\begin{proof}
+For $i < |B_v|$, since $ \mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{v,u} \right] > L-1$, we bound the probability that $B_v^{(i)}$ is empty:
+$$\pp[B_v^{(i)}\textrm{ is empty}] = \prod_{u\in B_v^{(i)}} (1-p_{v,u}) \leq e^{-\sum_{u\in B_v^{(i)}} p_{v,u}} \leq e^{1-L}=c
+$$
+for any arbitrary small constant $c$ given sufficienty large constant $L$. Let $T_{i}$ be the indicator for the event that $B_v^{(i)}$ is \emph{not} empty, so $\ee[T_i]\geq 1-c$. By the Chernoff bound, the probability that less than $|B_v|/3$ buckets are non-empty is 
+$$\textstyle
+\pp\left[\sum_{i\in[|B_v|]} T_i<\frac{|B_v|}{3}\right]<\pp\left[\sum_{i\in[|B_v|-1]} T_i<\frac{|B_v-1|}{2}\right]\leq e^{-\Theta(|B_v|-1)} = n^{-\Omega(1)}
+$$ as $|B_v| = \Omega(\log n)$ by assumption.
+\end{proof}
+
+\label{sec:bucket_fill}
+
+\input{buckets/sampling}
+\input{buckets/random}
+\input{buckets/fill}

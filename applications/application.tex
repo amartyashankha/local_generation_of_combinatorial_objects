@@ -1,0 +1,49 @@
+\section{Applications to Erd\"{o}s-R\'{e}nyi Model and Stochastic Block Model}
+\label{sec:applications}
+In this section we demonstrate the application of our techniques to
+two well known, and widely studied models of randon graphs. That is, as required by Theorem~\ref{thm:grand}, we must provide a method for computing the quantities $\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ of the desired random graph families in logarithmic time, space and random bits.
+Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- $G(n,p)$: in this case, $p_{v,u} = p$ is uniform and our quantities admit closed-form formulas.
+%It is quite simple to calculate the CDF for uniform probabilities.
+%{\color{red} Should we still be explicitly mentioning the CDFs? now that we have two ``assumptions'' (product and sum) maybe we should tone this section as actually computing them (rather than just providing CDFs). also did we actually mention sums?}
+
+Next, we focus on the Stochastic Block model with randomly-assigned communities.
+\iffalse
+{\color{red}In this case, a naive solution would be to simply assign communities to contiguous blocks of indices.
+In such a setting, the problem of calculating $\distr{F}(v,a,b)$, simply reduces to the $G(n,p)$ case,
+with some additional case analysis to check when we are at a community boundary.
+However, this setup is unrealistic,
+and not particularly useful in the context of the Stochastic Block model.
+In fact most algorithms operating on these graphs,
+are trying to unveil the underlying community structure.}
+{\color{blue} I'd say these motivations should show up in intro or preliminaries (for the full version)}
+\fi
+Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random, according to some given distribution $\distr{R}$ over the communities. We formulate a method of sampling community assignments locally.
+This essentially allows us to sample from the \emph{multivariate hypergeometric distribution},
+using $\poly(\log n)$ random bits, which may be of independent interest. We remark that, as our first step, we sample for the number of vertices of each community. That is, our construction can alternatively support the community assignment where the number of vertices of each community is given, under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
+
+\subsection{Erd\"{o}s-R\'{e}nyi Model}
+\label{sec:app_er}
+As $p_{v,u} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{v,u}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{v,u} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
+\begin{restatable}{corollary}{res:oblivious:corol}
+The final algorithm in Section~\ref{sec:undirected} locally generates a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
+\end{restatable}
+
+We remark that there exists an alternative approach that picks $F\sim\distr{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
+
+While we are able to generate our random graph on-the-fly supporting all three types of queries, our construction still only requires $\bo(m+n)$ space ($N$-bit words) in total at any state; that is, we keep $\bo(n)$ words for $\LAST$, $\bo(1)$ words per neighbor in $P_v$'s, and one marking bit for each bucket (where there can be up to $m+n$ buckets in total). Hence, our memory usage is nearly optimal for the $G(n,p)$ model:
+
+\begin{restatable}{corollary}{res:er-optimal}
+\label{thm:er-optimal}
+The final algorithm in Section~\ref{sec:undirected} can generate a complete random graph
+from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using overall
+$\tilde{\mathcal{O}}(n+m)$ time, random bits and space, which is $\tilde{\bo}(pn^2)$ in expectation.
+This is optimal up to $ \mathcal{O}(\poly(\log n))$ factors.
+\end{restatable}
+
+\iffalse
+The deterministic version (Section~\ref{sec:ER-det}) does not require the extra overhead resulting from failed iterations.
+However, the two level data-structure introduces an extra $\Bo(\log n)$ factor, resulting in the same overall running time.
+However, this only requires one $N$-bit random word.
+\fi
+
+\input{applications/sbm}

@@ -1,0 +1,82 @@
+\subsection{Na\"{i}ve Generator with an Explicit Adjacency Matrix}\label{sec:ER-naive}
+
+      \begin{algorithm}[H]
+        \caption{Na\"{i}ve Generator}
+        \begin{algorithmic}
+\Procedure{vertex-pair}{$u,v$}
+	\If {$\ADJ[u][v] = \PHI$}
+      	 \State{\textbf{draw} $X_{u,v}\sim\distr{Bern}(p_{u,v})$}
+	     \State{$\ADJ[v][u], \ADJ[u][v] \gets X_{u,v}$}
+	\EndIf
+	\State \Return $\ADJ[u][v]$
+\EndProcedure
+\Procedure{next-neighbor}{$v$}
+	\For {$u \gets \LAST[v]+1$ to $n$}
+	    \If {$\func{vertex-pair}(v,u) = \ONE$}
+	            \State{$\LAST[v] \gets u$}
+	            \State \Return $u$
+        \EndIf
+    \EndFor
+    \State{$\LAST[v] \gets n+1$}
+    \State \Return $n+1$
+\EndProcedure
+\Procedure{random-neighbor}{$v$}
+	\State{$R \gets V$}
+	\Repeat
+		\State{\textbf{sample} $u \in R$ u.a.r.}
+	    \If {$\func{vertex-pair}(v,u) = \ONE$}
+	            \State \Return $u$
+		\Else \State{$R \gets R\setminus\{u\}$}
+        \EndIf
+	\Until{$R=\emptyset$}
+	\State \Return $\bot$
+\EndProcedure
+        \end{algorithmic}
+\label{alg:naive}
+      \end{algorithm}
+
+First, consider a na\"{i}ve implemention that simply fills out the cells of the $n\times n$ adjacency matrix $\ADJ$ of $G$ one-by-one as required by each query.
+Each entry $\ADJ[u][v]$ occupies exactly one of following three states:
+$\ADJ[u][v] = \ONE$ or $\ZERO$ if the generator has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$, respectively, and $\ADJ[u][v] = \PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices.
+\iffalse
+\begin{itemize}
+\item $\ONE$ if the generator has determined that $\{u,v\} \in E$.
+\item $\ZERO$ if the generator has determined that $\{u,v\} \notin E$.
+\item $\PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices. In particular, %since the decisions to include any edges are independent in this model,
+the marginal probability that $\{u,v\} \in E$, conditioned on the current state of $\ADJ$, is still exactly $p_{u,v}$. %(including the case $u = v$ due to our simplifying assumption).
+\end{itemize}
+\fi
+Aside from $\ADJ$, our generator also maintains the vector $\LAST$, where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{next-neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
+This definition of $\LAST$ was introduced in \cite{reut}.
+All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
+%, and note that $\LAST[v]=n+1$ if the last call returned $n+1$.
+\iffalse
+We initialize the data structure by setting all entries of $\ADJ$ to $\PHI$ and those of $\LAST$ to $0$. %Each $\ADJ[u][v]$ will become $\ONE$ with probability $p_{u,v}$, or $\ZERO$ with probability $1-p_{u,v}$.
+At any point during the execution, $\ADJ$ will be symmetric, composed entirely of $\ONE, \ZERO$ and $\PHI$. Entries $\ADJ[u][v]$ and $\ADJ[v][u]$ correspond to the same edge and will always be updated together.
+\fi
+We refer to Algorithm~\ref{alg:naive} for its straightforward implemention, but highlight some notations and useful observations here.
+
+\paragraph{Characterizing random choices via $X_{u,v}$'s}
+Algorithm~\ref{alg:naive} updates the cell $\ADJ[u][v] = \PHI$ to the value of the Bernoulli random variable (RV) $X_{u,v} \sim \distr{Bern}(p_{u,v})$ (i.e., flip a coin with bias $p_{u,v}$) only when it needs to decide whether $\{u,v\}\in E$. %: we say that $X_{u,v}$ is \emph{decided} if $\ADJ[u][v] \neq \PHI$, and call it \emph{undecided} otherwise.
+For the sake of analysis, we will frequently consider the \emph{entire} table of RVs $X_{u,v}$ being sampled \emph{up-front} (i.e., flip all coins), and the algorithm simply ``uncovers'' these variables instead of making coin-flips. Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{u,v}$ once the graph generation is complete. An example application of this view of $X_{u,v}$ is the following analysis.
+
+\paragraph{Sampling from $\Gamma(v)$ uniformly without knowing $\deg(v)$}
+Consider a \func{random-neighbor}$(v)$ query. We create a \emph{pool} $R$ of vertices, draw from this pool one-by-one, until we find a neighbor of $u$. Then, for any fixed table $X_{u,v}$, the probability that a vertex $u \in \Gamma(v)$ is returned is simply the probability that, in the sequence of vertices drawn from the pool $R$, $u$ appears first among all neighbors in $\Gamma(v)$. Hence, we sample each $u \in \Gamma(v)$ with probability $1/\deg(v)$, even without \emph{knowing} the specific value of $\deg(v)$.
+
+\paragraph{Capturing the state of the partially-generated graph with $\ADJ$}
+Under the presence of \func{random-neighbor} queries, the probability distribution of the random graphs conditioned on the past queries and answers can be very complex: for instance, the number of repeated returned neighbors of $v$ reveals information about $\deg(v) = \sum_{u\in V}X_{u,v}$, which imposes dependencies on as many as $\Theta(n)$ variables. Our generator, on the other hand, records the neighbors and also \emph{non-neighbors} not revealed by its answers, yet surprisingly this internal information fully captures the state of the partially-generated graph. This suggests that we should design generators that maintain $\ADJ$ as done in Algorithm~\ref{alg:naive}, but in a more implicit and efficient fashion in order to achieve the desired complexities. Another benefit of this approach is that any analysis can be performed on the simple representation $\ADJ$ rather than any complicated data structure we may employ.
+
+\paragraph{Obstacles for maintaining $\ADJ$}
+There are two problems in the current approach. Firstly, the algorithm only finds a neighbor, for a \func{random-neighbor} or \func{next-neighbor} query, with probability $p_{u,v}$, which requires too many iterations: for $G(n,p)$ this requires $1/p$ iterations, which is already infeasible for $p = o(1/\poly(\log n))$. Secondly, the algorithm may generate a large number of non-neighbors in the process, possibly in random or arbitrary locations.
+
+\iffalse
+\paragraph{The table of Bernoulli random variables $X_{u,v}$'s} To process a \func{vertex-pair}$(u,v)$ query, we first check if $\ADJ[u][v]=\PHI$; if so, draw $X_{u,v}$ from a Bernoulli trial $\distr{Bern}(p_{u,v})$ (i.e., flip a coin with bias $p_{u,v}$) to choose whether $\{u,v\} \in E$, and update the cells corresponding to this edge accordingly. Then we simply answer with $\ADJ[u][v]$. That is, each $\ADJ[u][v]$ is originally $\PHI$, but eventually takes the value of the random variable (RV) $X_{u,v}$ (which is the same RV as $X_{v,u}$, only written differently) once the graph generation process is complete. For the sake of analysis, we will frequently consider the \emph{entire} table of Bernoulli RVs $X_{u,v}$ being sampled \emph{up-front}, and the algorithm inspects these variables instead of making coin-flips.
+
+More concretely, consider a \func{random-neighbor}$(v)$ query, where the subroutine samples a uniform random neighbor of $v$ \emph{without} knowing $\deg(v)$. We create a pool $R$ of vertices, draw from this pool one-by-one, until we find a neighbor of $u$. Then, for any fixed table $X_{u,v}$, the probability that a vertex $u \in \Gamma(v)$ is returned is simply the probability that, in the sequence of vertices drawn from the pool $R$, $u$ appears first among all neighbors in $\Gamma(v)$. Hence, $u$ is clearly sampled with probability $1/\deg(v)$, as desired.
+
+As for \func{next-neighbor}$(v)$, we straightforwardly consider each potential neighbor $u > \LAST[v]$: if $\{v,u\}\in E$, we update $\LAST[v]\leftarrow u$, return $u$ and terminate. We return $n+1$ if no such neighbor $u$ exists.
+\fi
+
+
+%Algorithm~\ref{alg:naive} clearly generates a graph drawn from the correct distribution $X_{u,v}\sim\distr{Bern}(p_{u,v})$ if the coin-flips are performed with no error. Otherwise, using random $N$-bit words, we may sample $X_{u,v}$ from a distribution that is $\frac{1}{\poly(n)}$-close to $\distr{Bern}(p_{u,v})$. Since all $O(n^2)$ RVs $X_{u,v}$'s are drawn independently, the distribution from which $G$ is generated is represented via the product distribution for these variables. Thus its $L_1$-distance to the desired distribution is increased by at most a factor of $O(n^2)$, which is still $\frac{1}{\poly(n)}$. %Unfortunately, Algorithm~\ref{alg:naive} may take up to $\Theta(n)$ iterations to answer a single \func{next-neighbor} query.
+

@@ -23,24 +23,10 @@ i.e. $c\not\in \left\{ X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recol
 After running the MC for $T = \mathcal{O}(n\log n)$ steps we reach the stationary distribution ($\epsilon$ close),
 and the coloring is an uniformly random one.
 
-\subsection{Local Coloring Algortihm}%
-\label{sub:local_coloring_algortihm}
+\textbf{Exact Bound:}
+$t_{mix}(\epsilon) \le \left( \frac{q-\Delta}{q-2\Delta}\right)n\left( \log n + \log(1/\epsilon)\right)$
+\todo{cite book (Peres, Lyons)}
 
-Given a vertex $v$, the local-access generator has to output the color of $v$
-after running $T = \mathcal{O}(n\log n) = k\cdot n\log n$ steps of Glauber Dynamics where $k$ is a constant.
-For this algorithm to work, we will take $q > 2k\Delta\log n = \mathcal{O}(\Delta\log n)$.
-
-We can consider T iterations of the above MC, and the corresponding vertex and color samples.
-\[
-\left\langle (v_1, c_1), (v_2, c_2), (v_3, c_3), \cdots, (v_T, c_T)\right\rangle
-\thicksim_{\mathcal U} \left( V\times [q]\right)^T
-\]
-A position $i$ in the sequence is labeled \emph{``ACCEPT''} if at the $i^{th}$ step,
-$v_i$ was recolored to $c_i$ (no conflicts with neighbors).
-Otherwise, position $i$ is marked \emph{``REJECT''}.
-
-Given a vertex $v$, we consider all instances of $(v, *)$, where $*\in [q]$.
-Let the last such occurrence be $(v, c_t)$.
-We now need to compute whether position $i$ was marked \emph{``ACCEPT''} or \emph{``REJECT''}.
-
+%\input{coloring/naive}
 \input{coloring/modified}
+\input{coloring/local}

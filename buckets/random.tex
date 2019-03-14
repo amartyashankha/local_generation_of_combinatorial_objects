@@ -1,0 +1,72 @@
+\subsubsection{Putting it all together: \func{random-neighbor} queries}
+\label{sec:random_neighbor}
+
+      \begin{algorithm}[H]
+      % TODO: Better Name <28-10-17, shankha> %
+        \caption{Bucketing Generator}
+        \begin{algorithmic}
+\Procedure{random-neighbor}{$v$}
+    \State{$R \gets [|B_v|]$}
+    % TODO: Set correct value for M_v <28-10-17, shankha> %
+%    \State{$M_v \gets \max_i{|P_v^{(i)}|}$}
+    \Repeat
+        \State{\textbf{sample} $i \in R$ u.a.r.}
+        \If {$B_v^{(i)}$ is not \emph{filled}}
+            \State$\func{fill}\left( v,i\right)$
+        \EndIf
+        \If {$|P_v^{(i)}| > 0$}
+            \State{\textbf{with probability} $\frac{|P_v^{(i)}|}{M}$}
+            \State{\hspace{\algorithmicindent}\textbf{sample} $u\in P_v^{(i)}$ u.a.r }
+            \State{\hspace{\algorithmicindent}\Return $u$}
+        \Else
+        % TODO: Is his necessary? <28-10-17, shankha> %
+            \State{$R \gets R\setminus\{i\}$}
+        \EndIf
+    \Until{$R=\emptyset$}
+    \State \Return $\bot$
+\EndProcedure
+        \end{algorithmic}
+\label{alg:random}
+      \end{algorithm}
+
+Consider Algorithm~\ref{alg:random} for generating a random neighbor via rejection sampling, in a rather similar overall framework as the simple implementation in Section~\ref{sec:ER-naive}.
+For simplicity, throughout the analysis, we assume $|B_v| = \Omega(\log n)$; otherwise, invoke $\func{fill}(v,i)$ for all $i \in [|B_v|]$ to obtain the entire neighbor list $\Gamma(v)$. This does not affect the analysis because we will soon bound the number of calls that Algorithm~\ref{alg:random} makes to \func{fill} by $O(\log n)$ (in expectation) for $|B_v| = \Omega(\log n)$.
+
+To obtain a random neighbor, we first choose a bucket $B_v^{(i)}$ uniformly at random.
+% TODO: Reference to Anak's section <28-10-17, shankha> %
+If the bucket is not yet filled, we invoke $\func{fill}(v,i)$ and fill this bucket.
+Then, we \emph{accept} the sampled bucket for generating our random neighbor with probability proportional to $|P_v^{(i)}|$. More specifically, let $M = \Theta(\log n)$ be the upper bound on the maximum number of neighbors in any bucket, as derived in Lemma~\ref{lem:max_bucket_size}; we accept this bucket with probability $|P_v^{(i)}|/M$, which is well-defined (i.e., does not exceed $1$) with high probability. 
+(Note that if $P_v^{(i)} = \emptyset$, we remove $i$ from the pool, then repeat as usual.) 
+If we choose to accept this bucket, we return a random neighbor from $P_v^{(i)}$.
+Otherwise, \emph{reject} this bucket and repeat the process again.
+
+Since the returned value is always a member of $P_v^{(i)}$,
+a valid neighbor is always returned.
+Further, $i$ is removed from $R$ only if $B_v^{(i)}$ does not contain any neighbors.
+So, if $v$ has any neighbor, $\func{random-neighbor}$ does not return $\bot$.
+We now proceed to showing the correctness of the algorithm and bound the number of iterations required for the rejection sampling process.
+\begin{restatable}{lem}{rand-gen-correct}
+\label{lem:rand_gen_correct}
+Algorithm~\ref{alg:random} returns a uniformly random neighbor of vertex $v$.
+\end{restatable}
+\begin{proof}
+It suffices to show that the probability that any neighbor in $\Gamma(v)$ is return with uniform positive probability, within the same iteration.
+Fix a single iteration and consider a vertex $u\in P_v^{(i)}$:
+we compute the probability that $u$ is accepted.
+The probability that $i$ is picked is $1/|R|$, the probability that $B_v^{(i)}$ is accepted is $|P_v^{(i)}|/M$, and the probability that $u$ is chosen among $P_v^{(i)}$ is $1/|P_v^{(i)}|$.
+Hence, the overall probability of returning $u$ in a single iteration
+of the loop is $1/(|R|\cdot M)$, which is positive and independent of $u$.
+Therefore, each vertex is returned with the same probability.
+\end{proof}
+
+\begin{restatable}{lem}{rand-gen-fast}
+\label{lem:rand_gen_fast}
+Algorithm~\ref{alg:random} terminates in $\mathcal{O}(\log n)$ iterations in expectation, or $\mathcal{O}(\log^2 n)$ iterations with high probability.
+\end{restatable}
+\begin{proof}
+Following the analysis above, the probability that some vertex from $P_v^{(i)}$ is accepted in an iteration is at least $1/(|R|\cdot M)$. From Lemma~\ref{lem:empty_bucket}, a $(1/3)$-fraction of the buckets are non-empty (with high probability), so the probability of choosing a non-empty bucket is at least $1/3$. Further, $M = \Theta(\log n)$ by Lemma~\ref{lem:max_bucket_size}. Hence, the success probability of each iteration is at least $1/(3M)=\Omega(1/\log n)$. Thus, with high probability, the number of iterations required is  $O(\log^2 n)$ with high probability.
+\end{proof}
+
+% TODO: Overall runtime <28-10-17, shankha> %
+%So, the algorithm calls the procedure $\func{fill}(v,i)$, $ \mathcal{O}(\log^2 n)$ times with high probability.
+%It remains to implement and analyze the performance of $\func{fill}(v,i)$.

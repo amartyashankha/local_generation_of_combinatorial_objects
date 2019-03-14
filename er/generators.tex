@@ -1,0 +1,20 @@
+\section{Local-Access Generators for Random Undirected Graphs}\label{sec:undirected}
+
+In this section, we provide an efficient implementation of local-access generators for random undirected graphs when the probabilities $p_{u,v} = \pp[\{u,v\} \in E]$ are given. More specifically, we assume that the following quantities can be efficiently computed:
+(1) the probability that there is no edge between a vertex $u$ and a range of consecutive vertices from $[a,b]$, namely $\prod_{u=a}^b (1-p_{v,u})$, and
+(2) the sum of the edge probabilities (i.e., the expected number of edges) between $u$ and vertices from $[a,b]$, namely $\sum_{u=a}^b p_{v,u}$. We will later give subroutines for computing these values for the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model with randomly-assigned communities in Section~\ref{sec:applications}. We also begin by assuming perfect-precision arithmetic, until Section~\ref{sec:remove-perfect} where we show how to relax this assumption to $N = \Theta(\log n)$-bit precision.
+
+First, we propose a simple implementation of our generator in Section~\ref{sec:ER-naive} that sequentially fills out the adjacency matrix; while we do not focus on its efficiency, we establish some basic concepts for further analysis in this section. Next, we improve our subroutine for \func{next-neighbor} queries in Section~\ref{sec:ER-rand}: this algorithm samples for the next candidate of the next neighbor in a more direct manner to speed-up the process. Extending this construction, we obtain our main algorithm in Section~\ref{sec:buckets} via the bucketing technique: partition the vertex set into contiguous ranges to normalize the expected number of neighbors in each bucket, allowing an efficient \func{random-neighbor} implementation by picking a random neighbor from a random bucket. The subroutine that samples for neighbors within a bucket, along with the remaining analysis of the algorithm, is given later in Section~\ref{sec:fill_implement}. Lastly, Section~\ref{sec:remove-perfect} handles the errors that may occur due to the use of finite precision.
+
+\iffalse
+{\color{blue}
+Alternatively, we provide an implementation for these two models with a deterministic performance guarantee in Section~\ref{sec:ER-det}.
+In this setting, introducing the \func{vertex-pair} queries results in an amortized guarantee on the run-time.
+The deterministic guarantee comes at the cost of more complicated data-structures
+(we use a two-level nested interval tree and binary search tree).
+%We then give two modifications to this implementation; a simplified generator that provides a randomized guarantee in Section~\ref{sec:ER-rand}, and an augmented generator that also implements \func{vertex-pair} queries in Section~\ref{sec:ER-pair}.
+}
+\fi
+
+\input{er/naive_generator}
+\input{er/improved_generator}

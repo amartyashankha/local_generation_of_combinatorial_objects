@@ -1,0 +1,43 @@
+\subsection{Local Coloring Algorithm}%
+\label{sub:local_coloring_algortihm}
+
+\input{coloring/algorithm}
+
+Given a vertex $v$, the local-access generator has to output the color of $v$
+after running $t = \mathcal O(1)$ epochs of \emph{Modified Glauber Dynamics}.
+We will define the $i^{th}$ epoch as $\chi^{(i)}$ and the number of colors as $q = \tau\Delta$ where $\tau > 1$.
+
+Each epoch can be implemented a local generator for a permutation of $V$.
+Specifically, each epoch is a sequence of vertex and color samples:
+\[
+\chi^{(i)}
+= \left\langle (v^{(i)}_1, c^{(i)}_1), (v^{(i)}_2, c^{(i)}_2), (v^{(i)}_3, c^{(i)}_3), \cdots, (v^{(i)}_T, c^{(i)}_T)\right\rangle
+\thicksim_{\mathcal U} \left( V\times [q]\right)^T
+\]
+Here, $\left\{ v^{(i)}_1, v^{(i)}_2,\cdots, v^{(i)}_n\right\}$ is a permutation of all the vertices.
+A position $j$ in the sequence is labeled \emph{``ACCEPT''} if at the $j^{th}$ step,
+$v^{(i)}_j$ was recolored to $c^{(i)}_j$ (no conflicts with neighbors).
+Otherwise, position $j$ is marked \emph{``REJECT''}.
+We define $X^{(i)}_v = 1$ if the sample for $v$ in the $i^{th}$ epoch $(v, c^{(i)}_j)$ is accepted and $X^{(i)}_v = 0$ otherwise.
+
+We also define $\mathcal C^{(i)}_v$ to be the color sampled for vertex $v$ in the $i^{th}$ epoch,
+and $\mathcal I^{(i)}_v$ to be the corresponding index $j$.
+
+Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $X^{(i)}_v$.
+
+\begin{theorem}
+\label{thm:coloring_recurrence}
+Coloring recurrence.
+\end{theorem}
+\begin{proof}
+Here, $\mathcal B(p)$ refers to the Bernoulli random variable with parameter $p$.
+Assuming $t = k\log n$.
+\begin{align}
+T_{t} &\le \left|\Gamma(v)\right| \cdot \mathlarger\sum\limits_{i=1}^{t} \mathcal B\left( \frac{1}{\tau\Delta}\right)\cdot
+\left[ T_{i} + T_{i+1} + \mathcal B\left(\frac{1}{\tau}\right)\cdot T_{i+2} + \mathcal B\left(\frac{1}{\tau^2}\right)\cdot T_{i+3} + \cdots\right]\\
+&\le 3\Delta \cdot \mathcal B\left(\frac{1}{\tau\Delta}\right)\cdot T_{t-1} + T_{t-1}\\
+\implies \mathbb E[T_t] &\le \left( 1 + \frac{3}{\tau}\right)\cdot \mathbb E[T_{t-1}]\\
+\implies \mathbb E[T_t] &\le \Delta\cdot \left( 1 + \frac{3}{\tau}\right)^t = \Delta\cdot \mathlarger n^{k\log{\left(1 + \frac{3}{\tau} \right)}}
+= \Delta\cdot \mathlarger n^{\frac{3k}{\tau}}
+\end{align}
+\end{proof}

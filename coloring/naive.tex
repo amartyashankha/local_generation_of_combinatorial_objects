@@ -1,0 +1,26 @@
+\begin{algorithm}[H]
+    \caption{Na\"{i}ve Generator}
+    \begin{algorithmic}
+        \Procedure{Color}{$v, t$}
+            \For{$i \gets 1 \cdots $}
+            \EndFor
+            \State{$S \gets U + D$}\\
+            \State{$d \sim \left\{\frac{\binom{S}{S-d}\binom{S}{D+d}}{\binom{2S}{2D}}\right\}_d$}\\\\
+            \State{$k' \gets k + U - D$}\\
+            \State{$p_d \gets
+                \frac{{{S}\choose{D-d}}-{{S}\choose{D-d-k}}{{S}\choose{U-d}}
+                -{{S}\choose{U-d-k'}}}{{{2S}\choose{2D}}-{{2S}\choose{2D-k}}}$}
+            \State{$q_d \gets \frac{\binom{S}{S-d}\binom{S}{D+d}}{\binom{2S}{2D}}$}\\
+            \If {$p_d < q_d$}
+                \State \Return $d$
+            \EndIf
+            \State{\textbf{draw} $X \sim\distr{Bern}(p_d/q_d)$}
+            \If {$X = 0$}
+                \State \Return $d$
+            \EndIf
+            \Return \func{Split}($U, D, k, k'$)
+
+        \EndProcedure
+    \end{algorithmic}
+    \label{alg:naive_coloring}
+\end{algorithm}

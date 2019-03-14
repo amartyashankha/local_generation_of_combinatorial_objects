@@ -70,8 +70,22 @@
 \newcommand{\PL}[2]{\prod\limits_{#1}^{#2}}
 \newcommand{\BPL}[2]{\mathlarger{\mathlarger{\prod}\limits_{#1}^{#2}}}
 \newcommand{\func}[1]{\textsc{#1}}
+\newcommand{\distr}[1]{\mathsf{#1}}
+\newcommand{\matr}[1]{\mathbf{#1}}
+\newcommand{\data}[1]{\mathbf{#1}}
+\def\poly{\mathrm{poly}}
 
-\newcommand{\anak}[1]{\todo[inline,color=green]{Anak: #1}}
+\def\filled{\textup{\textsf{filled}}}
+\def\unfilled{\textup{\textsf{unfilled}}}
+
+\def\ZERO{\mathsf{0}}
+\def\ONE{\mathsf{1}}
+\def\PHI{\phi}
+\def\LAST{\matr{last}}
+\def\BUCKET{\matr{bucket}}
+\def\BEGIN{\matr{begin}}
+\def\END{\matr{end}}
+\def\ADJ{\matr{A}}
 
 \renewcommand{\vec}[1]{\mathbf{#1}}
 
@@ -104,18 +118,22 @@
 
 \begin{document}
 
-
 \maketitle
 
-%\section{Miscellaneous Results}
-%\label{sec:miscellaneous_results}
+\tableofcontents
+\newpage
 
+%\input{abs}
+%\input{introduction/intro}
+%\input{model}
+%\input{er/generators}
+%\input{buckets/bucket}
+%\input{precision}
+%\input{applications/application}
+%\input{small_world}
 \input{dyck/dyck}
-
-\input{domino}
-
-\input{permutation}
-
+%\input{domino}
+%\input{permutation}
 %\input{coloring/coloring}
 
 

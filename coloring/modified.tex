@@ -10,7 +10,32 @@ In the $i^{th}$ epoch, denoted by $\mathcal E_i$,
           $\left\langle (\pi^{(i)}_1, c_1), (\pi^{(i)}_2, c_2), \cdots, (\pi^{(i)}_n, c_n)\right\rangle$.
 \end{itemize}
 
+\todo{Cite Path Coupling and prove?}
+For the path coupling argument, we define the standard pre-metric on the space for all possible colorings (not necessarily valid ones).
+Given two colorings $X$ and $Y$, we define $d(X,Y)$ as the number of vertices $v$ such that $X_v\not= Y_v$.
+
+We define a coupling $(X,Y)\rightarrow(X',Y')$ where $X$ and $Y$ differ only at a single vertex $v$ such that $X_v = c_X$ and $Y_v = c_Y$.
+Now, we pick a random permutation of the vertices along with uniformly sampled colors:
+\[
+\left\langle (v_1, c_1), (v_2, c_2), \cdots, (v_n, c_n)\right\rangle
+= \left\langle (\pi_1, c_1), (\pi_2, c_2), \cdots, (\pi_n, c_n)\right\rangle
+\]
+Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
+\begin{itemize}
+    \item If the current color of $v_i$ as well as $c_i$ is in $\{c_X,c_Y\}$,
+    then the $X$ chain picks the color $c_i$ and the $Y$ chain picks the other color.
+\end{itemize}
+
+\begin{lemma}
+\label{lem:single_epoch_distance}
+If $\tau \ge 7\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac 12$
+\end{lemma}
+
 \begin{theorem}
 \label{thm:modified_mixing}
-After $k\log n$ epochs, the Markov Chain is mixed.
+After $\mathcal O(\log n)$ epochs, the Markov Chain is mixed.
 \end{theorem}
+\begin{proof}
+Path Coupling
+\end{proof}
+
