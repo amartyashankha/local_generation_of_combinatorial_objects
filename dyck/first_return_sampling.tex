@@ -22,15 +22,19 @@ it suffices to estimate the number of paths asymptotically as well.
 
 \begin{restatable}{lemma}{ReturnDLeftBound}
 \label{lem:ReturnDLeftBound}
-$D_{left}(d) = \Theta\left( \frac{2^{2d+k}}{\sqrt{d}}\mathlarger e^{-r_{left}(d)}\cdot \frac{k-1}{d+k-1}\right)$
-where $r_{left}(d) = \frac{(k-2)^2}{8(2d+k-2)}$.
+If $d > \log^7 n$, then $D_{left}(d)
+= \Theta\left( \frac{2^{2d+k}}{\sqrt{d}}\mathlarger e^{-r_{left}(d)}\cdot \frac{k-1}{d+k-1}\right)$
+where $r_{left}(d) = \frac{(k-2)^2}{2(2d+k-2)}$.
 \end{restatable}
+\todo{Deal with smaller values of $d$}
 
 \begin{restatable}{lemma}{ReturnDRightBound}
 \label{lem:ReturnDRightBound}
-$D_{right}(d) = \Theta\left( \frac{2^{n+m-2d-k}}{\sqrt{n}}\mathlarger e^{-r_{right}(d)}\cdot \frac{n-m+k}{n-d+1}\right)$
-where $r_{right}(d) = \frac{(n-m-k-1)^2}{8(n+m-2d-k+1)}$.
+If $U+D-2d-k > \log^7 n$, then $D_{right}(d)
+= \Theta\left( \frac{2^{U+D-2d-k}}{\sqrt{U+d-2d-k}}\mathlarger e^{-r_{right}(d)}\cdot \frac{U-D+k}{U-d+1}\right)$
+where $r_{right}(d) = \frac{(U-D-k-1)^2}{4(U+D-2d-k+1)}$.
 \end{restatable}
+\todo{Deal with other values of $d$}
 
 
 \subsubsection{Estimating the CDF}%
@@ -39,7 +43,7 @@ where $r_{right}(d) = \frac{(n-m-k-1)^2}{8(n+m-2d-k+1)}$.
 \begin{restatable}{lemma}{ReturnProbabilityBoundNotNormalized}
 \label{lem:ReturnProbabilityBoundNotNormalized}
 $D_{left}(d)\cdot D_{right}(d)
-= \Theta\left( \frac{2^{n+m}}{dn}\mathlarger e^{-r(d)}\cdot\frac{k-1}{d+k-1}\cdot\frac{n-m+k}{n-d+1}\right)$
+= \Theta\left( \frac{2^{U+D}}{\sqrt{d(U+D-2d-k)}}\mathlarger e^{-r(d)}\cdot\frac{k-1}{d+k-1}\cdot\frac{U-D+k}{U-d+1}\right)$
 where $r(d)=\mathcal O(\log^2 n)$.
 \end{restatable}
 \begin{proof}
@@ -51,8 +55,8 @@ This follows from the fact that both $r_{left}(d)$ and $r_{right}(d)$ are $\math
 The probability $p_d$ of sampling $d$ as the number of up-steps
 before the first approach to the boundary can be approximated as:
 \[
-p_d = \Theta\left( \frac{ 2^{n+m}\cdot\frac{(k-1)(n-m+k)}{dn(d+k-1)(n-d+1)}\cdot
-\mathlarger e^{-\floor{r(d)}} }{\binom{n+m}{n}-\binom{n+m}{m-k}} \right)
+p_d = \Theta\left( \frac{ 2^{U+D}\cdot\frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}\cdot
+\mathlarger e^{-\floor{r(d)}} }{\binom{U+D}{U}-\binom{U+D}{D-k}} \right)
 \]
 \todo{$D_{total}$ is not correct}
 This is because the floor function only affects the value of the exponential by a factor of at most $e$.
@@ -61,8 +65,8 @@ This is because the floor function only affects the value of the exponential by 
 \label{cor:ReturnProbabilityPiecewiseContinuous}
 We define a piecewise continuous function
 \[
-\hat q(d) = \frac{ 2^{n+m}\cdot\frac{(k-1)(n-m+k)}{dn(d+k-1)(n-d+1)}\cdot
-\mathlarger e^{-\floor{r(d)}} }{\binom{n+m}{n}-\binom{n+m}{m-k}}
+\hat q(d) = \frac{ 2^{U+D}\cdot\frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}\cdot
+\mathlarger e^{-\floor{r(d)}} }{\binom{U+D}{U}-\binom{U+D}{D-k}}
 \]
 We claim that $p_d = \Theta\left( \int\limits_d^{d+1} \hat q(d)\right)$.
 Note that this integral has a closed form for a fixed value of $\floor{r(d)}$.

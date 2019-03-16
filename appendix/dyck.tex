@@ -9,14 +9,15 @@ This means that we start our Dyck path at a height of $k-1$,
 and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
 
 \begin{lemma}
-\label{lem:}
+\label{lem:dyck_path_deviation_bound}
 Both $|S-U|$ and $|S-D|$ are $\mathcal O(\log n\sqrt S)$ with high probability.
 \end{lemma}
 \begin{proof}
-
+Dyck paths can be constructed from a random walk. Random walk deviation is bounded. QED
+\todo{Finish}
 \end{proof}
 \begin{lemma}
-\label{lem:}
+\label{lem:dyck_path_irrelevant_boundary}
 There exists a constant $c$ such that if $k > c\log n\sqrt S$, then the distribution of paths sampled without a boundary
 (normal random walks) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
 \end{lemma}
@@ -59,12 +60,22 @@ $p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
 \subsection{Approximating Close-to-Central Binomial Coefficients}%
 \label{sub:approximating_close_to_central_binomial_coefficients}
 This immediately gives us an asymptotic formula for the central binomial coefficient as:
+\begin{lemma}
+\label{lem:central_binomial_coefficient}
 \[
 \binom{n}{n/2} = \sqrt{\frac{2}{\pi n}}2^n\left( 1 + \mathcal O\left( \frac 1n\right)\right)
 \]
-
+\end{lemma}
 \todo{Cite Asymptopia}
+
 Now, we consider a ``off-center'' Binomial coefficient $\binom{n}{k}$ where $k = \frac{n+c\sqrt n}{2}$.
+\begin{lemma}
+\label{lem:close_to_central_binomial_coefficient}
+\[
+\binom{n}{k} = \binom{n}{n/2} e^{-c^2/2}exp\left( \mathcal O(c^3/\sqrt n)\right)
+\]
+\end{lemma}
+\begin{proof}
 We consider the ratio: $R = \binom{n}{k}/\binom{n}{n/2}$:
 \begin{align}
 R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
@@ -75,6 +86,7 @@ R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
 = - \frac{c^2}{2} + \mathcal O\left( \frac{c^3}{\sqrt n}\right)\\
 \implies \binom{n}{k} &= \binom{n}{n/2} e^{-c^2/2}exp\left( \mathcal O(c^3/\sqrt n)\right)
 \end{align}
+\end{proof}
 
 
 \input{appendix/dyck_height_sampling}
