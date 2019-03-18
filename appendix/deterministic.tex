@@ -1,15 +1,15 @@
 \section{Alternative Generator with Deterministic Performance Guarantee}\label{sec:ER-det}
 
-In this section, we construct data structures that allow us to sample for the next neighbor directly by considering only the cells $\ADJ[v][u]=\PHI$ in the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model. This provides $\poly(\log n)$ \emph{worst-case} performance guarantee for generators supporting only the \func{next-neighbor} queries. We may again extend this data structure to support \func{vertex-pair} queries, however, at the cost of providing $\poly(\log n)$ \emph{amortized} performance guarantee instead.
+In this section, we construct data structures that allow us to sample for the next neighbor directly by considering only the cells $\ADJ[v][u]=\PHI$ in the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model. This provides $\poly(\log n)$ \emph{worst-case} performance guarantee for generators supporting only the \func{Next-Neighbor} queries. We may again extend this data structure to support \func{Vertex-Pair} queries, however, at the cost of providing $\poly(\log n)$ \emph{amortized} performance guarantee instead.
 
-In what follows, we first focus on the $G(n,p)$ model, starting with \func{next-neighbor} queries (Section~\ref{sec:det-er}) then extend to \func{vertex-pair} queries (Section~\ref{sec:det-er-pair}. We then explain how this result may be generalized to support the Stochastic Block model with random community assignment in Section~\ref{sec:det-sbm}.
+In what follows, we first focus on the $G(n,p)$ model, starting with \func{Next-Neighbor} queries (Section~\ref{sec:det-er}) then extend to \func{Vertex-Pair} queries (Section~\ref{sec:det-er-pair}. We then explain how this result may be generalized to support the Stochastic Block model with random community assignment in Section~\ref{sec:det-sbm}.
 
 \subsection{Data structure for next-neighbor queries in the Erd\"{o}s-R\'{e}nyi model}\label{sec:det-er}
 
 \begin{algorithm}[H]
 \caption{Alternative Generator}
 \begin{algorithmic}
-\Procedure{next-neighbor}{$v$}
+\Procedure{Next-Neighbor}{$v$}
 	\State{$w \gets \min K_v$, or $n+1$ if $K_v = \emptyset$}
 	\State{$t \gets$ \func{count}$(v)$}
 	\State{\textbf{sample} $F\sim\distr{ExactF}(p,t)$}
@@ -30,15 +30,15 @@ In what follows, we first focus on the $G(n,p)$ model, starting with \func{next-
 \label{alg:exact-coin-toss}
 \end{algorithm}
 
-Recall that \func{next-neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{v,u} = 1\}$ (or $n+1$ if no satisfying $u$ exists). To aid in computing this quantity, we define:
+Recall that \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{v,u} = 1\}$ (or $n+1$ if no satisfying $u$ exists). To aid in computing this quantity, we define:
 \begin{align*}
 K_v &= \{u \in (\LAST[v], n]: \ADJ[v][u]=1\},\\
 w_v &= \min K_v \textrm{, or $n+1$ if $K_v = \emptyset$,} \\
 T_v &= \{u \in (\LAST[v], w_v): \ADJ[v][u] = \PHI\}.
 \end{align*}
-The ordered set $K_v$ is only defined for ease of presentation within this section: it is equivalent to $(\LAST[v],n] \cap P_v$, recording the known neighbors of $v$ after $\LAST[v]$ (i.e., those that have not been returned as an answer by any \func{next-neighbor}$(v)$ query yet). The quantity $w_v$ remains unchanged but is simply restated in terms of $K_v$. $T_v$ specifies the list of candidates $u$ for \func{next-neighbor}$(v)$ with $\ADJ[v][u] = \PHI$; in particular, all candidates $u$'s, such that the corresponding RVs $X_{v,u} = \ZERO$ are decided, are explicitly excluded from $T_v$.
+The ordered set $K_v$ is only defined for ease of presentation within this section: it is equivalent to $(\LAST[v],n] \cap P_v$, recording the known neighbors of $v$ after $\LAST[v]$ (i.e., those that have not been returned as an answer by any \func{Next-Neighbor}$(v)$ query yet). The quantity $w_v$ remains unchanged but is simply restated in terms of $K_v$. $T_v$ specifies the list of candidates $u$ for \func{Next-Neighbor}$(v)$ with $\ADJ[v][u] = \PHI$; in particular, all candidates $u$'s, such that the corresponding RVs $X_{v,u} = \ZERO$ are decided, are explicitly excluded from $T_v$.
 
-Unlike the approach of Algorithm~\ref{alg:oblivious-coin-toss} that simulates coin-flips even for decided $X_{v,u}$'s, here we only flip undecided coins for the indices in $T_v$: we have $|T_v|$ Bernoulli trials to simulate. Let $F$ be the random variable denoting the first index of a successful trial out of $|T_v|$ coin-flips, or $|T_v|+1$ if all fail; denote the distribution of $F$ by $\distr{ExactF}(p,|T|)$. The CDF of $F$ is given by $\pp[F = f] = 1-(1-p)^f$ for $f \leq |T_v|$ (i.e., there is some success trial in the first $f$ trials), and $\pp[F = |T_v|+1] = 1$. Thus, we must design a data structure that can compute $w_v$, compute $|T_v|$, find the $F^\textrm{th}$ minimum value in $T_v$, and update $\ADJ[v][u]$ for the $F$ lowest values $u \in T_v$ accordingly.
+Unlike the approach of Algorithm~\ref{alg:oblivious-coin-toss} that simulates coin-flips even for decided $X_{v,u}$'s, here we only flip undecided coins for the indices in $T_v$: we have $|T_v|$ Bernoulli trials to simulate. Let $F$ be the random variable denoting the first index of a successful trial out of $|T_v|$ coin-flips, or $|T_v|+1$ if all fail; denote the distribution of $F$ by $\distr{ExactF}(p,|T|)$. The CDF of $F$ is given by $\mathbb P[F = f] = 1-(1-p)^f$ for $f \leq |T_v|$ (i.e., there is some success trial in the first $f$ trials), and $\mathbb P[F = |T_v|+1] = 1$. Thus, we must design a data structure that can compute $w_v$, compute $|T_v|$, find the $F^\textrm{th}$ minimum value in $T_v$, and update $\ADJ[v][u]$ for the $F$ lowest values $u \in T_v$ accordingly.
 
 Let $k = \lceil \log n \rceil$. We create a range tree, where each node itself contains a balanced binary search tree (BBST), storing $\LAST$ values of its corresponding range. Formally, for $i \in [0, n/2^j)$ and $j \in [0, k]$, the $i^\textrm{th}$ node of the $j^\textrm{th}$ level of the range tree, stores $\LAST[v]$ for every $v \in (i \cdot 2^{k-j}, (i+1)\cdot 2^{k-j}]$. Denote the range tree by $\data{R}$, and each BBST corresponding to the range $[a, b]$ by $\data{B}_{[a,b]}$. We say that the range $[a,b]$  is \emph{canonical} if it corresponds to a range of some $\data{B}_{[a,b]}$ in $\data{R}$.
 
@@ -55,15 +55,15 @@ This is done implicitly by handling the change $\LAST[v] \leftarrow u$: for each
 \end{itemize}
 It is straightforward to verify that all operations require at most $O(\log^2 n)$ time and $O(\log n)$ additional space per call. The overall implementation is given in Algorithm~\ref{alg:exact-coin-toss}, using the same asymptotic time and additional space. Recall also that sampling $F\sim\distr{ExactF}(p,t)$ requires $O(\log n)$ time and one $N$-bit random word for the $G(n,p)$ model.
 
-\subsection{Data structure for \func{vertex-pair} queries in the Erd\"{o}s-R\'{e}nyi model}\label{sec:det-er-pair}
-Recall that we define $Q$ in Algorithm~\ref{alg:oblivious-coin-toss} as the  set of pairs $(u,v)$ where $X_{u,v}$ is assigned to $\ZERO$ during a \func{vertex-pair} query, allowing us to check for modifications of $\ADJ$ not captured by $\LAST[v]$ and $K_v$. Here in Algorithm~\ref{alg:exact-coin-toss}, rather than checking, we need to be able to count such entries. Thus, we instead create a BBST $Q'_v$ for each $v$ defined as:
-\[Q'_v = \{u: u > \LAST[v], v > \LAST[u], \textrm{ and } X_{u,v}\textrm{ is assigned to }\ZERO \textrm{ during a \func{vertex-pair} query}\}.\]
+\subsection{Data structure for \func{Vertex-Pair} queries in the Erd\"{o}s-R\'{e}nyi model}\label{sec:det-er-pair}
+Recall that we define $Q$ in Algorithm~\ref{alg:oblivious-coin-toss} as the  set of pairs $(u,v)$ where $X_{u,v}$ is assigned to $\ZERO$ during a \func{Vertex-Pair} query, allowing us to check for modifications of $\ADJ$ not captured by $\LAST[v]$ and $K_v$. Here in Algorithm~\ref{alg:exact-coin-toss}, rather than checking, we need to be able to count such entries. Thus, we instead create a BBST $Q'_v$ for each $v$ defined as:
+\[Q'_v = \{u: u > \LAST[v], v > \LAST[u], \textrm{ and } X_{u,v}\textrm{ is assigned to }\ZERO \textrm{ during a \func{Vertex-Pair} query}\}.\]
 This definition differs from that of $Q$ in Section~\ref{sec:ER-pair} in two aspects. First, we ensure that each $\ADJ[v][u] = \ZERO$ is recorded by either $\LAST$ (via Lemma~\ref{lem:cond-0}) or $Q'_v$ (explicitly), but \emph{not both}. In particular, if $u$ were to stay in $Q'_v$ when $\LAST[v]$ increases beyond $u$, we would have double-counted these entries $\ZERO$ not only recorded by $Q'_v$ but also implied by $\LAST[v]$ and $K_v$. By having a BBST for each $Q'_v$, we can compute the number of $\ZERO$'s that must be excluded from $T_v$, which cannot be determined via $\LAST[v]$ and $K_v$ alone: we subtract these from any counting process done in the data structure $\data{R}$.
 
 Second, we maintain $Q'_v$ separately for each $v$ as an ordered set, so that we may identify non-neighbors of $v$ within a specific range -- this allows us to remove non-neighbors in specific range, ensuring that the first aspect holds. More specifically, when we increase $\LAST[v]$, we must go through the data structure $Q'_v$ and remove all $u < \LAST[v]$, and for each such $u$, also remove $v$ from $Q'_u$. There can be as many as linear number of such $u$, but the number of removals is trivially bounded by the number of insertions, yielding an amortized time performance guarantee in the following theorem. Aside from the deterministic guarantee, unsurprisingly, the required amount of random words for this algorithm is lower than that of the algorithm from Section~\ref{sec:reroll-cont} (given in Theorem~\ref{thm:ER-rand-iterations} and Corollary~\ref{cor:oblivious-alg}).
 
 \begin{theorem}
-Consider the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model. For \func{next-neighbor} queries only, Algorithm~\ref{alg:exact-coin-toss} is a generator that answers each query using $O(\log^2 n)$ time, $O(\log n)$ additional space, and one $N$-bit random word. For \func{next-neighbor} and \func{vertex pair} queries,an extension of Algorithm~\ref{alg:exact-coin-toss} answers each query using $O(\log^2 n)$ amortized time, $O(\log n)$ additional space, and one $N$-bit random word.
+Consider the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model. For \func{Next-Neighbor} queries only, Algorithm~\ref{alg:exact-coin-toss} is a generator that answers each query using $O(\log^2 n)$ time, $O(\log n)$ additional space, and one $N$-bit random word. For \func{Next-Neighbor} and \func{vertex pair} queries,an extension of Algorithm~\ref{alg:exact-coin-toss} answers each query using $O(\log^2 n)$ amortized time, $O(\log n)$ additional space, and one $N$-bit random word.
 \end{theorem}
 
 \subsection{Data structure for the Stochastic Block model}\label{sec:det-sbm}
@@ -71,6 +71,6 @@ Consider the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model. For \func{next-neighbor} querie
 We employ the data structure for generating and counting the number of vertices of each community in a specified range from Section~\ref{sec:app_sbm}. We create $r$ different copies of the data structure $\data{R}$ and $Q'_v$, one for each community, so that we may implement the required operations separately for each color, including using the \func{count} subroutine to sample $F\sim\distr{ExactF}$ via the corresponding CDF, and picking the next neighbor according to $F$. Recall that since we do not store $\LAST[v] = 0$ in $\data{R}$, and we only add an entry to $K_v$, $P_v$ or $Q'_v$ after drawing the corresponding $X_{u,v}$, the communities of the endpoints, which cover all elements stored in these data structures, must have already been determined. Thus, we obtain the following corollary for the Stochastic Block model.
 
 \begin{restatable}{corollary}{res:sbm-corol}
-Consider the Stochastic Block model with randomly-assigned communities. For \func{next-neighbor} queries only, Algorithm~\ref{alg:exact-coin-toss} is a generator that answers each query using $O(r\,\poly(\log n))$ time, random words, and additional space per query. For \func{next-neighbor} and \func{vertex-pair} queries, Algorithm~\ref{alg:exact-coin-toss} answers each query using $O(r\,\poly(\log n))$ amortized time, $O(r\,\poly(\log n))$ random words, and $O(r\,\poly(\log n))$ additional space per query additional space, and one $N$-bit random word.
+Consider the Stochastic Block model with randomly-assigned communities. For \func{Next-Neighbor} queries only, Algorithm~\ref{alg:exact-coin-toss} is a generator that answers each query using $O(r\,\poly(\log n))$ time, random words, and additional space per query. For \func{Next-Neighbor} and \func{Vertex-Pair} queries, Algorithm~\ref{alg:exact-coin-toss} answers each query using $O(r\,\poly(\log n))$ amortized time, $O(r\,\poly(\log n))$ random words, and $O(r\,\poly(\log n))$ additional space per query additional space, and one $N$-bit random word.
 \end{restatable}
 

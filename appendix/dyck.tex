@@ -1,60 +1,21 @@
 \section{Dyck Path Generator}%
 \label{sec:dyck_appendix}
 
-\subsection{Dyck Path Boundaries and Deviations}%
-\label{sub:dyck_path_boundaries_and_deviations}
-Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$ that comprises of $U$ up-steps and $D$ down-steps
-with $U + D = 2S$, such that the sum of any initial sub-string is not less than $1-k$ for some valid $U, D, k < n$.
-This means that we start our Dyck path at a height of $k-1$,
-and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
-
-\begin{lemma}
-\label{lem:dyck_path_deviation_bound}
-Both $|S-U|$ and $|S-D|$ are $\mathcal O(\log n\sqrt S)$ with high probability.
-\end{lemma}
+\begin{theorem}
+\label{thm:number_of_dyck_paths}
+There are $\frac{1}{n+1}\binom{2n}{n}$ Dyck paths for length $2n$.
+\todo{Proof from catalan book}
+\end{theorem}
 \begin{proof}
-Dyck paths can be constructed from a random walk. Random walk deviation is bounded. QED
-\todo{Finish}
-\end{proof}
-\begin{lemma}
-\label{lem:dyck_path_irrelevant_boundary}
-There exists a constant $c$ such that if $k > c\log n\sqrt S$, then the distribution of paths sampled without a boundary
-(normal random walks) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
-\end{lemma}
-\begin{proof}
-
+We first consider ballot sequences which are another catalan object.
+Formally, this is a sequence of $n+1$ $+1$s and $n$ $-1$s such that any prefix sum of the sequence is nonnegative.
+Note that a ballot sequence can be transformed into a valid Dyck path by removing the last occurence of $+1$.
+Similarly, a Dyck path can be converted to a valid ballot sequence by inserting a $+1$ after the last occurence of a 
+First we consider a \emph{balanced} walk with $n$ up and $n$ down steps (without the boundary constraint).
+We will define a function that maps balanced random walks to Dyck paths.
+To do this, we represent a balanced walk with a sequence of $2n$ variables $\{ X_1, X_2,\cdots, X_{2n}\}$ consisting of $n$ $+1$ and $-1$ values.
 \end{proof}
 
-
-\subsection{Computing Probabilities}%
-\label{sub:computing_probabilities}
-We start with Stirling's approximation which states that
-\[
-m! = \sqrt{2\pi m}\left( \frac me\right)^m\left( 1 + \mathcal O\left( \frac 1m\right)\right)\\
-\]
-We will also use the logarithm approximation when a better approximation is required:
-\begin{align}
-    \label{eq:log_factorial_approximation}
-\log (m!) = m\log m -m + \frac 12 \log(2\pi m) + \frac{1}{12m} - \frac{1}{360m^3} + \frac{1}{1260m^5} - \cdots
-\end{align}
-
-Oracle for estimating probabilities:
-\begin{lemma}
-\label{lem:probability_approximation_oracle}
-\todo{Point to section referencing the left right/ total.}
-
-Given a probability expression of the form $p_d = \frac{D_{left}\cdot D_{right}}{D_{total}}$ and a parameter $n$,
-there exists a $\poly(\log n)$ time oracle that returns a $\left( 1\pm 1/n^2\right)$
-multiplicative approximation to $p_d$.% as long as $p_d > 1/n^2$.
-\end{lemma}
-\begin{proof}
-We first compute a $1/n^2$ \emph{additive} approximation to $\log p_d$.
-Note that this is possible because $\log p_d$ can be written as a sum of logarithms of factorials \todo{Not obvious how}.
-So, we can use the series expansion from Equation~\ref{eq:log_factorial_approximation} up to $\mathcal O(\log n)$ terms.
-
-Now, we can exponentiate the approximation to obtain
-$p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
-\end{proof}
 
 
 \subsection{Approximating Close-to-Central Binomial Coefficients}%
@@ -89,5 +50,232 @@ R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
 \end{proof}
 
 
-\input{appendix/dyck_height_sampling}
-\input{appendix/dyck_first_return_sampling}
+
+\subsection{Dyck Path Boundaries and Deviations}%
+\label{sub:dyck_path_boundaries_and_deviations}
+
+\begin{lemma}
+\label{lem:random_walk_deviation_bound}
+Given a random walk of length $2n$ with exactly $n$ up and down steps,
+consider a contiguous \emph{sub-path} of length $2S$ that comprises of $U$ up-steps and $D$ down-steps i.e. $U + D = 2S$.
+Both $|S-U|$ and $|S-D|$ are $\mathcal O(\sqrt{S\log n})$ with probability at least $1-1/n^3$.
+\end{lemma}
+\begin{proof}
+We consider the random walk as a sequence of unbiased random variables $\{X_i\}_{i=1}^{2n}\in \{0,1\}^{2n}$
+with the constraint $\sum\limits_{i=1}^{2n}X_i = n$.
+Here, $1$ corresponds to an up-step and $0$ corresponds to a down step.
+Because of the constraint, $X_i, X_j$ are negatively correlated for $i \not= j$ which allows us to apply Chernoff bounds.
+Now we consider a sub-path of length $2S$ and let $U$ denote the sum of the $X_i$s associated with this subpath.
+Using Chernoff bound with $\mathbb E[X] = S$, we get:
+\[
+\mathbb P\left[ |U-S| < 3\sqrt{S \log n}\right]
+= \mathbb P\left[ |U-S| < 3\frac{\sqrt{\log n}}{\sqrt S}S\right] < e^{\frac{9\log n}{3}} \approx \frac{1}{n^3}
+\]
+Since $U$ and $D$ are symmetric, the same argument applies.
+\end{proof}
+
+\begin{corollary}
+\label{cor:random_walk_deviation_bound}
+With high probability, every contiguous sub-path in the random walk (with $U$ up and $D$ down steps) satisfies the above property with high probability.
+Specifically, if $U+D = 2S$, then $|S-U|$ is upper bounded by $\sqrt{S\log n}$ with high probability for all contiguous sub-paths.
+\end{corollary}
+\begin{proof}
+We can simply apply Lemma~\ref{lem:random_walk_deviation_bound} and union bound over all $n^2$ possible contiguous sub-paths.
+\end{proof}
+
+\begin{lemma}
+\label{lem:dyck_path_deviation_bound}
+Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
+where the sub-path is of length $2S$ comprising of $U$ up-steps and $D$ down-steps (with $U + D = 2S$).
+Both $|S-U|$ and $|S-D|$ are $\mathcal O(\log n\sqrt S)$ with probability at least $1-1/n^3$.
+\end{lemma}
+\begin{proof}
+Because of Theorem~\ref{thm:number_of_dyck_paths}, we can sample a Dyck path
+by first sampling a \emph{balanced} random walk and then converting it to a Dyck path.
+In the worst case, the transformation only increases the \emph{imbalance} in any interval by a factor of at most $\sqrt2$.
+So, we can simply use Corollary~\ref{cor:random_walk_deviation_bound} to finish the proof.
+\todo{Finish}
+\end{proof}
+
+\begin{lemma}
+\label{lem:dyck_path_irrelevant_boundary}
+There exists a constant $c$ such that if $k > c\log n\sqrt S$, then the distribution of paths sampled without a boundary
+(normal random walks) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
+\end{lemma}
+\begin{proof}
+\todo{Change statement. What if other end is much lower?}
+\end{proof}
+
+
+
+\subsection{Computing Probabilities}%
+\label{sub:computing_probabilities}
+We start with Stirling's approximation which states that
+\[
+m! = \sqrt{2\pi m}\left( \frac me\right)^m\left( 1 + \mathcal O\left( \frac 1m\right)\right)\\
+\]
+We will also use the logarithm approximation when a better approximation is required:
+\begin{align}
+    \label{eq:log_factorial_approximation}
+\log (m!) = m\log m -m + \frac 12 \log(2\pi m) + \frac{1}{12m} - \frac{1}{360m^3} + \frac{1}{1260m^5} - \cdots
+\end{align}
+
+Oracle for estimating probabilities:
+\begin{lemma}
+\label{lem:probability_approximation_oracle}
+\todo{Point to section referencing the left right/ total.}
+
+Given a probability expression of the form $p_d = \frac{D_{left}\cdot D_{right}}{D_{total}}$ and a parameter $n$,
+there exists a $\poly(\log n)$ time oracle that returns a $\left( 1\pm 1/n^2\right)$
+multiplicative approximation to $p_d$.% as long as $p_d > 1/n^2$.
+\end{lemma}
+\begin{proof}
+We first compute a $1/n^2$ \emph{additive} approximation to $\log p_d$.
+Note that this is possible because $\log p_d$ can be written as a sum of logarithms of factorials \todo{Not obvious how}.
+So, we can use the series expansion from Equation~\ref{eq:log_factorial_approximation} up to $\mathcal O(\log n)$ terms.
+
+Now, we can exponentiate the approximation to obtain
+$p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
+\end{proof}
+
+
+
+\subsection{Sampling the Height}%
+\label{sub:sampling_the_height}
+
+
+\todo{fix}
+\begin{itemize}
+    \item $d < c\cdot \sqrt S \log n$
+    \item $k < c\cdot \sqrt S \log n \implies U-D < c\cdot \sqrt S \log n$
+    \item $k' < c\cdot \sqrt S \log n$
+    \item $S > \log^2 n \implies \sqrt S \log n < S$
+\end{itemize}
+
+\begin{lemma}
+\label{lem:taylor_bound}
+For $x < 1$ and $k\ge 1$,
+\[
+1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2.
+\]
+\end{lemma}
+
+
+\DLeftBound*
+\begin{proof}
+This involves some simple manipulations.
+\begin{align}
+D_{left} &= {{S}\choose{D-d}}-{{S}\choose{D-d-k}}\\
+&= {{S}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(S-D-d+k)(S-D-d+k-1)\cdots(S-D-d+1)}\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{S-D+d+k}\right)^k\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
+&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\log n\sqrt{S})}{U+d+k}\right)^k\right]\\
+&\le \Theta \left( \frac{k\log n}{\sqrt{S}} \right) \cdot{{S}\choose{D-d}}
+\end{align}
+\end{proof}
+
+\DRightBound*
+\begin{proof}
+\begin{align}
+D_{right} &= {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}\\
+&= {{S}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(S-U-d+k')(S-U-d+k'-1)\cdots(S-U-d+1)}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{S-U+d+k'}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
+&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\log n\sqrt S)}{U+k+d}\right)^{k'}\right]\\
+&\le \Theta\left(\frac{k'\log n}{\sqrt{S}}\right)\cdot{{S}\choose{U-d}}
+\end{align}
+\end{proof}
+
+\begin{restatable}{lemma}{DTotalBasicBound}
+\label{lem:DTotalBasicBound}
+\todo{change statement}
+$D_{tot} \ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
+\end{restatable}
+\begin{proof}
+\begin{align}
+D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
+&= {{2S}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2S-2D+k)(2S-2D+k-1)\cdots(2S-2D+1)}\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2S-2D+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
+&\ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
+\end{align}
+\end{proof}
+
+\todo{Reference previous lemma}
+
+\DTotalFarBoundary*
+\begin{proof}
+When $kk' > 2U + 1 \implies k > \frac{2U+1}{k'}$,
+we will show that the above expression is greater than $\frac 12 \binom{2S}{2D}$.
+Defining $\nu = \frac{2U+1}{k'} > 1$, we see that $(1-\frac 1\nu)^k \le (1-\frac 1\nu)^\nu$.
+Since this is an increasing function of $\nu$ and since the limit of this function is $\frac 1e$,
+we conclude that
+\[
+1-\left(1 - \frac{k'}{2U+1}\right)^k > \frac 12
+\]
+\end{proof}
+
+\DTotalNearBoundary*
+\begin{proof}
+Now we bound the term $1-\left(1-\frac{k'}{2U+1}\right)^k$, given that $kk'\le 2U+1\implies\frac{kk'}{2U+1} \le 1$.
+Using Taylor expansion, we see that
+\begin{align}
+&1 - \left(1 - \frac{k'}{2U+1}\right)^k\\
+&\le \frac{kk'}{2U+1} - \frac{k(k-1)}{2}\cdot\frac{k'^2}{(2U+1)^2}\\
+&\le \frac{kk'}{2U+1} - \frac{k^2k'^2}{2(2U+1)^2}\\
+&\le \frac{kk'}{2U+1} \left(1 - \frac{kk'}{2(2U+1)}\right)\\
+&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(S)}\\
+\end{align}
+\end{proof}
+
+
+
+\subsection{First Return Sampling}%
+\label{sub:first_return_sampling}
+
+\ReturnDLeftBound*
+\begin{proof}
+In what follows, we will drop constant factors:
+Refer to Figure~\ref{fig:dyck_return_sampling} for the setup.
+The left section of the path reaches one unit above the boundary (the next step would make it touch the boundary).
+The number of up-steps on the left side is $d$ and therefore the number of down steps must be $d + k - 2$.
+This inclues $d$ down steps to cancel out the upwards movement, and $k-2$ more to get to one unit above the boundary.
+The boundary for this section is $k' = k-1$. This gives us:
+\begin{align}
+D_{left}(d) &= \binom{2d+k-2}{d} - \binom{2d+k-2}{d-1}\\
+&= \binom{2d+k-2}{d}\left[ 1-\frac{d}{d+k-1}\right] = \binom{2d+k-2}{d}\frac{k-1}{d+k-1}
+\end{align}
+Now, letting $z = 2d+k-2$,  we can write $d = \frac{z-(k-2)}{2} = \frac{z-\frac{k-2}{\sqrt z}\sqrt z}{2}$.
+Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\log n)$.
+If this is not the case, we can simply return $0$ because the probability associated with this value of $d$ is negligible.
+Since $z > \log^7 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
+\[
+D_{left}(d) = \Theta\left( \binom{z}{z/2} e^{\frac{(k-2)^2}{2z}} \frac{k-1}{d+k-1} \right)
+= \Theta\left( \frac{2^{2d+k}}{\sqrt d} e^{\frac{(k-2)^2}{2(2d+k-2)}} \frac{k-1}{d+k-1} \right)
+\]
+\end{proof}
+
+
+\ReturnDRightBound*
+\begin{proof}
+The right section of the path starts from the original boundary.
+Consequently, the boundary for this section is at $k' = 1$.
+The number of up-steps on the right side is $U-d$ and the number of down steps is $D-d-k+1$.
+This gives us:
+\begin{align}
+D_{right}(d) &= \binom{U+D-2d-k+1}{U-d} - \binom{U+D-2d-k+1}{U-d+1}\\
+&= \binom{U+D-2d-k+1}{U-d}\left[ 1-\frac{D-d-k-1}{U-d+1}\right]\\
+&= \binom{U+D-2d-k+1}{U-d}\frac{U-D+k}{U-d+1}
+\end{align}
+Now, letting $z = U+D-2d-k+1$,  we can write $U-d = \frac{z+(U-D+k-1)}{2} = \frac{z+\frac{U-D+k-1}{\sqrt z}\sqrt z}{2}$.
+Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\log n)$.
+If this is not the case, we can simply return $0$ because the probability associated with this value of $d$ is negligible.
+Since $z > \log^7 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
+\begin{align}
+D_{right}(d) &= \Theta\left( \binom{z}{z/2} e^{\frac{(U-D+k-1)^2}{2z}} \frac{U-D+k}{U-d+1} \right)\\
+&= \Theta\left( \frac{2^{U+D-2d-k}}{\sqrt{U+D-2d-k}} e^{\frac{(U-D+k-1)^2}{2(U+D-2d-k+1)}} \frac{U-D+k}{U-d+1} \right)
+\end{align}
+\end{proof}
+

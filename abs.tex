@@ -21,11 +21,11 @@ Then, we use this construction to obtain the first efficient local implementatio
 for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, and the Stochastic Block model.
 
 As in previous local-access implementations for random graphs, we support
-\textsc{vertex-pair}, \textsc{next-neighbor} queries, and \textsc{all-neighbors} queries.
-In addition, we introduce a new \textsc{random-neighbor} query.
-We also give the first local-access generation procedure for \textsc{all-neighbors}
+\func{Vertex-Pair}, \func{Next-Neighbor} queries, and \func{All-Neighbors} queries.
+In addition, we introduce a new \func{Random-Neighbor} query.
+We also give the first local-access generation procedure for \func{All-Neighbors}
 queries in the (sparse and directed) Kleinberg's Small-World model.
-Note that, in the sparse case, an \textsc{all-neighbors} query
+Note that, in the sparse case, an \func{All-Neighbors} query
 can be used to simulate the other types of queries efficiently.
 All of our generators require no pre-processing time, and answer each query
 using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
@@ -43,7 +43,7 @@ using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
 %and also the first generators for \emph{dense graphs}.
 %We support all three query types.
 %\textcolor{red}{
-%Note that in sparse graphs, an \textsc{all-neighbors} query provides all three.
+%Note that in sparse graphs, an \func{All-Neighbors} query provides all three.
 %}
 
 \end{abstract}

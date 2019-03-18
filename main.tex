@@ -1,64 +1,22 @@
-\def\conf{0}
-\def\icalp{0}
-\def\both{0}
+\documentclass[a4paper,UKenglish,cleveref,autoref]{lipics-v2019}
 
-\documentclass[11pt]{article}
-\usepackage{fullpage}
-
-
-\usepackage{graphicx,amsfonts,amsmath,amssymb,epsfig,hyperref,color}
 \usepackage{algorithm}
-\usepackage{pdfpages}
-\usepackage{enumitem}
-\usepackage{multirow}
 \usepackage{thm-restate}
-
 \usepackage{mathtools}
-
 \usepackage[noend]{algpseudocode}
-\usepackage[english]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
-
-\usepackage{verbatim}
-\usepackage{comment}
-\usepackage{hyperref}
-
-\usepackage{boxedminipage}
-\usepackage{fullpage}
-\usepackage{array}
-\usepackage[normalem]{ulem}
-
+\usepackage[T1]{fontenc}
 \usepackage{relsize}
-\usepackage{amsthm}
+%\usepackage{multirow}
+\usetikzlibrary{
+  shapes.multipart,
+  matrix,
+  positioning,
+  shapes.callouts,
+  shapes.arrows,
+  calc}
 
-%\usepackage{amsmath,amssymb,amsthm}
-%\theoremstyle{definition}
-%\newtheorem{defn}{Definition}
-%\newtheorem{ques}{Question}
 
-%\theoremstyle{remark}
-%\newtheorem{obs}{Observation}
-%\newtheorem{rem}{Remark}
-
-%\theoremstyle{definition}
-\newtheorem{lemma}{Lemma}
-\newtheorem{claim}{Claim}
-\newtheorem{theorem}{Theorem}
-\newtheorem{definition}{Definition}
-\newtheorem{corollary}{Corollary}
-\newtheorem{proposition}{Proposition}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{1em}
-
-\def\ll{\left}
-\def\rr{\right}
-\def\RR{\mathbb{R}}
-\def\ee{\mathbb{E}}
-\def\pp{\mathbb{P}}
 \def\bo{\mathcal{O}}
 \def\Bo{\mathlarger{\mathcal{O}}}
 \def\bt{\Theta}
@@ -69,7 +27,7 @@
 \newcommand{\BSL}[2]{\mathlarger{\mathlarger{\sum}\limits_{#1}^{#2}}}
 \newcommand{\PL}[2]{\prod\limits_{#1}^{#2}}
 \newcommand{\BPL}[2]{\mathlarger{\mathlarger{\prod}\limits_{#1}^{#2}}}
-\newcommand{\func}[1]{\textsc{#1}}
+\newcommand{\func}[1]{\texttt{\textsc{#1}}}
 \newcommand{\distr}[1]{\mathsf{#1}}
 \newcommand{\matr}[1]{\mathbf{#1}}
 \newcommand{\data}[1]{\mathbf{#1}}
@@ -88,56 +46,47 @@
 \def\ADJ{\matr{A}}
 
 \renewcommand{\vec}[1]{\mathbf{#1}}
+\graphicspath{{./images/}}
 
-%\usepackage{hyperref}
-\usepackage{multirow}
 
-\usepackage[margin=10pt]{subfig}
-
-\usepackage{graphicx}
-\usepackage{colortbl}
-\newcommand{\lemautorefname}{Lemma}
-\usetikzlibrary{
-  shapes.multipart,
-  matrix,
-  positioning,
-  shapes.callouts,
-  shapes.arrows,
-  calc}
-
+\bibliographystyle{plainurl}
 
 \title{Miscellaneous Results}
 
 \date{}
-\author{
-%Amartya Shankha Biswas
-%\thanks{MIT, Cambridge MA 02139.
-%E-mail: {\tt  asbiswas@mit.edu}.}
-}
+\author{Amartya Shankha Biswas}{CSAIL, MIT}{asbiswas@mit.edu}{https://orcid.org/0000-0002-5068-1524}{funding}
+\author{Ronitt Rubinfeld}{CSAIL, MIT}{ronitt@csail.mit.edu}{}{funding}
+\author{Anak Yodpinyanee}{CSAIL, MIT}{anak@csail.mit.edu}{https://orcid.org/0000-0002-7572-2003}{funding}
+
+\authorrunning{A.\,S. Biswas}
+
+\keywords{Dummy keyword}%TODO mandatory; please add comma-separated list of keywords
+
+\nolinenumbers
+
+\hideLIPIcs
 
 
 \begin{document}
 
 \maketitle
 
+\input{abs}
 \tableofcontents
 \newpage
 
-%\input{abs}
-%\input{introduction/intro}
-%\input{model}
-%\input{er/generators}
-%\input{buckets/bucket}
-%\input{precision}
-%\input{applications/application}
+\input{introduction}
+\input{model}
+\input{undirected_graphs}
+\input{buckets}
+\input{precision}
+\input{undirected_applications}
 %\input{small_world}
-\input{dyck/dyck}
+\input{dyck}
 %\input{domino}
 %\input{permutation}
-\input{coloring/coloring}
+%\input{coloring/coloring}
 
-
-\bibliographystyle{alpha}
 
 \bibliography{bib}
 

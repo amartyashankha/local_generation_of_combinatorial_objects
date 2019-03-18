@@ -5,19 +5,19 @@ In this section, we consider Kleinberg's Small-World model \cite{kleinberg, klei
 where the probability that a \emph{directed} edge $(u,v)$ exists is $\min\{c/(\func{dist}(u,v))^2, 1\}$.
 Here, $\func{dist}(u,v)$ is the Manhattan distance between $u$ and $v$ on a $\sqrt n\times\sqrt n$ grid.
 We begin with the case where $c = 1$, then generalize to different values of $c = \log^{\pm\Theta(1)}(n)$. 
-We aim to support $\func{all-neighbors}$ queries using $\poly(\log n)$ resources. 
+We aim to support $\func{All-Neighbors}$ queries using $\poly(\log n)$ resources. 
 This returns the entire list of out-neighbors of $v$.
 
 \subsection{Generator for $c=1$}
 
 %Let $X_{u,v}$ denote the Bernoulli indicator variable for the event that that $(u,v)$ exists; all $X_{u,v}$'s are independent, and unlike the undirected case, $X_{u,v}$ and $X_{v,u}$ are different random variables. Moreover, 
-Observe that since the graphs we consider here are directed, the answers to the $\func{all-neighbor}$ queries are all independent: each vertex may determine its out-neighbors independently.
+Observe that since the graphs we consider here are directed, the answers to the $\func{All-Neighbor}$ queries are all independent: each vertex may determine its out-neighbors independently.
 Given a vertex $v$, we consider a partition of all the other vertices of the graph into sets $\{\Gamma^v_1, \Gamma^v_2,\ldots\}$ by distance: $\Gamma^v_k = \{u: \func{dist}(v,u) = k\}$ contains all vertices at a distance $k$ from vertex $v$. Observe that $|\Gamma^v_k|\leq 4k = O(k)$. Then, the expected number of edges from $v$ to vertices in $\Gamma^v_k$ is therefore $|\Gamma^v_k|\cdot 1/k^2 = O(1/k)$.
 Hence, the expected degree of $v$ is at most $\sum_{k=1}^{2(\sqrt{n}-1)}O(1/k) = O(\log n)$.
 It is straightforward to verify that this bound holds with high probability (use Hoeffding's inequality).
-Since the degree of $v$ is small, in this model we can afford to perform \func{all-neighbors} queries instead of \func{next-neighbor} queries using an additional $\poly(\log n)$ resources.
+Since the degree of $v$ is small, in this model we can afford to perform \func{All-Neighbors} queries instead of \func{Next-Neighbor} queries using an additional $\poly(\log n)$ resources.
 
-Nonetheless, internally in our generator, we sample for our neighbors one-by-one similarly to how we process \func{next-neighbor} queries.
+Nonetheless, internally in our generator, we sample for our neighbors one-by-one similarly to how we process \func{Next-Neighbor} queries.
 We perform our sampling in two phases.
 In the first phase, we sample a distance $d$, such that the next neighbor closest to $v$ is at distance $d$.
 We maintain $\LAST[v]$ to be the last sampled distance.
@@ -33,13 +33,13 @@ That is, if $D\sim\distr{D}(a)$ is drawn, then we proceed to Phase 2 to sample a
 We repeat the process by sampling the next distance from $\distr{D}(a+D)$ and so on until we obtain $\bot$, at which point we return our answers and terminate.
 
 To sample the next distance, we perform a binary search: we must evaluate the CDF of $\distr{D}(a)$.
-The CDF is given by $\pp[D\leq d]$ where $D\sim\distr{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
+The CDF is given by $\mathbb P[D\leq d]$ where $D\sim\distr{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
 As usual, we compute the probability of the negation: there is \emph{no} neighbor at distance at most $d$.
 Recall that each distance $i$ has exactly $|\Gamma_i^v| = 4i$ vertices, and the probability of a vertex $u \in \Gamma_i^v$ is not a neighbor is exactly $1-1/i^2$.
 So, the probability that there is no neighbor at distance $i$ is $(1-1/i^2)^{4i}$.
 Thus, for $D\sim\distr{D}(a)$ and $d \leq 2(\sqrt{n}-1)$,
 \begin{align*}
-\pp[D\leq d] &= 1-\prod_{i=a}^{d} \left(1-\frac{1}{i^2}\right) = 1-\prod_{i=a}^{d} \left(\frac{(i-1)(i+1)}{i^2}\right)^{4i}
+\mathbb P[D\leq d] &= 1-\prod_{i=a}^{d} \left(1-\frac{1}{i^2}\right) = 1-\prod_{i=a}^{d} \left(\frac{(i-1)(i+1)}{i^2}\right)^{4i}
 =1-\left(\frac{(a-1)^{a}}{a^{a-1}}\cdot\frac{(d+1)^{d}}{d^{d+1}}\right)^4
 \end{align*}
 where the product enjoys telescoping as the denominator $(i^2)^{4i}$ cancels with $(i^2)^{4(i-1)}$ and $(i^2)^{4(i+1)}$ in the numerators of the previous and the next term, respectively.
@@ -89,7 +89,7 @@ As there are $O(\log n)$ neighbors with high probability, we obtain the followin
 
 \begin{restatable}{theorem}{res:swm-thm}\label{thm-swm}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model, where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
-using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
 
 \subsection{Generator for $c \neq 1$}
@@ -106,7 +106,7 @@ using one additional $N$-bit word overhead for each answer of $\mathcal{P}$.
 \begin{proof}
 Consider the following rejection sampling process to generating the Bernoulli trials.
 In addition to each Bernoulli variable $X_i$ with bias $p_i$, we sample another coin-flip $C_i$ with bias $c$.
-Set $Y_i = X_i \cdot C_i$, then $\pp[Y_i = 1] = \pp[X_i = 1]\cdot\pp[C_i] = c\cdot p_i$, as desired.
+Set $Y_i = X_i \cdot C_i$, then $\mathbb P[Y_i = 1] = \mathbb P[X_i = 1]\cdot\mathbb P[C_i] = c\cdot p_i$, as desired.
 That is, we keep a success of a Bernoulli trial with probability $c$, or reject it with probability $1-c$.
 
 Now, we are already given the process $\mathcal{P}$ that ``handles'' $X_i$'s, generating a sequence of indices $i$ with $X_i = 1$.
@@ -116,7 +116,7 @@ As a result, $\mathcal{P}^c$ can generate the indices of successful Bernoulli tr
 Applying this reduction to the distance sampling in Phase 1, we obtain the following corollary.
 \begin{restatable}{corollary}{res:small-c-corol}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c<1$,
-using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
 
 \subsubsection{Case $c > 1$}
@@ -147,6 +147,6 @@ We also note that the degree of each vertex is clearly bounded by $O(\log n)$ wi
 Thus, we obtain the following corollary.
 \begin{restatable}{corollary}{res:large-c-corol}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c = \poly(\log n)$,
-using $O(\log^2 n)$ time and random $N$-bit words per \func{all-neighbors} query with high probability.
+using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
 

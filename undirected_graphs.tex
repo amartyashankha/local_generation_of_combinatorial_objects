@@ -1,0 +1,303 @@
+\section{Local-Access Generators for Random Undirected Graphs}\label{sec:undirected}
+
+In this section, we provide an efficient implementation of local-access generators for random undirected graphs when the probabilities $p_{u,v} = \mathbb P[\{u,v\} \in E]$ are given. More specifically, we assume that the following quantities can be efficiently computed:
+(1) the probability that there is no edge between a vertex $u$ and a range of consecutive vertices from $[a,b]$, namely $\prod_{u=a}^b (1-p_{v,u})$, and
+(2) the sum of the edge probabilities (i.e., the expected number of edges) between $u$ and vertices from $[a,b]$, namely $\sum_{u=a}^b p_{v,u}$. We will later give subroutines for computing these values for the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model with randomly-assigned communities in Section~\ref{sec:applications}. We also begin by assuming perfect-precision arithmetic, until Section~\ref{sec:remove-perfect} where we show how to relax this assumption to $N = \Theta(\log n)$-bit precision.
+
+First, we propose a simple implementation of our generator in Section~\ref{sec:ER-naive} that sequentially fills out the adjacency matrix; while we do not focus on its efficiency, we establish some basic concepts for further analysis in this section. Next, we improve our subroutine for \func{Next-Neighbor} queries in Section~\ref{sec:ER-rand}: this algorithm samples for the next candidate of the next neighbor in a more direct manner to speed-up the process. Extending this construction, we obtain our main algorithm in Section~\ref{sec:buckets} via the bucketing technique: partition the vertex set into contiguous ranges to normalize the expected number of neighbors in each bucket, allowing an efficient \func{Random-Neighbor} implementation by picking a random neighbor from a random bucket. The subroutine that samples for neighbors within a bucket, along with the remaining analysis of the algorithm, is given later in Section~\ref{sec:fill_implement}. Lastly, Section~\ref{sec:remove-perfect} handles the errors that may occur due to the use of finite precision.
+
+\iffalse
+{\color{blue}
+Alternatively, we provide an implementation for these two models with a deterministic performance guarantee in Section~\ref{sec:ER-det}.
+In this setting, introducing the \func{Vertex-Pair} queries results in an amortized guarantee on the run-time.
+The deterministic guarantee comes at the cost of more complicated data-structures
+(we use a two-level nested interval tree and binary search tree).
+%We then give two modifications to this implementation; a simplified generator that provides a randomized guarantee in Section~\ref{sec:ER-rand}, and an augmented generator that also implements \func{Vertex-Pair} queries in Section~\ref{sec:ER-pair}.
+}
+\fi
+
+
+
+
+\subsection{Na\"{i}ve Generator with an Explicit Adjacency Matrix}\label{sec:ER-naive}
+
+      \begin{algorithm}[H]
+        \caption{Na\"{i}ve Generator}
+        \begin{algorithmic}
+\Procedure{Vertex-Pair}{$u,v$}
+	\If {$\ADJ[u][v] = \PHI$}
+      	 \State{\textbf{draw} $X_{u,v}\sim\distr{Bern}(p_{u,v})$}
+	     \State{$\ADJ[v][u], \ADJ[u][v] \gets X_{u,v}$}
+	\EndIf
+	\State \Return $\ADJ[u][v]$
+\EndProcedure
+\Procedure{Next-Neighbor}{$v$}
+	\For {$u \gets \LAST[v]+1$ to $n$}
+	    \If {$\func{Vertex-Pair}(v,u) = \ONE$}
+	            \State{$\LAST[v] \gets u$}
+	            \State \Return $u$
+        \EndIf
+    \EndFor
+    \State{$\LAST[v] \gets n+1$}
+    \State \Return $n+1$
+\EndProcedure
+\Procedure{Random-Neighbor}{$v$}
+	\State{$R \gets V$}
+	\Repeat
+		\State{\textbf{sample} $u \in R$ u.a.r.}
+	    \If {$\func{Vertex-Pair}(v,u) = \ONE$}
+	            \State \Return $u$
+		\Else \State{$R \gets R\setminus\{u\}$}
+        \EndIf
+	\Until{$R=\emptyset$}
+	\State \Return $\bot$
+\EndProcedure
+        \end{algorithmic}
+\label{alg:naive}
+      \end{algorithm}
+
+First, consider a na\"{i}ve implemention that simply fills out the cells of the $n\times n$ adjacency matrix $\ADJ$ of $G$ one-by-one as required by each query.
+Each entry $\ADJ[u][v]$ occupies exactly one of following three states:
+$\ADJ[u][v] = \ONE$ or $\ZERO$ if the generator has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$, respectively, and $\ADJ[u][v] = \PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices.
+\iffalse
+\begin{itemize}
+\item $\ONE$ if the generator has determined that $\{u,v\} \in E$.
+\item $\ZERO$ if the generator has determined that $\{u,v\} \notin E$.
+\item $\PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices. In particular, %since the decisions to include any edges are independent in this model,
+the marginal probability that $\{u,v\} \in E$, conditioned on the current state of $\ADJ$, is still exactly $p_{u,v}$. %(including the case $u = v$ due to our simplifying assumption).
+\end{itemize}
+\fi
+Aside from $\ADJ$, our generator also maintains the vector $\LAST$, where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
+This definition of $\LAST$ was introduced in \cite{reut}.
+All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
+%, and note that $\LAST[v]=n+1$ if the last call returned $n+1$.
+\iffalse
+We initialize the data structure by setting all entries of $\ADJ$ to $\PHI$ and those of $\LAST$ to $0$. %Each $\ADJ[u][v]$ will become $\ONE$ with probability $p_{u,v}$, or $\ZERO$ with probability $1-p_{u,v}$.
+At any point during the execution, $\ADJ$ will be symmetric, composed entirely of $\ONE, \ZERO$ and $\PHI$. Entries $\ADJ[u][v]$ and $\ADJ[v][u]$ correspond to the same edge and will always be updated together.
+\fi
+We refer to Algorithm~\ref{alg:naive} for its straightforward implemention, but highlight some notations and useful observations here.
+
+\paragraph*{Characterizing random choices via $X_{u,v}$'s}
+Algorithm~\ref{alg:naive} updates the cell $\ADJ[u][v] = \PHI$ to the value of the Bernoulli random variable (RV) $X_{u,v} \sim \distr{Bern}(p_{u,v})$ (i.e., flip a coin with bias $p_{u,v}$) only when it needs to decide whether $\{u,v\}\in E$. %: we say that $X_{u,v}$ is \emph{decided} if $\ADJ[u][v] \neq \PHI$, and call it \emph{undecided} otherwise.
+For the sake of analysis, we will frequently consider the \emph{entire} table of RVs $X_{u,v}$ being sampled \emph{up-front} (i.e., flip all coins), and the algorithm simply ``uncovers'' these variables instead of making coin-flips. Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{u,v}$ once the graph generation is complete. An example application of this view of $X_{u,v}$ is the following analysis.
+
+\paragraph*{Sampling from $\Gamma(v)$ uniformly without knowing $\deg(v)$}
+Consider a \func{Random-Neighbor}$(v)$ query. We create a \emph{pool} $R$ of vertices, draw from this pool one-by-one, until we find a neighbor of $u$. Then, for any fixed table $X_{u,v}$, the probability that a vertex $u \in \Gamma(v)$ is returned is simply the probability that, in the sequence of vertices drawn from the pool $R$, $u$ appears first among all neighbors in $\Gamma(v)$. Hence, we sample each $u \in \Gamma(v)$ with probability $1/\deg(v)$, even without \emph{knowing} the specific value of $\deg(v)$.
+
+\paragraph*{Capturing the state of the partially-generated graph with $\ADJ$}
+Under the presence of \func{Random-Neighbor} queries, the probability distribution of the random graphs conditioned on the past queries and answers can be very complex: for instance, the number of repeated returned neighbors of $v$ reveals information about $\deg(v) = \sum_{u\in V}X_{u,v}$, which imposes dependencies on as many as $\Theta(n)$ variables. Our generator, on the other hand, records the neighbors and also \emph{non-neighbors} not revealed by its answers, yet surprisingly this internal information fully captures the state of the partially-generated graph. This suggests that we should design generators that maintain $\ADJ$ as done in Algorithm~\ref{alg:naive}, but in a more implicit and efficient fashion in order to achieve the desired complexities. Another benefit of this approach is that any analysis can be performed on the simple representation $\ADJ$ rather than any complicated data structure we may employ.
+
+\paragraph*{Obstacles for maintaining $\ADJ$}
+There are two problems in the current approach. Firstly, the algorithm only finds a neighbor, for a \func{Random-Neighbor} or \func{Next-Neighbor} query, with probability $p_{u,v}$, which requires too many iterations: for $G(n,p)$ this requires $1/p$ iterations, which is already infeasible for $p = o(1/\poly(\log n))$. Secondly, the algorithm may generate a large number of non-neighbors in the process, possibly in random or arbitrary locations.
+
+\iffalse
+\paragraph*{The table of Bernoulli random variables $X_{u,v}$'s} To process a \func{Vertex-Pair}$(u,v)$ query, we first check if $\ADJ[u][v]=\PHI$; if so, draw $X_{u,v}$ from a Bernoulli trial $\distr{Bern}(p_{u,v})$ (i.e., flip a coin with bias $p_{u,v}$) to choose whether $\{u,v\} \in E$, and update the cells corresponding to this edge accordingly. Then we simply answer with $\ADJ[u][v]$. That is, each $\ADJ[u][v]$ is originally $\PHI$, but eventually takes the value of the random variable (RV) $X_{u,v}$ (which is the same RV as $X_{v,u}$, only written differently) once the graph generation process is complete. For the sake of analysis, we will frequently consider the \emph{entire} table of Bernoulli RVs $X_{u,v}$ being sampled \emph{up-front}, and the algorithm inspects these variables instead of making coin-flips.
+
+More concretely, consider a \func{Random-Neighbor}$(v)$ query, where the subroutine samples a uniform random neighbor of $v$ \emph{without} knowing $\deg(v)$. We create a pool $R$ of vertices, draw from this pool one-by-one, until we find a neighbor of $u$. Then, for any fixed table $X_{u,v}$, the probability that a vertex $u \in \Gamma(v)$ is returned is simply the probability that, in the sequence of vertices drawn from the pool $R$, $u$ appears first among all neighbors in $\Gamma(v)$. Hence, $u$ is clearly sampled with probability $1/\deg(v)$, as desired.
+
+As for \func{Next-Neighbor}$(v)$, we straightforwardly consider each potential neighbor $u > \LAST[v]$: if $\{v,u\}\in E$, we update $\LAST[v]\leftarrow u$, return $u$ and terminate. We return $n+1$ if no such neighbor $u$ exists.
+\fi
+
+
+%Algorithm~\ref{alg:naive} clearly generates a graph drawn from the correct distribution $X_{u,v}\sim\distr{Bern}(p_{u,v})$ if the coin-flips are performed with no error. Otherwise, using random $N$-bit words, we may sample $X_{u,v}$ from a distribution that is $\frac{1}{\poly(n)}$-close to $\distr{Bern}(p_{u,v})$. Since all $O(n^2)$ RVs $X_{u,v}$'s are drawn independently, the distribution from which $G$ is generated is represented via the product distribution for these variables. Thus its $L_1$-distance to the desired distribution is increased by at most a factor of $O(n^2)$, which is still $\frac{1}{\poly(n)}$. %Unfortunately, Algorithm~\ref{alg:naive} may take up to $\Theta(n)$ iterations to answer a single \func{Next-Neighbor} query.
+
+
+
+
+\subsection{Improved \func{Next-Neighbor} Queries via Run-of-$\ZERO$'s Sampling}\label{sec:ER-rand}
+
+We now speed-up our \func{Next-Neighbor}$(v)$ procedure by attempting to sample for the first index $u > \LAST[v]$ of $X_{v,u}=\ONE$, from a sequence of Bernoulli RVs $\{X_{v, u}\}_{u > \LAST[v]}$, in a direct fashion. To do so, we sample a consecutive ``run'' of $\ZERO$'s with probability $\prod_{u=\LAST[v]+1}^{u'} (1-p_{v,u})$: this is the probability that there is no edge between a vertex $v$ and any $u \in (\LAST[v],u']$, which can be computed efficiently by our assumption. The problem is that, some entries $\ADJ[v][u]$'s in this run may have already been determined (to be $\ONE$ or $\ZERO$) by queries $\func{Next-Neighbor}(u)$ for $u > \LAST[v]$. To this end, we give a succinct data structure that determines the value of $\ADJ[v][u]$ for $u >\LAST[v]$ and, more generally, captures the state $\ADJ$, in Section~\ref{sec:nn-ds}. Using this data structure, we ensure that our sampled run does not skip over any $\ONE$. Next, for the sampled index $u$ of the first occurrence of $\ONE$, we check against this data structure to see if $\ADJ[v][u]$ is already assigned to $\ZERO$, in which case we re-sample for a new candidate $u' > u$. Section~\ref{sec:nn-correctness} discusses the subtlety of this issue.
+
+We note that we do not yet try to handle other types of queries here yet. We also do not formally bound the number of re-sampling iterations of this approach here, because the argument is not needed by our final algorithm. Yet, we remark that $O(\log n)$ iterations suffice with high probability, even if the queries are adversarial. This method can be extended to support \func{Vertex-Pair} queries (but unfortunately not \func{Random-Neighbor} queries). See Section~\ref{sec:reroll-cont} for full details.
+
+\subsubsection{Data structure}\label{sec:nn-ds}
+
+From the definition of $X_{u,v}$, \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{v,u} = \ONE\}$ (or $n+1$ if no satisfying $u$ exists). Let
+%\begin{align*}
+%P_v &= \{u \in (\LAST[v], n]: \ADJ[v][u]=1\},\\
+%w_v &= \min P_v \textrm{, or $n+1$ if $P_v = \emptyset$}. 
+%\end{align*}
+$P_v = \{u: \ADJ[v][u]=1\}$ be the set of known neighbors of $v$, and $w_v = \min \{(P_v \cap (\LAST[v], n]) \cup \{n+1\}\}$ be its first known neighbor not yet reported by a $\func{Next-Neighbor}(v)$ query, or equivalently, the next occurrence of $\ONE$ in $v$'s row on $\ADJ$ after $\LAST[v]$. Note that $w_v = n+1$ denotes that there is no known neighbor of $v$ after $\LAST[v]$.
+Consequently, $\ADJ[v][u] \in \{\PHI,\ZERO\}$ for all $u \in (\LAST[v], w_v)$, so \func{Next-Neighbor}$(v)$ is
+either the index $u$ of the first occurrence of $X_{v,u} = \ONE$ in this range, or $w_v$ if no such index exists.
+
+We keep track of $\LAST[v]$ in a dictionary, where the key-value pair $(v,\LAST[v])$ is stored only when $\LAST[v] \neq 0$: this removes any initialization overhead.
+Each $P_v$ is maintained as an ordered set, which is also only instantiated when it becomes non-empty.
+We maintain $P_v$ simply by adding $u$ to $v$ if a call \func{Next-Neighbor}$(v)$ returns $u$, and vice versa. Clearly, $\ADJ[v][u]=1$ if and only if $u \in P_v$ by construction.
+
+As discussed in the previous section, we cannot maintain $\ADJ$ explicitly, as updating it requires replacing up to $\Theta(n)$ $\PHI$'s to $\ZERO$'s for a single \func{Next-Neighbor} query in the worst case. Instead, we argue that $\LAST$ and $P_v$'s provide a succinct representation of $\ADJ$ via the following observation. For simplicity, we say that $X_{u,v}$ is \emph{decided} if $\ADJ[u][v] \neq \PHI$, and call it \emph{undecided} otherwise.
+%For $\ADJ[v][u] \neq \ONE$, we observe that our algorithm upholds the following condition: $\ADJ[v][u] = \ZERO$ if $u < \LAST[v]$ or $v < \LAST[u]$; otherwise $\ADJ[v][u]=\PHI$. To see why this is true, $\ADJ[v][u]$ changes its value from $\PHI$ to $\ZERO$ only when a new neighbor $u' > u$ has been found, and only in this occasion that 
+
+\iffalse
+\begin{restatable}{lem}{cond}\label{lem:cond-0}
+Assuming that only \func{Next-Neighbor} queries are allowed, consider $u > \LAST[v]$. Then, $\ADJ[v][u] = \ZERO$ if and only if $\LAST[u] > v$ and $u \notin P_v$.
+\end{restatable}
+\begin{proof}
+\label{proof:cond-0}
+If $\ADJ[v][u] = \ZERO$ while $\LAST[v] < u$, then the coin-flip for $X_{v,u}$ must have been performed during some call \func{Next-Neighbor}$(u)$ returning a value $v' > v$: $\LAST[u]$ is increased to $v' > v$ right before the return. Further, $v$ could not have been returned from \func{Next-Neighbor}$(u)$ at any time because $X_{v,u}=\ZERO$, and thus $u$ is never added to $P_v$.
+
+Similarly, if $\LAST[u] > v$ then $X_{v,u}$ is already determined. Further, suppose to the contrary that $X_{v,u} = \ONE$, then $v$ must have been returned in a \func{Next-Neighbor}$(u)$ call. As we still have $u > \LAST[v]$ and $\LAST[v]$ can never decrease, $u$ must have been added to $P_v$ during that call and not removed yet, contradicting $u \notin P_v$.
+\end{proof}
+Combined with the fact that all entries $\ADJ[v][u]$ for $u < \LAST[v]$ has been revealed (by as a result of repeatedly invoking \func{Next-Neighbor}$(v)$), we conclude that $\LAST$ and $P_v$'s fully represent $\ADJ$.
+\fi
+\begin{restatable}{lem}{cond}\label{lem:cond-0}
+The data structures $\LAST$ and $P_v$'s together provide a succinct representation of $\ADJ$ when only \func{Next-Neighbor} queries are allowed. In particular, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v$. Otherwise, $\ADJ[v][u]=\ZERO$ when $u <\LAST[v]$ or $v < \LAST[u]$. In all remaining cases, $\ADJ[v][u]=\PHI$.
+\end{restatable}
+\begin{proof}
+The condition for $\ADJ[v][u]=\ONE$ clearly holds by constuction. Otherwise, observe that $\ADJ[v][u]$ becomes decided (that is, its value is changed from $\PHI$ to $\ZERO$) precisely during the first call of \func{Next-Neighbor}$(v)$ that returns a value $u' > u$ which thereby sets $\LAST[v]$ to $u'$ yielding $u<\LAST[v]$, or vice versa.
+\end{proof}
+
+\subsubsection{Queries and Updates}\label{sec:nn-correctness}
+\begin{algorithm}[H]
+\caption{Sampling \func{Next-Neighbor}}
+\begin{algorithmic}
+\Procedure{Next-Neighbor}{$v$}
+	\State{$u \gets \LAST[v]$}
+	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
+	\Repeat
+		\State{\textbf{sample} $F\sim\distr{F}(v,u,w_v)$}
+		\State{$u \gets F$}
+	\Until{$u = w_v$ or $\LAST[u] < v$}
+	\If{$u \neq w_v$}
+		\State{$P_v \gets P_v \cap \{u\}$}
+		\State{$P_u \gets P_u \cap \{v\}$}
+	\EndIf
+	\State{$\LAST[v] \gets u$}
+	\State \Return $u$
+\EndProcedure
+\end{algorithmic}
+\label{alg:oblivious-coin-toss}
+\end{algorithm}
+
+We now provide our generator (Algorithm~\ref{alg:oblivious-coin-toss}), and discuss the correctness of its sampling process. The argument here is rather subtle and relies on viewing the random process as an ``uncovering'' process on the table of RVs $X_{u,v}$'s as previously introduced in Section~\ref{sec:ER-naive}.
+Algorithm~\ref{alg:oblivious-coin-toss}, considers the following experiment for sampling the next neighbor of $v$ in the range $(\LAST[v],w_v)$.
+Suppose that we generate a sequence of $w_v-\LAST[v]-1$ independent coin-tosses,
+where the $i^\textrm{th}$ coin $C_{v,u}$ corresponding to $u = \LAST[v]+i$ has bias $p_{v,u}$,
+regardless of whether $X_{v,u}$'s are decided or not.
+Then, we use the sequence $\langle C_{v,u} \rangle$ to assign values to \emph{undecided} random variable $X_{v,u}$.
+The crucial observation here is that, the \emph{decided} random variables $X_{v,u} = \ZERO$ do not need coin-flips, and the corresponding coin result $C_{v,u}$ can simply be discarded.
+Thus, we need to generate coin-flips up until we encounter some $u$ satisfying
+both (i) $C_{v,u} = \ONE$, and (ii) $\ADJ[v][u] = \PHI$.
+
+%\anak{Due to Shankha's change, $\distr{F}$ here and $\distr{ExactF}$ in the deterministic construction have rather different meaning; consider using a different name altogether in the latter.}
+
+Let $\distr{F}(v,a,b)$ denote the probability distribution of the occurrence $u$ of the first coin-flip $C_{v,u} = \ONE$ among the neighbors in $(a, b)$.
+More specifically, $F\sim\distr{F}(v,a,b)$ represents the event that $C_{v,a+1}=\cdots=C_{v,F-1}=\ZERO$ and $C_{v,F}=\ONE$,
+which happens with probability $\mathbb P[F=f]=\prod_{u=a+1}^{f-1} (1-p_{v,u}) \cdot p_{v,f}$.
+For convenience, let $F = b$ denote the event where all $C_{v,u}=\ZERO$. Our algorithm samples $F_1\sim\distr{F}(v,\LAST[v],w_v)$ to find the first occurrence of $C_{v,F_1} = \ONE$, then samples $F_2\sim\distr{F}(v,F_1,w_v)$ to find the second occurrence $C_{v,F_2} = \ONE$, and so on.
+These values $\{F_i\}$ are iterated as $u$ in Algorithm~\ref{alg:oblivious-coin-toss}.
+As this process generates $u$ satisfying (i) in the increasing order, we repeat until we find one that also satisfies (ii).
+Note that once the process terminates at some $u$, we make no implications on the results of any uninspected coin-flips after $C_{v,u}$.
+
+\paragraph*{Obstacles for extending beyond \func{Next-Neighbor} queries}
+There are two main issues that prevent this method from supporting \func{Random-Neighbor} queries. Firstly, while one might consider applying \func{Next-Neighbor} from some random location $u$ to find the minimum $u' \geq u$ where $\ADJ[v][u']=\ONE$, the probability of choosing $u'$ will depend on the probabilities $p_{v,u}$'s, and is generally not uniform. While a rejection sampling method may be applied to balance out the probabilities of choosing neighbors, these arbitrary $p_{v,u}$'s may distribute the neighbors rather unevenly: some small contiguous locations may contain so many neighbors that the rejection sampling approach requires too many iterations to obtain a single uniform neighbor.
+
+ %{\color{red}
+ Secondly, in developing Algorithm~\ref{alg:oblivious-coin-toss}, we observe that $\LAST[v]$ and $P_v$ together provide a succinct representation of $\ADJ[v][u] = \ZERO$ only for contiguous cells $\ADJ[v][u]$ where $u \leq \LAST[v]$ or $v \leq \LAST[u]$: they cannot handle $\ZERO$ anywhere else. Unfortunately, in order to extend our construction to support \func{Random-Neighbor} queries using the idea suggested in Algorithm~\ref{alg:naive}, we must unavoidably assign $\ADJ[v][u]$ to $\ZERO$ in random locations beyond $\LAST[v]$ or $\LAST[u]$, which cannot be captured by the current data structure. Furthermore, unlike $\ONE$'s, we cannot record $\ZERO$'s using a data structure similarly to that of $P_v$. More specifically, to speed-up the sampling process for small $p_{v,u}$'s, we must generate many random non-neighbors at once as suggested in Algorithm~\ref{alg:oblivious-coin-toss}, but we cannot afford to spend time linear in the number of created $\ZERO$'s to update our data structure. We remedy these issues via the following bucketing approach.
+ %}
+
+\iffalse
+\subsubsection{Correctness}
+
+The CDF of the distribution $\distr{F}(v,a,b)$ is given by $\mathbb P[F \leq f] = 1-\prod_{i=a+1}^{f} (1-p_{v,i})$ for $F<b$
+(i.e., $C_{v,u} = \ONE$ for some $u \in (a,F]$).
+Since $b=w_v$ is already a neighbor of $v$, $\mathbb P[F \leq b] = 1$.
+By our assumption, this CDF can be efficiently computed, and thus sampling with $\frac{1}{\poly(n)}$ error in the $L_1$-distance requires a random $N$-bit word and a binary-search in $O(\log (b-a+1)) = O(\log n)$ iterations.
+However, unlike the case of Algorithm~\ref{alg:naive}, a single sample of our Algorithm~\ref{alg:oblivious-coin-toss} determines the values of multiple $X_{v,u}$'s, and we cannot represent the distribution of our generated graph simply via a product distributions of $X_{v,u}$'s.
+Instead, we prove a more general statement given below.
+Note that $\distr{F}, \distr{F}'$ need not be the same pair of distributions for every sample.
+\begin{restatable}{lem}{transition}\label{lemma:transition}
+If Algorithm~\ref{alg:oblivious-coin-toss} constructs a graph $G$ by making at most $S$ random choices (samples), each of which comes from some distribution $\distr{F}'(v,a,b)$ that is $\epsilon$-close in $L_1$-distance to the correct distribution $\distr{F}(v,a,b)$ that perfectly generates the desired distribution $\distr{G}$ over all graphs, then the distribution $\distr{G}'$ of the generated graph $G$ is $(\epsilon S)$-close to $\distr{G}$ in the $L_1$-distance.
+\end{restatable}
+\begin{proof}
+\label{proof:transition}
+For simplicity, assume that the algorithm generates the graph to completion according to a sequence of $n^2$ \func{Next-Neighbor} queries $Q = \langle q_1, q_2, \ldots q_{n^2}\rangle$, where each $q_i \in V$ specifies the vertex in which the query \func{Next-Neighbor} is invoked, and there are $n$ occurrences of each vertex $Q$. Define an \emph{internal state} of our generator as the triplet $s = (k, u, \ADJ)$, representing that the algorithm is currently processing the $k^\textrm{th}$ \func{Next-Neighbor} query in the iteration (the \textbf{repeat} loop) with value $u$, and have generated $\ADJ$ so far. Let $t_{\ADJ}$ denote the \emph{terminal state} after processing all queries and having generated the graph $G_\ADJ$ represented by $\ADJ$. We note that $\ADJ$ is used here in the analysis but not explicitly maintained; further, it reflects the changes in every iteration: as $u$ is updated during each iteration of \func{Next-Neighbor}, the cells $\ADJ[v][u'] = \PHI$ for $u' \in (\LAST[v],u)$ are also updated to $\ZERO$.
+
+Let $\mathcal{S}$ denote the set of all (internal and terminal) states. For each state $s$, the generator samples $F$ from the corresponding $\distr{F}'(v,a,b)$ where $\|\distr{F}(v,a,b)-\distr{F}'(v,a,b)\|_1 \leq \epsilon = \frac{1}{\poly(n)}$, then moves to a new state according to $F$. In other words, there is an induced pair of collection of distributions over the states: $(\mathcal{T},\mathcal{T}')$ where $\mathcal{T}=\{\distr{T}_s\}_{s\in\mathcal{S}}, \mathcal{T}'=\{\distr{T}'_s\}_{s\in\mathcal{S}}$, such that $\distr{T}_s(s')$ and $\distr{T}'_s(s')$ denote the probability that the algorithm advances from $s$ to $s'$ by using a sample from the correct $\distr{F}(v,a,b)$ and from the approximated $\distr{F}'(v,a,b)$, respectively. Consequently, $\|\distr{T}_s-\distr{T}'_s\|_1 \leq \epsilon$ for every $s\in\mathcal{S}$.
+
+The generator begins with the initial (internal) state $s_0 = (1, 0, \ADJ_\PHI)$ where all cells of $\ADJ_\PHI$ are $\PHI$'s, goes through at most $S=O(n^3)$ other states as there are up to $n^2$ values of $k$ and $O(n)$ values of $u$, and reach some terminal state $t_\ADJ$. Let $P = \langle s^P_0 = s_0, s^P_1, \ldots, s^P_{\ell(P)} = t_\ADJ \rangle$ for some $\ADJ$ denote a sequence of up to $S+1$ states the algorithm proceeds through. For simplicity, let $T_{t_\ADJ}(t_\ADJ)=1$ and $T_{t_\ADJ}(s)=0$ for all state $s \neq t_\ADJ$, so that the terminal state can be repeated, and we may assume $\ell(P) = S$ for every $P$. Then, for the correct transition probabilities described as $\mathcal{T}$, each $P$ occurs with probability $q(P) = \prod_{i=1}^{S} \distr{T}_{s_{i-1}}(s_i)$, and thus $\distr{G}(G_\ADJ) = \sum_{P:s^P_{S} = t_\ADJ} q(P)$.
+
+Let $\mathcal{T}^{\min}=\{\distr{T}^{\min}_s\}_{s\in\mathcal{S}}$ where $\distr{T}^{\min}_s(s') = \min\{\distr{T}_s(s'),\distr{T}'_s(s')\}$, and note that each $\distr{T}^{\min}_s$ is not necessarily a probability distribution. Then, $\sum_{s'} \distr{T}^{\min}_s(s') = 1 - \|\distr{T}_s-\distr{T}'_s\|_1 \geq 1-\epsilon$. Define $q', q^{\min}, \distr{G}'(G_\ADJ),\distr{G}^{\min}(G_\ADJ)$ analogously, and observe that $q^{\min}(P) \leq \min\{q(P), q'(p)\}$ for every $P$, so $\distr{G}^{\min}(G_\ADJ) \leq \min\{\distr{G}(G_\ADJ),\distr{G}'(G_\ADJ)\}$ for every $G_\ADJ$ as well. In other words, $q^{\min}(P)$ lower bounds the probability that the algorithm, drawing samples from the correct distributions or the approximated distributions, proceeds through states of $P$; consequently, $\distr{G}^{\min}(G_\ADJ)$ lower bounds the probability that the algorithm generates the graph $G_\ADJ$.
+
+Next, consider the probability that the algorithm proceeds through the prefix $P_i = \langle s^P_0, \ldots, s^P_{l}\rangle$ of $P$. Observe that for $i \geq 1$,
+\begin{align*}\sum_{P} q^{\min}(P_i) &=\sum_{P} q^{\min}(P_{l-1})\cdot \distr{T}^{\min}_{s^P_{i-1}}(s^P_{i}) 
+= \sum_{s,s'} \sum_{P:s^P_{i-1} = s,s^P_{i} = s'} q^{\min}(P_{i-1})\cdot \distr{T}^{\min}_{s}(s') \\
+&= \sum_{s'} \distr{T}^{\min}_s(s')\cdot\sum_{s} \sum_{P:s^P_{i-1} = s} q^{\min}(P_{i-1})
+\geq (1-\epsilon) \sum_{P} q^{\min}(P_{i-1}).\end{align*}
+Roughly speaking, at least a factor of $1-\epsilon$ of the ''agreement'' between the distributions over states according to $\mathcal{T}$ and $\mathcal{T}'$ is necessarily conserved after a single sampling process. As $\sum_{P} q^{\min}(P_0)=1$ because the algorithm begins with $s_0 = (1, 0, \ADJ_\PHI)$, by an inductive argument we have $\sum_{P} q^{\min}(P)=\sum_{P} q^{\min}(P_S) \geq (1-\epsilon)^S \geq 1-\epsilon S$. So, $\sum_{G_\ADJ} \min\{\distr{G}(G_\ADJ),\distr{G}'(G_\ADJ)\} \geq \sum_{G_\ADJ} \distr{G}^{\min}(G_\ADJ) \geq 1-\epsilon S$, implying that $\|\distr{G}-\distr{G}'\|_1 \leq \epsilon S$. In particular,  by substituting $\epsilon = \frac{1}{\poly(n)}$ and $S = O(n^3)$, we have shown that Algorithm~\ref{alg:oblivious-coin-toss} only creates a $\frac{1}{\poly(n)}$ error in the $L_1$-distance. 
+\end{proof}
+
+
+\anak{Ronitt says the proof above is known (e.g., from pseudorandomness) and will help find a reference.}
+\iffalse
+We defer its proof in Section~\ref{proof:transition}, and provide a high-level proof sketch here.
+To prove Lemma~\ref{lemma:transition}, we consider an arbitrary sequence of up to $n^2$ queries  $Q = \langle q_i \rangle$, where $q_i \in V$ specifies the vertex in which the query \func{Next-Neighbor} is invoked. We represent a \emph{state} of the generator as triplet $s = (k, u, \ADJ)$, representing that the algorithm is currently processing the $k^\textrm{th}$ \func{Next-Neighbor} query in the iteration with value $u$, and have generated $\ADJ$ so far. Then, each random choice sampled from $\distr{F}$ and $\distr{F}'$ maps each state $s$ to some new state $s'$; in other words, they describe the transition probability that the generator moves to its next state. The distributions of the new states according to each $\distr{F}$ and $\distr{F}'$ only differ by $\epsilon = \frac{1}{\poly(n)}$ in the $L_1$-distance; that is, at least a factor of $1-\epsilon$ of the ''agreement'' between the distributions over states according to these two transitions is necessarily conserved after a single sampling process. 
+
+Observe that a generator can only undergo at most $S = O(n^3)$ states before it generate the entire graph: for the specification of a state $s = (k, u, \ADJ)$, there are up to $n^2$ values of $k$ and $O(n)$ values of $u$. By an inductive argument, the distribution of $\ADJ$ generated by the ''correct'' sequence of distributions $\distr{F}$'s and the ``actual'' sequence of distributions $\distr{F}'$'s still agree on at least a fraction of $(1-\epsilon)^S \geq 1-\epsilon S = 1-\frac{1}{\poly(n)}$ of their probability masses, yielding the desired $L_1$-distance guarantee.
+We remark that our proof above is rather robust: it is straightforward to embed more information into the state depending on the application, and the proof will still guarantee the desired correctness as long as $\epsilon S \leq \frac{1}{\poly(n)}$.
+\fi
+
+\subsubsection{Performance Guarantee}
+We now show the following lemma that bounds the required resources per query of Algorithm~\ref{alg:oblivious-coin-toss}.
+\begin{restatable}{lem}{res:ER-rand-iterations}\label{lem:ER-rand-iterations}
+The loop of Algorithm~\ref{alg:oblivious-coin-toss} requires at most $O(\log n)$ iterations with high probability.
+\end{restatable}
+
+\paragraph*{Specifying random choices} The performance of the algorithm depends on not only the random variables $X_{v,u}$'s, but also the unused coins $C_{v,u}$'s. We characterize the two collections of Bernoulli variables $\{X_{v,u}\}$ and $\{Y_{v,u}\}$ that cover all random choices made by Algorithm~\ref{alg:oblivious-coin-toss} as follows.
+
+\begin{itemize}
+\item Each $X_{v,u}$ (same as $X_{u,v}$) represents the result for the \emph{first} coin-toss corresponding to cells $\ADJ[v][u]$ and $\ADJ[u][v]$, which is the coin-toss obtained when $X_{v,u}$ becomes decided: either $C_{v,u}$ during a \func{Next-Neighbor}$(v)$ call when $\ADJ[v][u] = \PHI$, or $C_{v,u}$ during a \func{Next-Neighbor}$(u)$ call when $\ADJ[u][v] = \PHI$, whichever occurs first.
+This description of $X_{v,u}$ respects our invariant that, if the generation process is executed to completion, we will have $\ADJ[v][u]=X_{v,u}$ in all entries.
+\item Each $Y_{v,u}$ represents the result for the \emph{second} coin-toss corresponding to cell $\ADJ[v][u]$, which is the coin-toss $C_{v,u}$ obtained during a \func{Next-Neighbor}$(v)$ call when $X_{v,u}$ is already decided. In other words, $\{Y_{v,u}\}$'s are the coin-tosses that should have been skipped but still performed in Algorithm~\ref{alg:oblivious-coin-toss} (if they have indeed been generated). Unlike the previous case, $Y_{v,u}$ and $Y_{u,v}$ are two independent random variables: they may be generated during a \func{Next-Neighbor}$(v)$ call and a \func{Next-Neighbor}$(u)$ call, respectively.
+\end{itemize}
+As mentioned earlier, we allow any sequence of probabilities $p_{v,u}$ in our proof. The success probabilities of these indicators are therefore given by $\mathbb P[X_{v,u}=\ONE] = \mathbb P[Y_{v,u}=\ONE] = p_{v,u}$.
+
+\anak{Consider improving paragraph below.}
+\paragraph*{Characterizing iterations}
+Suppose that we compute \func{Next-Neighbor}$(v)$ and obtain an answer $u$. Then $X_{v,\LAST[v]+1} = \cdots = X_{v, u-1} = \ZERO$ as none of $u' \in (\LAST[v], u)$ is a neighbor of $v$. The vertices considered in the loop of Algorithm~\ref{alg:oblivious-coin-toss} that do not result in the answer $u$, are $u' \in (\LAST[v], u)$ satisfying $\ADJ[v][u'] = \ZERO$ and $Y_{v,u'} = \ONE$; we call the iteration corresponding to such a $u'$ a \emph{failed iteration}. Observe that if $X_{v,u'} = \ZERO$ but is undecided ($\ADJ[v][u'] = \PHI$), then the iteration is not failed, even if $Y_{v,u'} = \ONE$ {\color{red}(in which case, $X_{v,u'}$ takes the value of $C_{v,u'}$ while $Y_{v,u'}$ is never used)}. Thus we assume the worst-case scenario where all $X_{v,u'}$ are revealed: $\ADJ[v][u']=X_{v,u'}=\ZERO$ for all $u'\in(\LAST[v], u)$. The number of failed iterations in this case stochastically dominates those in all other cases.\footnote{There exists an adversary who can enforce this worst case. Namely, an adversary that first makes \func{Next-Neighbor} queries to learn all neighbors of every vertex except for $v$, thereby filling out the whole $\ADJ$ in the process. The claimed worst case then occurs as this adversary now repeatedly makes \func{Next-Neighbor} queries on $v$. In particular, a committee of $n$ adversaries, each of which is tasked to perform this series of calls corresponding to each $v$, can always expose this worst case.}
+
+Then, the upper bound on the number of failed iterations of a call \func{Next-Neighbor}$(v)$ is given by the maximum number of cells $Y_{v, u'} = 1$ of $u' \in(\LAST[v], u)$, over any $u \in(\LAST[v], n]$ satisfying $X_{v,\LAST[v]+1} = \cdots = X_{v,u} = \ZERO$. Informally, we are asking ''of all consecutive cells of $\ZERO$'s in a single row of $\{X_{v,u}\}$-table, what is the largest number of cells of $\ONE$'s in the corresponding cells of $\{Y_{v,u}\}$-table?''
+
+\paragraph*{Bounding the number of iterations required for a fixed pair $(v, \LAST[v])$}
+We now proceed to bounding the number of iterations required over a sampled pair of $\{X_{v,u}\}$ and $\{Y_{v,u}\}$, from any probability distribution. For simplicity we renumber our indices and drop the index $(v,\LAST[v])$ as follows. Let $p_1, \ldots, p_L \in [0, 1]$ denote the probabilities corresponding to the cells $\ADJ[v][\LAST[v]+1 \ldots n]$ (where $L = n-\LAST[v]$), then let $X_1, \ldots, X_L$ and $Y_1, \ldots, Y_L$ be the random variables corresponding to the same cells on $\ADJ$.
+
+For $i=1, \ldots, L$, define the random variable $Z_i$ in terms of $X_i$ and $Y_i$ so that
+\begin{itemize}
+\item $Z_i = 2$ if $X_i = 0$ and $Y_i = 1$, which occurs with probability $p_i(1-p_i)$. \\
+This represents the event where $i$ is not a neighbor, and the iteration fails.
+\item $Z_i = 1$ if $X_i = Y_i = 0$, which occurs with probability $(1-p_i)^2$.\\
+ This represents the event where $i$ is not a neighbor, and the iteration does not fail.
+\item $Z_i = 0$ if $X_i = 1$, which occurs with probability $p_i$. \\
+This represents the event where $i$ is a neighbor.
+\end{itemize}
+
+For $\ell \in [L]$, define the random variable $M_\ell := \prod_{i=1}^\ell Z_i$, and $M_0 = 1$ for convenience. If $X_i = 1$ for some $i \in [1, \ell]$, then $Z_i = 0$ and $M_\ell = 0$. Otherwise, $\log M_\ell$ counts the number of indices $i \in [\ell]$ with $Y_i = 1$, the number of failed iterations. Therefore, $\log(\max_{\ell \in \{0, \ldots, L\}} M_\ell)$ gives the number of failed iterations this \func{Next-Neighbor}$(v)$ call.
+
+To bound $M_\ell$, observe that for any $\ell\in[L]$, $\mathbb{E}[Z_\ell] = 2p_\ell(1-p_\ell) + (1-p_\ell)^2 = 1 - p_\ell^2 \leq 1$ regardless of the probability $p_\ell \in [0, 1]$. Then, $\mathbb{E}[M_\ell] = \mathbb{E}[\prod_{i=1}^\ell Z_i] = \prod_{i=1}^\ell \mathbb{E}[Z_i] \leq 1$ because $Z_\ell$'s are all independent. By Markov's inequality, for any (integer) $r \geq 0$, $\Pr[\log M_\ell > r] = \Pr[M_\ell > 2^r] < 2^{-r}$. By the union bound, the probability that more than $r$ failed iterations are encountered is $\Pr[\log(\max_{\ell \in \{0, \ldots, L\}} M_\ell) > r] < L\cdot 2^{-r} \leq n\cdot 2^{-r}$.
+
+\paragraph*{Establishing the overall performance guarantee}
+So far we have deduced that, for each pair of a vertex $v$ and its $\LAST[v]$, the probability that the call \func{Next-Neighbor}$(v)$ encounters more than $r$ failed iterations is less that $n \cdot 2^{-r}$, which is at most $n^{-c-2}$ for any desired constant $c$ by choosing a sufficiently large $r = \Theta(\log n)$. As Algorithm~\ref{alg:oblivious-coin-toss} may need to support up to $\Theta(n^2)$ \func{Next-Neighbor} calls, one corresponding to each pair $(v, \LAST[v])$, the probability that it ever encounters more than $O(\log n)$  failed iterations to answer a single \func{Next-Neighbor} query is at most $n^{-c}$. That is, with high probability, $O(\log n)$ iterations are required per \func{Next-Neighbor} call, which concludes the proof of Lemma~\ref{lem:ER-rand-iterations}.
+%For the $G(n,p)$ model, each iteration requires $O(\log n)$ time and random bits (for sampling), so this bound on the number of iterations implies that each \func{Next-Neighbor} call requires $O(\log^2 n)$ time, $O(1)$ additional space for the maintained data structure, and $O(\log^2 n)$ random bits with high probability. The former two offer an improvement over Algorithm~\ref{alg:exact-coin-toss}, but note also that the bounds of Algorithm~\ref{alg:exact-coin-toss} holds deterministically.
+
+\subsubsection{Supporting \func{Vertex-Pair} Queries} \label{sec:ER-pair}
+We consider extending our generator (Algorithm~\ref{alg:oblivious-coin-toss}) to support the \func{Vertex-Pair} queries: given a pair of vertices $(u, v)$, decide whether there exists an edge $\{u, v\}$ in the generated graph. To answer a \func{Vertex-Pair} query, we must first check whether the value $X_{u,v}$ for $\{u, v\}$ has already been assigned, in which case we answer accordingly. Otherwise, we must make a coin-flip with the corresponding bias $p_{u,v}$ to assign $X_{u,v}$, deciding whether $\{u, v\}$ exists in the generated graph. If we maintained the full $\ADJ$ as done in the na\"{i}ve Algorithm~\ref{alg:naive}, we would have been able to simply set $\ADJ[u][v]$ and $\ADJ[v][u]$ to this new value. However, our more efficient Algorithm~\ref{alg:oblivious-coin-toss} that represents $\ADJ$ compactly via $\LAST$ and $P_v$'s cannot record these arbitrary modifications to $\ADJ$. In our following analysis, we do not modify $\ADJ$ during any \func{Vertex-Pair} query: $\LAST$ and $P_v$'s would still together capture the correct state of $\ADJ$. Instead, we create data structures that explicitly record the modifications made by \func{Vertex-Pair} queries.
+
+More specifically, we define the following additional set data structures:
+\begin{align*}
+P &= \{(u,v): X_{u,v}\textrm{ is assigned to }\ONE \textrm{ (during any query)}\},\\
+Q &= \{(u,v): X_{u,v}\textrm{ is assigned to }\ZERO \textrm{ during a \func{Vertex-Pair} query}\}.
+\end{align*}
+Maintaining these data structures is trivial: we simply add $(u,v)$ to $P$ or $Q$ before we finish processing the query if their respective conditions hold. Employing hashing, each insertion requires constant time and additional space. We remark that $P_v = \{u \in (\LAST[v], n]: \ADJ[v][u]=1\}$ by definition, so if we assign $X_{u,v} = 1$ during a \func{Vertex-Pair} query, we must also add $u$ to $P_v$ or add $v$ to $P_u$, should they satisfy their respective conditions. Note that updating $P_v$ takes $O(\log n)$ time and $O(1)$ additional space.
+
+To handle a \func{Vertex-Pair}$(u,v)$ query, we first decide whether $X_{u,v}$ has already been assigned or not. If $\LAST[v] \geq u$ or $\LAST[u] \geq v$, then $X_{u,v}$ is already assigned (as $X_{u,v}=\ADJ[u][v] \in \{\ZERO,\ONE\}$). In this case, we simply check whether $(u,v)\in P$ and answer \YES~or \NO~accordingly. Otherwise, we have $u > \LAST[v]$ and $v > \LAST[u]$. This condition implies that $\ADJ[u][v] \neq \ZERO$ by Lemma~\ref{lem:cond-0}. It also implies that $\ADJ[u][v] \neq \ONE$, because otherwise, we would have either increased $\LAST[u]$ to $u$ or vice versa when $\ADJ[u][v]$ was set to $\ONE$. Thus $\ADJ[u][v] = \PHI$, implying that $X_{u,v}$ could not have possibly been assigned a value during a \func{Next-Neighbor} query.
+
+In other words, if $X_{u,v}$ is assigned, it must have happened during a \func{Vertex-Pair} query. Since all assignments done by \func{Vertex-Pair} queries are recorded in $P$ and $Q$, we answer \YES~if $(u,v)\in P$, answer \NO~if $(u,v)\in Q$, or safely conclude that $X_{u,v}$ has not been assigned otherwise. In the last case, we perform a coin-toss to assign $X_{u,v}$, and update the data structures as outlined above. This process takes $O(\log n)$ time and $O(1)$ additional space per \func{Vertex-Pair} call in the worst case.
+
+We now explain other necessary changes to Algorithm~\ref{alg:oblivious-coin-toss}. In the implementation of \func{Next-Neighbor}, an iteration is not failed when the chosen $X_{v,u}$ is still undecided: $\ADJ[v][u]$ must still be $\phi$. Since $X_{v,u}$ may also be assigned to $\ZERO$ via a \func{Vertex-Pair}$(v,u)$ query, we must also consider an iteration where $(v,u) \in Q$ failed. That is, we now require one additional condition $(v,u) \notin Q$ for termination (which only takes $O(1)$ time to verify per iteration). As for the analysis, aside from handling the fact that $X_{v,u}$ may also be assigned during a \func{Vertex-Pair} call, and allowing the states of the algorithm to support \func{Vertex-Pair} queries, all of the remaining analysis for correctness and performance guarantee still holds. 
+
+
+Therefore, we have established that our augmentation to Algorithm~\ref{alg:oblivious-coin-toss} still maintains all of its (asymptotic) performance guarantees for \func{Next-Neighbor} queries, and supports \func{Vertex-Pair} queries with complexities as specified above, concluding the following theorem.
+\begin{restatable}{theorem}{res:oblivious-thm}
+Let $t(n)$ and $w(n)$ denote the time and random $N$-bit words required to sample from the distribution $\distr{F}(v,a,b)$ with error $\frac{1}{\poly(n)}$ in the $L_1$-distance, respectively. Then Algorithm~\ref{alg:oblivious-coin-toss} is a random access generator that answers each \func{Next-Neighbor} or \func{Vertex-Pair} query using $O(t(n) \log n)$ time, $O(w(n) \log n)$ random $N$-bit words, and $O(\log n)$ additional space, with high probability.
+\end{restatable} 
+\fi

@@ -1,7 +1,7 @@
 \section{Additional related work}
 \label{sec:related_work}
 
-\paragraph{Random graph models}
+\paragraph*{Random graph models}
 The Erd\"{o}s-R\'{e}nyi model, given in \cite{er}, is one of the most simple theoretical random graph model,
 yet more specialized models are required to capture properties of real-world data.
 The Stochastic Block model (or the planted partition model) was proposed in \cite{holland} originally for modeling social networks;
@@ -18,23 +18,23 @@ Kleinberg's model on the simple lattice topology (as considered in this paper) i
 yielding important results such as routing algorithms (decentralized search) \cite{kleinberg, klein}.
 See also e.g., \cite{newman2000models} and Chapter 20 of \cite{easley2010networks}.
 
-\paragraph{Generation of random graphs}
+\paragraph*{Generation of random graphs}
 The problem of local-access implementation of random graphs has been considered in the aforementioned work \cite{huge_old,sparse,reut},
 as well as in \cite{mansour2012converting} that locally generates out-going edges on bipartite graphs while minimizing the maximum in-degree.
 The problem of generating full graph instances for random graph models have been frequently considered in many models of computations,
 such as sequential algorithms \cite{milo2003uniform,er_gen,nobari2011fast,miller2011efficient},
 and the parallel computation model \cite{alam2017parallel}.
 
-\paragraph{Query models}
+\paragraph*{Query models}
 In the study of sub-linear time graph algorithms where reading the entire input is infeasible,
 it is necessary to specify how the algorithm may access the input graph,
 normally by defining the type of queries that the algorithm may ask about the input graph;
 the allowed types of queries 
 can greatly affect the performance of the algorithms.
-While \func{next-neighbor} query is only recently considered in \cite{reut},
+While \func{Next-Neighbor} query is only recently considered in \cite{reut},
 there are other query models providing a neighbor of a vertex,
 such as asking for an entry in the adjacency-list representation \cite{goldreich1997property},
 or traversing to a random neighbor \cite{brautbar2010local}. On the other hand,
 the
-\func{vertex-pair} query is common in the study of dense graphs as accessing the adjacency matrix representation \cite{goldreich1998property}.
-The \func{all-neighbors} query has recently been explicitly considered in local algorithms \cite{feige2017probe}.
+\func{Vertex-Pair} query is common in the study of dense graphs as accessing the adjacency matrix representation \cite{goldreich1998property}.
+The \func{All-Neighbors} query has recently been explicitly considered in local algorithms \cite{feige2017probe}.
