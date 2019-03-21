@@ -1,6 +1,7 @@
 \section{Random Coloring of a Graph}%
 \label{sec:random_coloring_of_a_graph}
 
+\todo{Query access}
 We wish to locally sample an uniformly random coloring of a graph.
 A $q$-coloring of a graph $G = (V, E)$ is a function $\sigma : V\rightarrow [q]$,
 such that for all $(u,v)\in E$, $\sigma_u \not= \sigma_v$.
@@ -67,7 +68,7 @@ Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as fo
 
 \begin{lemma}
 \label{lem:mohsen_single_epoch_distance}
-If $q = \alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 1-\frac1\alpha\right)e^{-6/\alpha} + \frac{1/\alpha}{1-2/\alpha}$
+If $q = 2\alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
 \end{lemma}
 \begin{corollary}
 \label{cor:single_epoch_distansce}
@@ -76,7 +77,7 @@ If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{e^{1/3}
 
 \begin{theorem}
 \label{thm:modified_mixing_time}
-If $q\ge 9\Delta$, then the Markov Chain is mixed after $3\ln n$ epochs.
+If $q\ge 9\Delta$, then the Markov Chain is mixed after $\tau_{mix}(\epsilon) = 3\ln n + 3\ln(1/\epsilon)$ epochs.
 \end{theorem}
 \begin{proof}
 \todo{Write proof}
@@ -90,8 +91,7 @@ If $q\ge 9\Delta$, then the Markov Chain is mixed after $3\ln n$ epochs.
 Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\ln n$ epochs of \emph{Modified Glauber Dynamics}.
 We will define the number of colors as $q = \alpha\Delta$ where $\alpha > 1$.
 
-Each epoch can be implemented a local generator for a permutation of $V$.
-\todo{No need for this any more}
+%Each epoch can be implemented a local generator for a permutation of $V$.
 %Specifically, each epoch is a sequence of vertex and color samples:
 %\[
 %\chi^{(i)}
@@ -107,14 +107,15 @@ Each epoch can be implemented a local generator for a permutation of $V$.
 %We also define $\mathcal C^{(i)}_v$ to be the color sampled for vertex $v$ in the $i^{th}$ epoch,
 %and $\mathcal I^{(i)}_v$ to be the corresponding index $j$.
 
-Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^T$.
+Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^n$.
+Note that these values are fully independent and as such any $\vec C^i_v$ can be sampled trivially.
 We also use $\vec X^i$ to denote the final vector of vertex colors at the end of the $i^{th}$ epoch.
 Finally, we define indicator variables $\bm \chi^i_v$ to denote if the color for vertex $v$ was accepted at the $i^{th}$ epoch;
 $\bm \chi^i_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
 we satisfy the condition $\vec  C^i_v\not= \vec X^{i-1}_w$ and $\vec C^i_v\not= \vec C^i_w$.
-So, the color of a vertex $v$ after the $t^{th}$ epoch $X^t_v$ is set to be $C^i_v$
-where $i\le t$ is the largest index such that $\chi^i_v=1$.
-Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $X^t_v$.
+So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
+where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
+Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
 
 \begin{algorithm}[H]
 \caption{Generator}
@@ -159,37 +160,104 @@ Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $X^t_
 \end{algorithm}
 
 When the algorithm is asked for the final color of $v$, it finds the last epoch in which $v$ was accepted.
-Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the 
+Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the subroutine $\func{Accepted}$ that samples the value of $\bm\chi^t_v$.
+The algorithm iterates through the neighbors $w$ of $v$, and check for conflicts with the proposed color $c=\vec C^t_v$.
+The condition $c\not= \vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$ in the current epoch.
+If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
-\begin{theorem}
-\label{thm:coloring_recurrence}
-The expected runtime of the color generator for the $t^{th}$ epochs is $\mathcal O\left( e^{2t/\alpha}\right)$.
-\end{theorem}
+We first iterate through all the epochs in reverse order to check whether the color $c$ was ever proposed for vertex $w$.
+If not, we can ignore $w$, and otherwise let's say that the last proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
+Now, we need to recursively check if this proposal was $\func{Accepted}$.
+If it was, we move to epoch $t'+1$ to see if $w$'s color was replaced.
+If not, we check epoch $t'+2$ and so on until we reach epoch $t-1$.
+At this point we have seen that $\bm\chi^{t'}_w = 1$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected
+i.e. $\vec X^{t-1}_w = c$ and this leads to a conflict with $v$'s current proposal for color $c$ and hence $\bm\chi^t_v = 0$.
+If at any of the iterations, we see that a different proposal was accepted, then $w$ does not cause a conflict and we can move on to the next neighbor.
+If we exhaust all the neighbors and don't find any conflicts then $\bm\chi^t_v = 1$.
+
+\begin{lemma}
+\label{lem:color_reject_probability}
+The probability that any given proposal is rejected $\mathbb P[\bm\chi^t_v=0]$ is at most $1/\alpha$.
+Moreover, this upper bound holds even if we condition on all the values in $\vec C$ except $\vec C^t_v$.
+\end{lemma}
 \begin{proof}
-Here, $\mathcal B(p)$ refers to the Bernoulli random variable with parameter $p$.
-Assuming $t = k\ln n$.
+A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{ C^t_w, X^{t-1}_w | w\in\Gamma(v)\}$.
+Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/\alpha$.
+\end{proof}
+
+So, the number of probes required to check whether a color $c$ (assigned at epoch $t'$) was overwritten at some epoch before $t$ is:
 \begin{align}
-T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathcal B\left( \frac{1}{\alpha\Delta}\right)\cdot
+\label{eq:color_overwrite}
+\Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
++ \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots
++ \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]
+\end{align}
+
+\begin{lemma}
+\label{lem:coloring_recurrence}
+For $\alpha>4$, the expected time to sample a single $\bm\chi^t_v$ is $\mathbb E[T_t] = \mathcal{O}\left(t\Delta e^{2t/\alpha}\right)$.
+\end{lemma}
+\begin{proof}
+We formulate a recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$ used by the algorithm.
+We will use $\mathcal B(p)$ to refer to the Bernoulli random variable with bias $p$.
+When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
+(technically, only the last occurence matters, but we are looking for an upper bound).
+If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
+Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accepted}$ proposal is found.
+Adding an extra $T_{t'}$ term to Equation~\ref{eq:color_overwrite} and summing up over all neighbors and epochs we get the following:
+\begin{align}
+T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
 \Biggl[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
 + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots\\
 &\hspace{23em}
 \cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]\\
-&\le \Delta\cdot\mathcal B\left( \frac{1}{\alpha\Delta}\right) \Biggl[
+&\le \Delta\cdot\mathcal B\left( \frac{1}{q}\right) \Biggl[
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} +
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \mathcal B\left(\frac1\alpha\right) + \mathcal B\left(\frac1{\alpha^2}\right) + \cdots\right)
 \Biggr]
 \end{align}
+In the second step, we just group all the terms from the same epoch together.
+Using Lemma~\ref{lem:color_reject_probability} and the fact that $\mathbb P[C^{t'}_w = c]$ is independent of all other events,
+we can write a recurrence for the expected number of probes.
+\begin{align}
+\mathbb E[T_t]\le \Delta\cdot\frac{1}{\alpha\Delta}
+\left[
+\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} + \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot
+\left(1 + \frac1\alpha + \frac1{\alpha^2} + \cdots\right)
+\right]
+\end{align}
 Now, we make the assumption that $\mathbb E[T_{t'}]\le e^{2t/\alpha}$ and show that this satisfies the expectation recurrence.
-Since $\alpha\ge 9$, we see that $e^{2/\alpha}<1$ which in turn implies that:
+First, we sum the geometric series:
 \[
-\mathlarger\sum\limits_{t'=1}^{t-1} \mathbb E[T_{t'}] < \frac{\mathbb E[T_t]-1}{e^{2/\alpha}-1} < \frac{\mathbb E[T_t]}{e^{2/\alpha}-1}
+\mathlarger\sum\limits_{t'=1}^{t-1} \mathbb E[T_{t'}] = \mathlarger\sum\limits_{t'=1}^{t-1} e^{2t'/\alpha}
+< \frac{e^{2t/\alpha}-1}{e^{2/\alpha}-1} < \frac{e^{2t/\alpha}}{e^{2/\alpha}-1}
 \]
-The recurrence to be satisfied then becomes:
+The expectation recurrence to be satisfied then becomes:
 \[
-\mathbb E[T_t]\le \mathbb E[T_t]\cdot \frac 1{\alpha}\cdot \frac{1}{e^{2/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
-= \mathbb E[T_t]\cdot \frac{2\alpha-1}{\alpha(\alpha-1)(e^{2/\alpha}-1)} = \mathbb E[T_t]\cdot f(\alpha)
+\mathbb E[T_t]\le e^{2t/\alpha}\cdot \frac 1{\alpha}\cdot \frac{1}{e^{2/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
+= e^{2t/\alpha}\cdot \frac{2\alpha-1}{\alpha(\alpha-1)(e^{2/\alpha}-1)} = e^{2t/\alpha}\cdot f(\alpha)
 \]
-We notice that $f(\alpha)$ is is upper bounded by $1$ in the domain $\alpha\ge 9$ (in fact $\lim\limits_{\alpha\to\infty}f(\alpha) = 1$).
+We notice that $f(\alpha)$ is is upper bounded by $1$ in the domain $\alpha> 4$ (in fact $\lim\limits_{\alpha\to\infty}f(\alpha) = 1$).
 This can easily be verified by taking the derivatives and using L'H\^{o}spital's rule.
 Thus, our recurrence is satisfied.
+Finally, we note that each probe potentially takes time $\mathcal O(t\Delta)$ to iterate through all the neighbors in all epochs
+resulting in a total runtime of $\mathcal O(t\Delta e^{2t/\alpha})$.
 \end{proof}
+
+\begin{corollary}
+\label{cor:coloring_improved_probes}
+Instead of looking through all the epochs in order, we can use the coloring generator \todo{where?} to find the locations directly.
+\end{corollary}
+
+\begin{theorem}
+\label{thm:coloring_generator_main}
+Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta$ colors,
+we can sample the color of any given node in an ($1/n$-approximate) uniformly random coloring of the graph in a consistent manner
+using only $\mathcal O(n^{12/\alpha}\Delta\log n)$ time space and random bits.
+This is sublinear for $\alpha>12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
+\end{theorem}
+\begin{proof}
+We use the mixing time from Theorem~\ref{thm:modified_mixing_time} $\tau_{mix}(1/n) = 6\ln n$ in conjunction with Lemma~\ref{lem:coloring_recurrence}.
+So, the overall runtime becomes $\mathcal O(n^{12/\alpha}\Delta\log n)$.
+\end{proof}
+
