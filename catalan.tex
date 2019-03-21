@@ -130,55 +130,15 @@ We also use the following lemmas to bound the deviation of the path.
 \label{lem:dyck_path_deviation_bound}
 Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
 where the sub-path is of length $2B$ comprising of $U$ up-steps and $D$ down-steps (with $U + D = 2B$).
-The quantities $|B-U|$, $|B-D|$, and $|U-D|$ are $\mathcal O(\sqrt{B\log n})$ with probability at least $1-1/n$.
+Then there exists a constant $c$ such that the quantities $|B-U|$, $|B-D|$, and $|U-D|$
+are all $<c\sqrt{B\log n}$ with probability at least $1-1/n^2$ for every possible sub-path.
 \end{restatable}
 \begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
 \label{lem:dyck_path_irrelevant_boundary}
 There exists a constant $c$ such that if $k > c \sqrt{B\log n}$, then the distribution of paths sampled without a boundary
-(hypergeometric sampling) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
+(hypergeometric sampling) is statistically $\mathcal O(1/n^2)$-close in $L_1$ distance to the distribution of Dyck paths.
 \end{restatable}
 
-
-\begin{algorithm}[H]
-    \caption{Na\"{i}ve Generator}
-    \begin{algorithmic}
-        \Procedure{Split}{$U, D, k$}
-            \State{$B \gets U + D$}\\
-            \State{$d \sim \left\{\frac{\binom{B}{B-d}\binom{B}{D+d}}{\binom{2B}{2D}}\right\}_d$}\\\\
-            \State{$k' \gets k + U - D$}\\
-            \State{$p_d \gets
-                \frac{{{B}\choose{D-d}}-{{B}\choose{D-d-k}}{{B}\choose{U-d}}
-                -{{B}\choose{U-d-k'}}}{{{2B}\choose{2D}}-{{2B}\choose{2D-k}}}$}
-            \State{$q_d \gets \frac{\binom{B}{B-d}\binom{B}{D+d}}{\binom{2B}{2D}}$}\\
-            \If {$p_d < q_d$}
-                \State \Return $d$
-            \EndIf
-            \State{\textbf{draw} $X \sim\distr{Bern}(p_d/q_d)$}
-            \If {$X = 0$}
-                \State \Return $d$
-            \EndIf
-            \Return \func{Split}($U, D, k, k'$)
-
-        \EndProcedure
-        \Procedure{Height}{$x$}
-            \If {$x\in heights$}
-                \State \Return $heights[x]$
-            \EndIf
-            \State{$l \gets \func{lower-bound}(x)$}
-            \State{$r \gets \func{upper-bound}(x)$}
-            \State{$h_l \gets \func{Height}(l)$}
-            \State{$h_r \gets \func{Height}(r)$}
-            \State{$extra \gets (r-l)-(h_r-h_l)$}
-            \State{$U\gets (h_r-h_l) + extra/2$}
-            \State{$D\gets extra/2$}
-            \State{$k\gets 1 + h_l$}
-            \State{$d \gets \func{Split}(U,D,k)$}
-            \State{$heights[(r+l)/2] \gets h_l + U + d$}
-            \State \Return $\func{Height}(x)$
-        \EndProcedure
-    \end{algorithmic}
-    \label{alg:catalan_generator}
-\end{algorithm}
 
 
 
@@ -333,7 +293,6 @@ along with their corresponding heights $ \langle h_1, h_2,\cdots, h_m \rangle$.
 For any two adjacent positions $x_i,x_{i+1}$ whose heights have been sampled as $h_i, h_{i+1}$,
 the Dyck path between positions $x_i$ and $x_{i+1}$ is constrained to lie above $min(h_i, h_{i+1})$.
 \end{proposition}
-
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_boundary_invariant.pdf}
@@ -381,13 +340,13 @@ Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to sample a p
 In fact, we will do something stronger by sampling the \emph{first} time the walk touches the boundary after $x_i$.
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=1.0\linewidth, trim={0 6cm 0 5cm}]{images/dyck_return_sampling.pdf}
-    \caption{Zooming into (and flipping) the error in Figure~\ref{fig:dyck_boundary_invariant}}
-    \label{fig:dyck_return_sampling}
+    \includegraphics[width=\textwidth]{images/dyck_first_approach_sampling.pdf}
+    \caption{Zooming into the error in Figure~\ref{fig:dyck_boundary_invariant}}
+    \label{fig:dyck_first_approach_sampling}
 \end{figure}
 
 We will parameterize the position $x$ the number of up-steps between $x_i$ and $x$
-(See Figure~\ref{fig:dyck_return_sampling}).
+(See Figure~\ref{fig:dyck_first_approach_sampling}).
 This quantity will be referred to as $d$ such that $x - x_{i+1} = 2d + k-1$.
 Given a specific $d$, we want to compute the number of valid paths that result in
 $d$ up-steps before the first approach to the boundary.
@@ -399,7 +358,7 @@ it suffices to estimate the number of paths asymptotically as well.
 
 \begin{restatable}{lemma}{ReturnDLeftBound}
 \label{lem:ReturnDLeftBound}
-If $d > \log^7 n$, then $D_{left}(d)
+If $d > \log^4 n$, then $D_{left}(d)
 = \Theta\left( \frac{2^{2d+k}}{\sqrt{d}}\mathlarger e^{-r_{left}(d)}\cdot \frac{k-1}{d+k-1}\right)$
 where $r_{left}(d) = \frac{(k-2)^2}{2(2d+k-2)}$.
 \end{restatable}
@@ -407,7 +366,7 @@ where $r_{left}(d) = \frac{(k-2)^2}{2(2d+k-2)}$.
 
 \begin{restatable}{lemma}{ReturnDRightBound}
 \label{lem:ReturnDRightBound}
-If $U+D-2d-k > \log^7 n$, then $D_{right}(d)
+If $U+D-2d-k > \log^4 n$, then $D_{right}(d)
 = \Theta\left( \frac{2^{U+D-2d-k}}{\sqrt{U+d-2d-k}}\mathlarger e^{-r_{right}(d)}\cdot \frac{U-D+k}{U-d+1}\right)$
 where $r_{right}(d) = \frac{(U-D-k-1)^2}{4(U+D-2d-k+1)}$.
 \end{restatable}

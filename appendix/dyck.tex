@@ -3,26 +3,36 @@
 
 \begin{theorem}
 \label{thm:number_of_dyck_paths}
-There are $\frac{1}{n+1}\binom{2n}{n}$ Dyck paths for length $2n$.
-\todo{Proof from catalan book}
+There are $\frac{1}{n+1}\binom{2n}{n}$ Dyck paths for length $2n$ (construction from \cite{catalan_book}).
 \end{theorem}
 \begin{proof}
-We first consider ballot sequences which are another catalan object.
-Formally, this is a sequence of $n+1$ $+1$s and $n$ $-1$s such that any prefix sum of the sequence is nonnegative.
-Note that a ballot sequence can be transformed into a valid Dyck path by removing the last occurence of $+1$.
-Similarly, a Dyck path can be converted to a valid ballot sequence by inserting a $+1$ after the last occurence of a 
-First we consider a \emph{balanced} walk with $n$ up and $n$ down steps (without the boundary constraint).
-We will define a function that maps balanced random walks to Dyck paths.
-To do this, we represent a balanced walk with a sequence of $2n$ variables $\{ X_1, X_2,\cdots, X_{2n}\}$ consisting of $n$ $+1$ and $-1$ values.
+Consider all possible sequences containing $n+1$ up-steps and $n$ down-steps with the restriction that the first step is an up-step.
+We say that two sequences belong to the same \emph{class} if they are cyclic shifts of each other.
+Because of the restriction, the total number of sequences is $\binom{2n}{n}$ and each class is of size $n+1$.
+Now, within each class, exactly one of the sequences is such that the prefix sums are \emph{strictly greater} than zero.
+From such a sequence, we can obtain a Dyck sequence by deleting the first up-step.
+Similarly, we can start with a Dyck sequence, add an initial up-step and consider all $n+1$ cyclic shifts to obtain a \emph{class}.
+This bijection shows that the number of Dyck paths is $ \frac{1}{n+1} \binom{2n}{n}$.
 \end{proof}
 
 
 
 \subsection{Approximating Close-to-Central Binomial Coefficients}%
 \label{sub:approximating_close_to_central_binomial_coefficients}
+We start with Stirling's approximation which states that
+\[
+m! = \sqrt{2\pi m}\left( \frac me\right)^m\left( 1 + \mathcal O\left( \frac 1m\right)\right)\\
+\]
+We will also use the logarithm approximation when a better approximation is required:
+\begin{align}
+    \label{eq:log_factorial_approximation}
+\log (m!) = m\log m -m + \frac 12 \log(2\pi m) + \frac{1}{12m} - \frac{1}{360m^3} + \frac{1}{1260m^5} - \cdots
+\end{align}
+
 This immediately gives us an asymptotic formula for the central binomial coefficient as:
 \begin{lemma}
 \label{lem:central_binomial_coefficient}
+The central binomial coefficient can be approximated as:
 \[
 \binom{n}{n/2} = \sqrt{\frac{2}{\pi n}}2^n\left( 1 + \mathcal O\left( \frac 1n\right)\right)
 \]
@@ -32,6 +42,7 @@ This immediately gives us an asymptotic formula for the central binomial coeffic
 Now, we consider a ``off-center'' Binomial coefficient $\binom{n}{k}$ where $k = \frac{n+c\sqrt n}{2}$.
 \begin{lemma}
 \label{lem:close_to_central_binomial_coefficient}
+Proof from \cite{asymptopia}
 \[
 \binom{n}{k} = \binom{n}{n/2} e^{-c^2/2}exp\left( \mathcal O(c^3/\sqrt n)\right)
 \]
@@ -57,7 +68,7 @@ R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
 \label{lem:random_walk_deviation_bound}
 Given a random walk of length $2n$ with exactly $n$ up and down steps,
 consider a contiguous \emph{sub-path} of length $2B$ that comprises of $U$ up-steps and $D$ down-steps i.e. $U + D = 2B$.
-Both $|B-U|$ and $|B-D|$ are $\mathcal O(\sqrt{B\log n})$ with probability at least $1-1/n^3$.
+Both $|B-U|$ and $|B-D|$ are $\mathcal O(\sqrt{B\log n})$ with probability at least $1-1/n^4$.
 \end{lemma}
 \begin{proof}
 We consider the random walk as a sequence of unbiased random variables $\{X_i\}_{i=1}^{2n}\in \{0,1\}^{2n}$
@@ -76,7 +87,8 @@ Since $U$ and $D$ are symmetric, the same argument applies.
 \begin{corollary}
 \label{cor:random_walk_deviation_bound}
 With high probability, every contiguous sub-path in the random walk (with $U$ up and $D$ down steps) satisfies the property with high probability.
-Specifically, if $U+D = 2B$, then $|B-U|$ and $|B-D|$ are upper bounded by $\sqrt{B\log n}$ w.h.p. $1-1/n$ for all contiguous sub-paths.
+Specifically, if $U+D = 2B$, then $|B-U|$ and $|B-D|$ are upper bounded by $c\sqrt{B\log n}$ w.h.p. $1-1/n^2$
+for all contiguous sub-paths (for some constant $c$).
 \end{corollary}
 \begin{proof}
 We can simply apply Lemma~\ref{lem:random_walk_deviation_bound} and union bound over all $n^2$ possible contiguous sub-paths.
@@ -84,48 +96,61 @@ We can simply apply Lemma~\ref{lem:random_walk_deviation_bound} and union bound 
 
 \DyckPathDeviationBound*
 \begin{proof}
-Because of Theorem~\ref{thm:number_of_dyck_paths}, we can sample a Dyck path
-by first sampling a \emph{balanced} random walk and then converting it to a Dyck path.
-In the worst case, the transformation only increases the \emph{imbalance} in any interval by a factor of at most $\sqrt2$.
+As a consequence of Theorem~\ref{thm:number_of_dyck_paths}, we can sample a Dyck path
+by first sampling a \emph{balanced} random walk with $n$ up steps and $n$ down steps and adding an initial up step.
+We can then find the corresponding Dyck path by taking the unique cyclic shift that satisfies the Dyck constraint (after removing the initial up-step).
+Any interval in a cyclic shift is the union of at most two intervals in the original sequence.
+This affects the bound only by a constant factor.
 So, we can simply use Corollary~\ref{cor:random_walk_deviation_bound} to finish the proof.
 Notice that since $|U-D| \le |B-U|+|B-D|$, $|U-D| = \mathcal O(\sqrt{B\log n})$ comes for free.
 \end{proof}
 
 \DyckPathIrrelevantBoundary*
 \begin{proof}
-\todo{Change statement. What if other end is much lower?}
+We use $\mathcal D$ and $\mathcal R$ to denote the set of all valid Dyck paths and all random sequences respectively.
+Clearly, $\mathcal D\subseteq \mathcal R$. Let $c$ be a constant satisfying Corollary~\ref{cor:random_walk_deviation_bound}.
+Since the random walk/sequence distribution is uniform on $\mathcal R$, and by Corollary~\ref{cor:random_walk_deviation_bound}
+we see that at least $1-1/n^2$ fraction of the elements of $\mathcal R$ do not violate the boundary constraint.
+Therefore, $|\mathcal D|\ge (1-1/n^2)|\mathcal R|$ and so the $L_1$ distance between
+$\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
 \end{proof}
 
 
 
 \subsection{Computing Probabilities}%
 \label{sub:computing_probabilities}
-We start with Stirling's approximation which states that
-\[
-m! = \sqrt{2\pi m}\left( \frac me\right)^m\left( 1 + \mathcal O\left( \frac 1m\right)\right)\\
-\]
-We will also use the logarithm approximation when a better approximation is required:
-\begin{align}
-    \label{eq:log_factorial_approximation}
-\log (m!) = m\log m -m + \frac 12 \log(2\pi m) + \frac{1}{12m} - \frac{1}{360m^3} + \frac{1}{1260m^5} - \cdots
-\end{align}
-
 Oracle for estimating probabilities:
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
 \todo{Point to section referencing the left right/ total.}
-
-Given a probability expression of the form $p_d = \frac{D_{left}\cdot D_{right}}{D_{total}}$ and a parameter $n$,
-there exists a $\poly(\log n)$ time oracle that returns a $\left( 1\pm 1/n^2\right)$
-multiplicative approximation to $p_d$.% as long as $p_d > 1/n^2$.
+Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
+$p_d = \frac{D_{left}\cdot D_{right}}{D_{total}}$, there exists a $\poly(\log n)$ time oracle that returns a
+$\left( 1\pm 1/n^2\right)$ multiplicative approximation to $p_d$ if $p_d = \Omega(1/n^2)$ and returns $0$ otherwise.
 \end{lemma}
 \begin{proof}
-We first compute a $1/n^2$ \emph{additive} approximation to $\log p_d$.
-Note that this is possible because $\log p_d$ can be written as a sum of logarithms of factorials \todo{Not obvious how}.
+We first compute a $1+1/n^3$ multiplicative approximation to $\ln p_d$.
+Using $\mathcal O(\log n)$ terms of the series in Equation~\ref{eq:log_factorial_approximation},
+it is possible to estimate the logarithm of a factorial up to $1/n^c$ additive error.
 So, we can use the series expansion from Equation~\ref{eq:log_factorial_approximation} up to $\mathcal O(\log n)$ terms.
+The additive error can also be cast as multiplicative since factorials are large positive integers.
 
-Now, we can exponentiate the approximation to obtain
-$p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
+The probability $p_d$ can be written as an arithmetic expression involving sums and products of a constant number of factorial terms.
+Given a $1\pm1/n^c$ multiplicative approximation to $l_a = \ln a$ and $l_a = \ln b$, we wish to approximate $\ln(ab)$ and $\ln(a+b)$.
+The former is trivial since $\ln(ab) = \ln a + \ln b$.
+For the latter, we assume $a>b$ and use the identity $\ln(a+b) = \ln a + \ln(1+b/a)$ to note that it suffices to approximate $\ln(1+b/a)$.
+We define $\hat l_a = l_a\cdot(1\pm \mathcal O(1/n^c))$ and $\hat l_b = l_b\cdot(1\pm \mathcal O(1/n^c))$.
+In case $\hat l_b-\hat l_a <c\ln n\implies b/a < 1/n^c$, we approximate $\ln(a+b)$ by $\ln a$ since $\ln(1+b/a) = \mathcal O(1/n^c)$ in this case.
+Otherwise, using the fact that $l_a-l_b = o(n^2)$, we compute:
+\[
+1+e^{\hat l_b-\hat l_a} = 1+\frac ba\cdot \mathlarger e^{\mathcal O\left( \frac{l_b-l_a}{n^c}\right)}
+= 1+\frac ba\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-2}} \right)\right)
+= \left( 1+\frac ba\right)\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-2}} \right)\right)
+\]
+In other words, the value of $c$ decreases every time we have a sunm operation.
+Since there are only a constant number of such arithmetic operations in the expression for $p_d$,
+we can set $c$ to be a high enough constant (when approximating the factorials) and obtain the desired $1\pm1/n^3$ approximation to $\ln p_d$.
+If $\ln p_d < -3\ln n$, we approximate $p_d = 0$.
+Otherwise, we can exponentiate the approximation to obtain $p_d\cdot e^{-\mathcal O(\ln n/n^3)} = p_d\left( 1 \pm \mathcal O(1/n^2)\right)$.
 \end{proof}
 
 
@@ -228,7 +253,7 @@ Using Taylor expansion, we see that
 \ReturnDLeftBound*
 \begin{proof}
 In what follows, we will drop constant factors:
-Refer to Figure~\ref{fig:dyck_return_sampling} for the setup.
+Refer to Figure~\ref{fig:dyck_first_approach_sampling} for the setup.
 The left section of the path reaches one unit above the boundary (the next step would make it touch the boundary).
 The number of up-steps on the left side is $d$ and therefore the number of down steps must be $d + k - 2$.
 This inclues $d$ down steps to cancel out the upwards movement, and $k-2$ more to get to one unit above the boundary.
@@ -238,9 +263,9 @@ D_{left}(d) &= \binom{2d+k-2}{d} - \binom{2d+k-2}{d-1}\\
 &= \binom{2d+k-2}{d}\left[ 1-\frac{d}{d+k-1}\right] = \binom{2d+k-2}{d}\frac{k-1}{d+k-1}
 \end{align}
 Now, letting $z = 2d+k-2$,  we can write $d = \frac{z-(k-2)}{2} = \frac{z-\frac{k-2}{\sqrt z}\sqrt z}{2}$.
-Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\log n)$.
+Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\sqrt{\log n})$.
 If this is not the case, we can simply return $0$ because the probability associated with this value of $d$ is negligible.
-Since $z > \log^7 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
+Since $z > \log^4 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
 \[
 D_{left}(d) = \Theta\left( \binom{z}{z/2} e^{\frac{(k-2)^2}{2z}} \frac{k-1}{d+k-1} \right)
 = \Theta\left( \frac{2^{2d+k}}{\sqrt d} e^{\frac{(k-2)^2}{2(2d+k-2)}} \frac{k-1}{d+k-1} \right)
@@ -260,12 +285,11 @@ D_{right}(d) &= \binom{U+D-2d-k+1}{U-d} - \binom{U+D-2d-k+1}{U-d+1}\\
 &= \binom{U+D-2d-k+1}{U-d}\frac{U-D+k}{U-d+1}
 \end{align}
 Now, letting $z = U+D-2d-k+1$,  we can write $U-d = \frac{z+(U-D+k-1)}{2} = \frac{z+\frac{U-D+k-1}{\sqrt z}\sqrt z}{2}$.
-Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\log n)$.
+Using Lemma~\ref{lem:dyck_path_deviation_bound}, we see that $\frac{k-2}{\sqrt z}$ should be $\mathcal O(\sqrt{\log n})$.
 If this is not the case, we can simply return $0$ because the probability associated with this value of $d$ is negligible.
-Since $z > \log^7 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
+Since $z > \log^4 n$, we can apply Lemma~\ref{lem:close_to_central_binomial_coefficient} to get:
 \begin{align}
 D_{right}(d) &= \Theta\left( \binom{z}{z/2} e^{\frac{(U-D+k-1)^2}{2z}} \frac{U-D+k}{U-d+1} \right)\\
 &= \Theta\left( \frac{2^{U+D-2d-k}}{\sqrt{U+D-2d-k}} e^{\frac{(U-D+k-1)^2}{2(U+D-2d-k+1)}} \frac{U-D+k}{U-d+1} \right)
 \end{align}
 \end{proof}
-

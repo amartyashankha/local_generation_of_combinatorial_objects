@@ -71,12 +71,12 @@ If $q = \alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 
 \end{lemma}
 \begin{corollary}
 \label{cor:single_epoch_distansce}
-If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{\sqrt{2}}$
+If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{e^{1/3}}$
 \end{corollary}
 
 \begin{theorem}
 \label{thm:modified_mixing_time}
-If $q\ge 9\Delta$, then the Markov Chain is mixed after $2\log n$ epochs.
+If $q\ge 9\Delta$, then the Markov Chain is mixed after $3\ln n$ epochs.
 \end{theorem}
 \begin{proof}
 \todo{Write proof}
@@ -87,7 +87,7 @@ If $q\ge 9\Delta$, then the Markov Chain is mixed after $2\log n$ epochs.
 
 \subsection{Local Coloring Algorithm}%
 \label{sub:local_coloring_algortihm}
-Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\log n$ epochs of \emph{Modified Glauber Dynamics}.
+Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\ln n$ epochs of \emph{Modified Glauber Dynamics}.
 We will define the number of colors as $q = \alpha\Delta$ where $\alpha > 1$.
 
 Each epoch can be implemented a local generator for a permutation of $V$.
@@ -158,19 +158,38 @@ Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $X^t_
 \label{alg:coloring}
 \end{algorithm}
 
+When the algorithm is asked for the final color of $v$, it finds the last epoch in which $v$ was accepted.
+Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the 
+
 \begin{theorem}
 \label{thm:coloring_recurrence}
-Coloring recurrence.
+The expected runtime of the color generator for the $t^{th}$ epochs is $\mathcal O\left( e^{2t/\alpha}\right)$.
 \end{theorem}
 \begin{proof}
 Here, $\mathcal B(p)$ refers to the Bernoulli random variable with parameter $p$.
-Assuming $t = k\log n$.
+Assuming $t = k\ln n$.
 \begin{align}
-T_{t} &\le \left|\Gamma(v)\right| \cdot \mathlarger\sum\limits_{i=1}^{t} \mathcal B\left( \frac{1}{\alpha\Delta}\right)\cdot
-\left[ T_{i} + T_{i+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{i+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{i+3} + \cdots\right]\\
-&\le 3\Delta \cdot \mathcal B\left(\frac{1}{\alpha\Delta}\right)\cdot T_{t-1} + T_{t-1}\\
-\implies \mathbb E[T_t] &\le \left( 1 + \frac{3}{\alpha}\right)\cdot \mathbb E[T_{t-1}]\\
-\implies \mathbb E[T_t] &\le \Delta\cdot \left( 1 + \frac{3}{\alpha}\right)^t = \Delta\cdot \mathlarger n^{k\log{\left(1 + \frac{3}{\alpha} \right)}}
-= \Delta\cdot \mathlarger n^{\frac{3k}{\alpha}}
+T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathcal B\left( \frac{1}{\alpha\Delta}\right)\cdot
+\Biggl[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
++ \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots\\
+&\hspace{23em}
+\cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]\\
+&\le \Delta\cdot\mathcal B\left( \frac{1}{\alpha\Delta}\right) \Biggl[
+\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} +
+\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \mathcal B\left(\frac1\alpha\right) + \mathcal B\left(\frac1{\alpha^2}\right) + \cdots\right)
+\Biggr]
 \end{align}
+Now, we make the assumption that $\mathbb E[T_{t'}]\le e^{2t/\alpha}$ and show that this satisfies the expectation recurrence.
+Since $\alpha\ge 9$, we see that $e^{2/\alpha}<1$ which in turn implies that:
+\[
+\mathlarger\sum\limits_{t'=1}^{t-1} \mathbb E[T_{t'}] < \frac{\mathbb E[T_t]-1}{e^{2/\alpha}-1} < \frac{\mathbb E[T_t]}{e^{2/\alpha}-1}
+\]
+The recurrence to be satisfied then becomes:
+\[
+\mathbb E[T_t]\le \mathbb E[T_t]\cdot \frac 1{\alpha}\cdot \frac{1}{e^{2/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
+= \mathbb E[T_t]\cdot \frac{2\alpha-1}{\alpha(\alpha-1)(e^{2/\alpha}-1)} = \mathbb E[T_t]\cdot f(\alpha)
+\]
+We notice that $f(\alpha)$ is is upper bounded by $1$ in the domain $\alpha\ge 9$ (in fact $\lim\limits_{\alpha\to\infty}f(\alpha) = 1$).
+This can easily be verified by taking the derivatives and using L'H\^{o}spital's rule.
+Thus, our recurrence is satisfied.
 \end{proof}
