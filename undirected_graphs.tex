@@ -129,7 +129,7 @@ As discussed in the previous section, we cannot maintain $\ADJ$ explicitly, as u
 %For $\ADJ[v][u] \neq \ONE$, we observe that our algorithm upholds the following condition: $\ADJ[v][u] = \ZERO$ if $u < \LAST[v]$ or $v < \LAST[u]$; otherwise $\ADJ[v][u]=\PHI$. To see why this is true, $\ADJ[v][u]$ changes its value from $\PHI$ to $\ZERO$ only when a new neighbor $u' > u$ has been found, and only in this occasion that 
 
 \iffalse
-\begin{restatable}{lem}{cond}\label{lem:cond-0}
+\begin{restatable}{lemma}{cond}\label{lem:cond-0}
 Assuming that only \func{Next-Neighbor} queries are allowed, consider $u > \LAST[v]$. Then, $\ADJ[v][u] = \ZERO$ if and only if $\LAST[u] > v$ and $u \notin P_v$.
 \end{restatable}
 \begin{proof}
@@ -140,7 +140,7 @@ Similarly, if $\LAST[u] > v$ then $X_{v,u}$ is already determined. Further, supp
 \end{proof}
 Combined with the fact that all entries $\ADJ[v][u]$ for $u < \LAST[v]$ has been revealed (by as a result of repeatedly invoking \func{Next-Neighbor}$(v)$), we conclude that $\LAST$ and $P_v$'s fully represent $\ADJ$.
 \fi
-\begin{restatable}{lem}{cond}\label{lem:cond-0}
+\begin{restatable}{lemma}{cond}\label{lem:cond-0}
 The data structures $\LAST$ and $P_v$'s together provide a succinct representation of $\ADJ$ when only \func{Next-Neighbor} queries are allowed. In particular, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v$. Otherwise, $\ADJ[v][u]=\ZERO$ when $u <\LAST[v]$ or $v < \LAST[u]$. In all remaining cases, $\ADJ[v][u]=\PHI$.
 \end{restatable}
 \begin{proof}
@@ -206,7 +206,7 @@ By our assumption, this CDF can be efficiently computed, and thus sampling with 
 However, unlike the case of Algorithm~\ref{alg:naive}, a single sample of our Algorithm~\ref{alg:oblivious-coin-toss} determines the values of multiple $X_{v,u}$'s, and we cannot represent the distribution of our generated graph simply via a product distributions of $X_{v,u}$'s.
 Instead, we prove a more general statement given below.
 Note that $\distr{F}, \distr{F}'$ need not be the same pair of distributions for every sample.
-\begin{restatable}{lem}{transition}\label{lemma:transition}
+\begin{restatable}{lemma}{transition}\label{lemma:transition}
 If Algorithm~\ref{alg:oblivious-coin-toss} constructs a graph $G$ by making at most $S$ random choices (samples), each of which comes from some distribution $\distr{F}'(v,a,b)$ that is $\epsilon$-close in $L_1$-distance to the correct distribution $\distr{F}(v,a,b)$ that perfectly generates the desired distribution $\distr{G}$ over all graphs, then the distribution $\distr{G}'$ of the generated graph $G$ is $(\epsilon S)$-close to $\distr{G}$ in the $L_1$-distance.
 \end{restatable}
 \begin{proof}
@@ -239,7 +239,7 @@ We remark that our proof above is rather robust: it is straightforward to embed 
 
 \subsubsection{Performance Guarantee}
 We now show the following lemma that bounds the required resources per query of Algorithm~\ref{alg:oblivious-coin-toss}.
-\begin{restatable}{lem}{res:ER-rand-iterations}\label{lem:ER-rand-iterations}
+\begin{restatable}{lemma}{res:ER-rand-iterations}\label{lem:ER-rand-iterations}
 The loop of Algorithm~\ref{alg:oblivious-coin-toss} requires at most $O(\log n)$ iterations with high probability.
 \end{restatable}
 

@@ -1,5 +1,13 @@
 \documentclass[a4paper,UKenglish,cleveref,autoref]{lipics-v2019}
 
+\hypersetup{
+    colorlinks=true,
+    linkcolor=Sepia,
+    citecolor=ForestGreen,
+    urlcolor=RoyalBlue}
+
+\usepackage[dvipsnames]{xcolor}
+
 \usepackage{algorithm}
 \usepackage{thm-restate}
 \usepackage{mathtools}
@@ -45,11 +53,15 @@
 \def\END{\matr{end}}
 \def\ADJ{\matr{A}}
 
+\newcommand{\sectioninput}{\input}
+
+\usepackage{bm}
+
 \renewcommand{\vec}[1]{\mathbf{#1}}
 \graphicspath{{./images/}}
 
 
-\bibliographystyle{plainurl}
+\bibliographystyle{alpha}
 
 \title{Miscellaneous Results}
 
@@ -77,18 +89,19 @@
 
 \input{introduction}
 \input{model}
+\input{building_blocks}
 \input{undirected_graphs}
 \input{buckets}
 \input{precision}
 \input{undirected_applications}
-%\input{small_world}
-\input{dyck}
+\input{small_world}
+\input{permutation}
+\input{catalan}
 %\input{domino}
-%\input{permutation}
-%\input{coloring/coloring}
+\input{coloring}
 
 
-\bibliography{bib}
+\bibliography{bob}
 
 \input{appendix/appendix}
 

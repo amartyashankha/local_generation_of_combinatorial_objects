@@ -53,55 +53,45 @@ R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
 
 \subsection{Dyck Path Boundaries and Deviations}%
 \label{sub:dyck_path_boundaries_and_deviations}
-
 \begin{lemma}
 \label{lem:random_walk_deviation_bound}
 Given a random walk of length $2n$ with exactly $n$ up and down steps,
-consider a contiguous \emph{sub-path} of length $2S$ that comprises of $U$ up-steps and $D$ down-steps i.e. $U + D = 2S$.
-Both $|S-U|$ and $|S-D|$ are $\mathcal O(\sqrt{S\log n})$ with probability at least $1-1/n^3$.
+consider a contiguous \emph{sub-path} of length $2B$ that comprises of $U$ up-steps and $D$ down-steps i.e. $U + D = 2B$.
+Both $|B-U|$ and $|B-D|$ are $\mathcal O(\sqrt{B\log n})$ with probability at least $1-1/n^3$.
 \end{lemma}
 \begin{proof}
 We consider the random walk as a sequence of unbiased random variables $\{X_i\}_{i=1}^{2n}\in \{0,1\}^{2n}$
 with the constraint $\sum\limits_{i=1}^{2n}X_i = n$.
 Here, $1$ corresponds to an up-step and $0$ corresponds to a down step.
 Because of the constraint, $X_i, X_j$ are negatively correlated for $i \not= j$ which allows us to apply Chernoff bounds.
-Now we consider a sub-path of length $2S$ and let $U$ denote the sum of the $X_i$s associated with this subpath.
-Using Chernoff bound with $\mathbb E[X] = S$, we get:
+Now we consider a sub-path of length $2B$ and let $U$ denote the sum of the $X_i$s associated with this subpath.
+Using Chernoff bound with $\mathbb E[X] = B$, we get:
 \[
-\mathbb P\left[ |U-S| < 3\sqrt{S \log n}\right]
-= \mathbb P\left[ |U-S| < 3\frac{\sqrt{\log n}}{\sqrt S}S\right] < e^{\frac{9\log n}{3}} \approx \frac{1}{n^3}
+\mathbb P\left[ |U-B| < 3\sqrt{B \log n}\right]
+= \mathbb P\left[ |U-B| < 3\frac{\sqrt{\log n}}{\sqrt B}B\right] < e^{\frac{9\log n}{3}} \approx \frac{1}{n^3}
 \]
 Since $U$ and $D$ are symmetric, the same argument applies.
 \end{proof}
 
 \begin{corollary}
 \label{cor:random_walk_deviation_bound}
-With high probability, every contiguous sub-path in the random walk (with $U$ up and $D$ down steps) satisfies the above property with high probability.
-Specifically, if $U+D = 2S$, then $|S-U|$ is upper bounded by $\sqrt{S\log n}$ with high probability for all contiguous sub-paths.
+With high probability, every contiguous sub-path in the random walk (with $U$ up and $D$ down steps) satisfies the property with high probability.
+Specifically, if $U+D = 2B$, then $|B-U|$ and $|B-D|$ are upper bounded by $\sqrt{B\log n}$ w.h.p. $1-1/n$ for all contiguous sub-paths.
 \end{corollary}
 \begin{proof}
 We can simply apply Lemma~\ref{lem:random_walk_deviation_bound} and union bound over all $n^2$ possible contiguous sub-paths.
 \end{proof}
 
-\begin{lemma}
-\label{lem:dyck_path_deviation_bound}
-Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
-where the sub-path is of length $2S$ comprising of $U$ up-steps and $D$ down-steps (with $U + D = 2S$).
-Both $|S-U|$ and $|S-D|$ are $\mathcal O(\log n\sqrt S)$ with probability at least $1-1/n^3$.
-\end{lemma}
+\DyckPathDeviationBound*
 \begin{proof}
 Because of Theorem~\ref{thm:number_of_dyck_paths}, we can sample a Dyck path
 by first sampling a \emph{balanced} random walk and then converting it to a Dyck path.
 In the worst case, the transformation only increases the \emph{imbalance} in any interval by a factor of at most $\sqrt2$.
 So, we can simply use Corollary~\ref{cor:random_walk_deviation_bound} to finish the proof.
-\todo{Finish}
+Notice that since $|U-D| \le |B-U|+|B-D|$, $|U-D| = \mathcal O(\sqrt{B\log n})$ comes for free.
 \end{proof}
 
-\begin{lemma}
-\label{lem:dyck_path_irrelevant_boundary}
-There exists a constant $c$ such that if $k > c\log n\sqrt S$, then the distribution of paths sampled without a boundary
-(normal random walks) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
-\end{lemma}
+\DyckPathIrrelevantBoundary*
 \begin{proof}
 \todo{Change statement. What if other end is much lower?}
 \end{proof}
@@ -146,10 +136,10 @@ $p_d\cdot e^{\mathcal O(1/n^2)} \approx p_d\left( 1 + \mathcal O(1/n^2)\right)$
 
 \todo{fix}
 \begin{itemize}
-    \item $d < c\cdot \sqrt S \log n$
-    \item $k < c\cdot \sqrt S \log n \implies U-D < c\cdot \sqrt S \log n$
-    \item $k' < c\cdot \sqrt S \log n$
-    \item $S > \log^2 n \implies \sqrt S \log n < S$
+    \item $d < c\cdot \sqrt B \log n$
+    \item $k < c\cdot \sqrt B \log n \implies U-D < c\cdot \sqrt B \log n$
+    \item $k' < c\cdot \sqrt B \log n$
+    \item $B > \log^2 n \implies \sqrt B \log n < B$
 \end{itemize}
 
 \begin{lemma}
@@ -165,41 +155,41 @@ For $x < 1$ and $k\ge 1$,
 \begin{proof}
 This involves some simple manipulations.
 \begin{align}
-D_{left} &= {{S}\choose{D-d}}-{{S}\choose{D-d-k}}\\
-&= {{S}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(S-D-d+k)(S-D-d+k-1)\cdots(S-D-d+1)}\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{S-D+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
-&\le {{S}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\log n\sqrt{S})}{U+d+k}\right)^k\right]\\
-&\le \Theta \left( \frac{k\log n}{\sqrt{S}} \right) \cdot{{S}\choose{D-d}}
+D_{left} &= {{B}\choose{D-d}}-{{B}\choose{D-d-k}}\\
+&= {{B}\choose{D-d}}\cdot \left[1-\frac{(D-d)(D-d-1)\cdots(D-d-k+1)}{(B-D-d+k)(B-D-d+k-1)\cdots(B-D-d+1)}\right]\\
+&\le {{B}\choose{D-d}}\cdot \left[1-\left(\frac{D-d-k+1}{B-D+d+k}\right)^k\right]\\
+&\le {{B}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-(U-D+d+k-1)}{U+d+k}\right)^k\right]\\
+&\le {{B}\choose{D-d}}\cdot \left[1-\left(\frac{U+d+k-\Bo(\log n\sqrt{B})}{U+d+k}\right)^k\right]\\
+&\le \Theta \left( \frac{k\log n}{\sqrt{B}} \right) \cdot{{B}\choose{D-d}}
 \end{align}
 \end{proof}
 
 \DRightBound*
 \begin{proof}
 \begin{align}
-D_{right} &= {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}\\
-&= {{S}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(S-U-d+k')(S-U-d+k'-1)\cdots(S-U-d+1)}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{S-U+d+k'}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
-&\le {{S}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\log n\sqrt S)}{U+k+d}\right)^{k'}\right]\\
-&\le \Theta\left(\frac{k'\log n}{\sqrt{S}}\right)\cdot{{S}\choose{U-d}}
+D_{right} &= {{B}\choose{U-d}}-{{B}\choose{U-d-k'}}\\
+&= {{B}\choose{U-d}}\cdot \left[1-\frac{(U-d)(U-d-1)\cdots(U-d-k'+1)}{(B-U-d+k')(B-U-d+k'-1)\cdots(B-U-d+1)}\right]\\
+&\le {{B}\choose{U-d}}\cdot \left[1-\left(\frac{U-d-k'+1}{B-U+d+k'}\right)^{k'}\right]\\
+&\le {{B}\choose{U-d}}\cdot \left[1-\left(\frac{2D-U-d-k+1}{2U-D+k+d}\right)^{k'}\right]\\
+&\le {{B}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - (2U-2D+2d+2k-1)}{U+k+d}\right)^{k'}\right]\\
+&\le {{B}\choose{U-d}}\cdot \left[1-\left(\frac{U+k+d - \Bo(\log n\sqrt B)}{U+k+d}\right)^{k'}\right]\\
+&\le \Theta\left(\frac{k'\log n}{\sqrt{B}}\right)\cdot{{B}\choose{U-d}}
 \end{align}
 \end{proof}
 
 \begin{restatable}{lemma}{DTotalBasicBound}
 \label{lem:DTotalBasicBound}
 \todo{change statement}
-$D_{tot} \ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
+$D_{tot} \ge {{2B}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
 \end{restatable}
 \begin{proof}
 \begin{align}
-D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
-&= {{2S}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2S-2D+k)(2S-2D+k-1)\cdots(2S-2D+1)}\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2S-2D+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
-&\ge {{2S}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
+D_{tot} &= {{2B}\choose{2D}}-{{2B}\choose{2D-k}}\\
+&= {{2B}\choose{2D}}\cdot \left[1-\frac{(2D)(2D-1)\cdots(2D-k+1)}{(2B-2D+k)(2B-2D+k-1)\cdots(2B-2D+1)}\right]\\
+&\ge {{2B}\choose{2D}}\cdot \left[1-\left(\frac{2D-k+1}{2B-2D+1}\right)^k\right]\\
+&\ge {{2B}\choose{2D}}\cdot \left[1-\left(\frac{2U-(2U-2D+k-1)}{2U+1}\right)^k\right]\\
+&\ge {{2B}\choose{2D}}\cdot \left[1-\left(\frac{(2U+1)-k'}{2U+1}\right)^k\right]\\
+&\ge {{2B}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
 \end{align}
 \end{proof}
 
@@ -208,7 +198,7 @@ D_{tot} &= {{2S}\choose{2D}}-{{2S}\choose{2D-k}}\\
 \DTotalFarBoundary*
 \begin{proof}
 When $kk' > 2U + 1 \implies k > \frac{2U+1}{k'}$,
-we will show that the above expression is greater than $\frac 12 \binom{2S}{2D}$.
+we will show that the above expression is greater than $\frac 12 \binom{2B}{2D}$.
 Defining $\nu = \frac{2U+1}{k'} > 1$, we see that $(1-\frac 1\nu)^k \le (1-\frac 1\nu)^\nu$.
 Since this is an increasing function of $\nu$ and since the limit of this function is $\frac 1e$,
 we conclude that
@@ -226,7 +216,7 @@ Using Taylor expansion, we see that
 &\le \frac{kk'}{2U+1} - \frac{k(k-1)}{2}\cdot\frac{k'^2}{(2U+1)^2}\\
 &\le \frac{kk'}{2U+1} - \frac{k^2k'^2}{2(2U+1)^2}\\
 &\le \frac{kk'}{2U+1} \left(1 - \frac{kk'}{2(2U+1)}\right)\\
-&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(S)}\\
+&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(B)}\\
 \end{align}
 \end{proof}
 

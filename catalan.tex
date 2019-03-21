@@ -1,12 +1,18 @@
 \section{Sampling Catalan Objects}%
 \label{sec:catalan_objects}
+\todo{Computing $p_d$ values. Mention that this is imperfect sampling (close impl.)}
+\todo{Thresholding.}
+\todo{Mention that this is imperfect sampling (close impl.)}
+\todo{Fix $\sqrt{B\log n}$ everywhere.}
 
-As we have seen before \todo{we have?}, \cite{huge} gives us a method of sampling Binomial objects.
-In constructing a generator for the Stochastic Block model, we generalized this to help us sample from the multivariate hypergeometric distribution.
-Now we focus on a more interesting variant of the question.
+Earlier, we were interested in querying the following random object.
+In a random permutation of $n$ white marbles and $n$ black marbles, how many white marbles are present in the first $k$ positions.
+As we have seen before, \todo{we have?} \cite{huge} gives us a method of sampling from this (hypergeometric) distribution.
+In constructing a generator for the Stochastic Block model, we generalized this by adding more colors (multivariate hypergeometric distribution).
+We also took this to the extreme where all marbles are distinguishable (i.e. a random permutation),
+and saw that this could also be implemented efficiently.
+Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
 \todo{Connect with previous part on SBM}
-
-Dyck paths are one interpretation of the Catalan numbers.
 
 \begin{figure}[htbp]
     \centering
@@ -14,12 +20,14 @@ Dyck paths are one interpretation of the Catalan numbers.
     \caption{Simple Dyck path with $n = 35$.}
     \label{fig:basic_dyck}
 \end{figure}
-
-A Dyck path can be constructed as a $2n$ step one-dimensional random walk (Figure~\ref{fig:basic_dyck}).
-Each step in the walk moves one unit along the positive $x$-axis and one unit up or down the positive $y$-axis.
+We consider a sequence of $n$ white and $n$ black marbles such that every prefix of the sequence has at least as many white marbles as black ones.
+The number of such is sequences is the $n^{th}$ Catalan number $C_n$.
+Many important combinatorial objects occur in Catalan families.
+Dyck paths are one such interpretation of the Catalan numbers that fits in nicely with our setup of white and black marbles.
+A Dyck path is constructed as a $2n$ step one-dimensional walk with exactly $n$ up and down steps.
+In Figure~\ref{fig:basic_dyck}, each step in the walk moves one unit along the positive $x$-axis and one unit up or down the positive $y$-axis.
 Given these restrictions, we would obtain a 1D random walk pinned to zero  on both sides.
-A Dyck path also has the additional restriction that the $y$-coordinate of any point on the random walk is $\ge 0$.
-i.e. the walk is always north of the origin.
+A Dyck path also has a restriction that the $y$-coordinate of any point on the random walk is $\ge 0$ i.e. the walk never crosses the $x$-axis.
 The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) is the $n^{th}$ Catalan number $C_n=\frac{1}{n+1}\cdot{2n\choose n}$.
 
 We will attempt to support queries to a uniformly random instance of a Dyck path.
@@ -29,18 +37,29 @@ Specifically, we will want to answer the following queries:
     \item \func{First-Return}$(i)$: Returns an index $j>i$ such that $\func{Height}(j)=\func{Height}(i)$ and for any $k$ between $i$ and $j$,
     $\func{Height}(k)$ is strictly greater than $\func{Height}(i)$.
 \end{itemize}
-The $\func{Height}$ query seems natural, but it isn't obvious why we care about the $\func{First-Return}$ query.
+The $\func{Height}$ query seems natural for Dyck paths, but the $\func{First-Return}$ query is important in exploring other Catalan objects.
+or instance, consider a random well bracketed expression i.e. an uniform distribution over the Dyck language.
+There is a trivial bijection between Dyck paths and words in this language.
+The $\func{Height}$ query corresponds to asking for the nesting depth at a certain position in the word,
+and $\func{First-Return}(i)$ returns the position of the matching bracket for position $i$.
+
+There is also a natural bijection between Dyck paths and rooted ordered trees by letting the path be a transcript of the DFS traversal of a tree.
+Starting with the root, for each up step we create a new child of the current node, and for each down step, we backtrack up the tree.
+Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
+\todo{Figure? Degree queries by repeated application.}
+Moving forwards, we will focus on Dyck paths for the sake of clarity.
+
 
 
 \subsection{Catalan Trapezoids and Generalized Dyck Paths}
-In order to generate these objects locally, we will need to analyze more general Catalan objects
-which correspond to numbers in the \textit{Catalan Trapezoid}.
-First, we define Catalan trapezoids as presented in \cite{trap}.
+In order to sample Dyck paths locally, we will need to analyze more general Catalan objects
+which correspond to numbers in the \textit{Catalan Trapezoid} (presented in \cite{trap}).
 Let $C_k(n,m)$ be the $(n,m)^{th}$ entry of the Catalan trapezoid of order $k$, where $C_1(n,m)$ corresponds to the Catalan triangle.
 We can interpret $C_k(n,m)$ as  the number of \emph{generalized} Dyck paths.
 Specifically, we consider a sequence of $n$ up-steps and $m$ down-steps, such that the sum of any initial sub-string is not less than $1-k$.
 This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
-The total number of such paths is exactly $C_k(n,m)$.  For $k = 1$, we obtain the definition of the simple Dyck path (Figure~\ref{fig:basic_dyck}).
+The total number of such paths is exactly $C_k(n,m)$.
+For $k = 1$ and $n=m$, we obtain the definition of the simple Dyck path (Figure~\ref{fig:basic_dyck}).
 Now, we state a result from \cite{trap} without proof
 $$
 C_k(n,m)=
@@ -58,20 +77,14 @@ $$
              Notice that the boundary is shifted.} \label{fig:complex_dyck}
 \end{figure}
 
-\subsection{Generating Dyck Paths}
+\subsection{Sampling the Height}
 Our general recursive step is as follows.
-We consider a sequence of length $2S$ comprising of $2U$ up moves ($+1$) and $2D$ down moves ($-1$).
-Additionally, the sum of any initial sequence {\color{red} prefix?} canon be less than $k-1$.
-Without loss of generality, let's assume that $2D\le S$. If this were not the case,
-we could simply flip the sequence and negate the elements.
+We consider a random sequence of length $2B$ comprising of $2U$ up steps ($+1$) and $2D$ down steps ($-1$)
+where the sum of any prefix cannot be less than $k-1$.
+Without loss of generality, let's assume that $2D\le B$. If this were not the case, we could simply flip the sequence and negate the elements.
 This essentially means that the overall Dyck path is non-decreasing.
 
-\begin{lemma}
-$S-2D = \Bo(\log n\sqrt S) \implies U-D = \Bo(\log n\sqrt S)$
-\label{lem:dyck_var0}
-\end{lemma}
-
-We want to sample the height of this path after $S$ steps.
+We want to sample the height of this path after $B$ steps.
 This is the same as sampling the number of $(+1)$s that get assigned to the first half of the elements in the sequence.
 We define $p_d$ as the probability that exactly $D-d$ $(-1)$s get assigned to the first half.
 This means that exactly $U+d$ $(+1)$s get assigned to the first half.
@@ -87,12 +100,12 @@ Here, $D_{left}$ denotes the number of valid starting sequences (first half)
 and $D_{right}$ denotes the number of valid ending sequences.
 Here, \textit{valid} means that each half sequence gets the appropriate number of ups and downs
 and the initial sums never drop below $1-k$.
-For, $D_{right}$, we will start the Dyck path from the end of the $2S$ sequence.
+For, $D_{right}$, we will start the Dyck path from the end of the $2B$ sequence.
 In this case the invalidation threshold will be a different $k'$.
-This $k'$ is the final height of the $2S$ sequence. So, $k'=k+2U-2D = k+4S-2D$.
+This $k'$ is the final height of the $2B$ sequence. So, $k'=k+2U-2D = k+4B-2D$.
 We will use this fact extensively moving forward.
 
-Also, $D_{tot}$ is the total number of possible sequences of length $2S$, given the initial conditions.
+Also, $D_{tot}$ is the total number of possible sequences of length $2B$, given the initial conditions.
 Note that in this case the threshold remains at $k$.
 
 We will use the following rejection sampling lemma from \cite{huge}.
@@ -103,26 +116,40 @@ Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
 \begin{enumerate}
     \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
     \item Generating an index $i$ according to $q_i$ is closely implementable.
-    \item There exists a $poly(log n)$-time recognizable set $S$ such that
+    \item There exists a $poly(log n)$-time recognizable set $B$ such that
     \begin{itemize}
-        \item $1-\SL{i\in S}{} p_i$ is negligible
+        \item $1-\sum\limits_{i\in B} p_i$ is negligible
         \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
     \end{itemize}
 \end{enumerate}
 Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
 \end{lemma}
 
+We also use the following lemmas to bound the deviation of the path.
+\begin{restatable}{lemma}{DyckPathDeviationBound}
+\label{lem:dyck_path_deviation_bound}
+Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
+where the sub-path is of length $2B$ comprising of $U$ up-steps and $D$ down-steps (with $U + D = 2B$).
+The quantities $|B-U|$, $|B-D|$, and $|U-D|$ are $\mathcal O(\sqrt{B\log n})$ with probability at least $1-1/n$.
+\end{restatable}
+\begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
+\label{lem:dyck_path_irrelevant_boundary}
+There exists a constant $c$ such that if $k > c \sqrt{B\log n}$, then the distribution of paths sampled without a boundary
+(hypergeometric sampling) is statistically $1/n^2$-close in $L_1$ distance to the distribution of Dyck paths.
+\end{restatable}
+
+
 \begin{algorithm}[H]
     \caption{Na\"{i}ve Generator}
     \begin{algorithmic}
         \Procedure{Split}{$U, D, k$}
-            \State{$S \gets U + D$}\\
-            \State{$d \sim \left\{\frac{\binom{S}{S-d}\binom{S}{D+d}}{\binom{2S}{2D}}\right\}_d$}\\\\
+            \State{$B \gets U + D$}\\
+            \State{$d \sim \left\{\frac{\binom{B}{B-d}\binom{B}{D+d}}{\binom{2B}{2D}}\right\}_d$}\\\\
             \State{$k' \gets k + U - D$}\\
             \State{$p_d \gets
-                \frac{{{S}\choose{D-d}}-{{S}\choose{D-d-k}}{{S}\choose{U-d}}
-                -{{S}\choose{U-d-k'}}}{{{2S}\choose{2D}}-{{2S}\choose{2D-k}}}$}
-            \State{$q_d \gets \frac{\binom{S}{S-d}\binom{S}{D+d}}{\binom{2S}{2D}}$}\\
+                \frac{{{B}\choose{D-d}}-{{B}\choose{D-d-k}}{{B}\choose{U-d}}
+                -{{B}\choose{U-d-k'}}}{{{2B}\choose{2D}}-{{2B}\choose{2D-k}}}$}
+            \State{$q_d \gets \frac{\binom{B}{B-d}\binom{B}{D+d}}{\binom{2B}{2D}}$}\\
             \If {$p_d < q_d$}
                 \State \Return $d$
             \EndIf
@@ -150,32 +177,32 @@ Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely
             \State \Return $\func{Height}(x)$
         \EndProcedure
     \end{algorithmic}
-    \label{alg:naive}
+    \label{alg:catalan_generator}
 \end{algorithm}
 
 
 
-\subsubsection{The Simple Case}
-The problem of sampling reduces to the binomial sampling case when $k > \mathcal{O}(\log n)\sqrt S$ for some constant $c$.
-This is because with high probability, will never dip below the threshold.
+\subsubsection{The Simple Case: Far Boundary}%
+\label{sec:the_simple_case}
+By Lemma~\ref{lem:dyck_path_irrelevant_boundary}, the problem reduces to the hypergeometric sampling case when $k>\mathcal{O}(\sqrt{B\log n})$.
 In this case, the we can simply approximate the probability as
 $$
-\frac{{{S}\choose{D-d}}\cdot{{S}\choose{D+d}}}{{{2S}\choose{2D}}}
+\frac{{{B}\choose{D-d}}\cdot{{B}\choose{D+d}}}{{{2B}\choose{2D}}}
 $$
 This is because unconstrained random walks will not dip below the $1-k$ threshold with high probability.
 This problem was solved in \cite{huge} using $\mathcal O(poly(\log n))$ resources.
 
 \subsubsection{Path Segments Close to Zero}
-The problem arises when we $k <\mathcal{O}(\log n)\sqrt{S}$. In this case we need to compute the actual probability,
+The problem arises when we $k = \mathcal{O}(\sqrt{B\log n})$. In this case we need to compute the actual probability,
 Using the formula from \cite{trap}, we find that.
 {\scriptsize
     \begin{align}
-        D_{left} = {{S}\choose{D-d}}-{{S}\choose{D-d-k}}
-        &&D_{right} = {{S}\choose{U-d}}-{{S}\choose{U-d-k'}}
-        &&D_{tot} = {{2S}\choose{2D}}-{{2S}\choose{2D-k}}
+        D_{left} = {{B}\choose{D-d}}-{{B}\choose{D-d-k}}
+        &&D_{right} = {{B}\choose{U-d}}-{{B}\choose{U-d-k'}}
+        &&D_{tot} = {{2B}\choose{2D}}-{{2B}\choose{2D-k}}
     \end{align}
 }
-Here, $k' = k+2U-2D$, and so $k' = \Bo(\log n)\sqrt S$ (using Lemma~\ref{lem:dyck_var0}).
+Here, $k' = k+2U-2D$, and so $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:dyck_path_deviation_bound}).
 
 The final distribution we wish to sample from is given by $\{p_d\}_d$ where $p_d = \frac{D_{left}\cdot D_{right}}{D_{tot}}$.
 To achieve this, we will use Lemma~\ref{lem:huge} from \cite{huge}.
@@ -184,30 +211,25 @@ For now, we will assume that we have access to an oracle that will compute the v
 Later, in Section~, we will see how to construct such an oracle.
 \todo{Fix reference}
 
-In this process, we will first disregard all values of $d$ where $|d|>\Theta(\log n\sqrt S)$.
-The probability mass associated with these values can be shown to be negligible \todo{bound variance of path}.
-
-Next, we will construct an appropriate $\{q_i\}$ and show that $p_d < \log^{\mathcal{O}(1)} n\cdot q_d$
-for all $|d|<\Theta(\sqrt S)$ and some constant $c$.
-We will use the following distribution
+Next, we will construct an appropriate $\{q_i\}$ and show that $p_d < \poly(\log n)\cdot q_d$ for all $|d|=\mathcal O(\sqrt{B\log n})$
+which will allow us to invoke Lemma~\ref{lem:huge}.
+Note that Lemma~\ref{lem:dyck_path_deviation_bound} implies that the probability mass associated with $|d|>\Theta(\sqrt{B\log n})$ is negligible.
+In fact we will be able to use the hypergeometric distribution for $q_d$:
 $$
-q_d = \frac{{S\choose D-d}\cdot{S\choose D+d}}{{2S\choose 2D}} = \frac{{S\choose D-d}\cdot{S\choose U-d}}{{2S\choose 2D}}
+q_d = \frac{{B\choose D-d}\cdot{B\choose D+d}}{{2B\choose 2D}} = \frac{{B\choose D-d}\cdot{B\choose U-d}}{{2B\choose 2D}}
 $$
-It is shown in \cite{huge} that this distribution is closely implementable.
 
 First, we consider the case where $k\cdot k'\le 2U+1$.
-In this case, we use loose bounds for $D_{left} < \binom{S}{D-d}$ and $D_{right} < \binom{S}{U-d}$.
+In this case, we use loose bounds for $D_{left} < \binom{B}{D-d}$ and $D_{right} < \binom{B}{U-d}$.
 We also use the following lemma (proven in Section~\ref{sec:dyck_appendix}).
-
 \begin{restatable}{lemma}{DTotalFarBoundary}
 \label{lem:DTotalFarBoundary}
-When $kk' > 2U + 1$, $D_{tot} > \frac 12\cdot \binom{2S}{2D}$.
+When $kk' > 2U + 1$, $D_{tot} > \frac 12\cdot \binom{2B}{2D}$.
 \end{restatable}
 
 Combining the three bounds we obtain $p_d < \frac 12 q_d$.
-Intuitively, in this case the dyck boundary is far away, and therefore the number of possible paths
-is only a constant factor away from the number of unconstrained paths (no boundary).
-
+Intuitively, in this case the Dyck boundary is far away, and therefore the number of possible paths
+is only a constant factor away from the number of unconstrained paths (see Section~\ref{sec:the_simple_case}).
 The case where the boundaries are closer (i.e. $k\cdot k' \le 2U+1$) is trickier,
 since the individual counts need not be close to the corresponding binomial counts.
 However, in this case we can still ensure that the sampling probability is within
@@ -216,43 +238,42 @@ We use the following lemmas (proven in Section~\ref{sec:dyck_appendix}).
 
 \begin{restatable}{lemma}{DLeftBound}
 \label{lem:DLeftBound}
-$D_{left} \le c_1 \frac{ k\cdot\log n}{\sqrt{S}}\cdot{{S}\choose{D-d}}$ for some constant $c_1$.
+$D_{left} \le c_1 \frac{ k\cdot\log n}{\sqrt{B}}\cdot{{B}\choose{D-d}}$ for some constant $c_1$.
 \end{restatable}
 
 \begin{restatable}{lemma}{DRightBound}
 \label{lem:DRightBound}
-$D_{right} < c_2 \frac{k'\cdot log n}{\sqrt{S}}\cdot{{S}\choose{U-d}}$ for some constant $c_2$.
+$D_{right} < c_2 \frac{k'\cdot log n}{\sqrt{B}}\cdot{{B}\choose{U-d}}$ for some constant $c_2$.
 \end{restatable}
 
 \begin{restatable}{lemma}{DTotalNearBoundary}
 \label{lem:DTotalNearBoundary}
-When $kk' \le 2U + 1$, $D_{tot} < c_3 \frac{k\cdot k'}{S}\cdot{{2S}\choose{2D}}$ for some constant $c_3$.
+When $kk' \le 2U + 1$, $D_{tot} < c_3 \frac{k\cdot k'}{B}\cdot{{2B}\choose{2D}}$ for some constant $c_3$.
 \end{restatable}
 
-We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log^2 n)$.
-Now, we can apply Lemma~\ref{lem:huge} to sample the value of $d$,
-which gives us the height of the Dyck path at the midpoint of the two given points.
+We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log^2 n)$ and invoke Lemma~\ref{lem:huge} to sample the value of $d$.
+This gives us the height of the Dyck path at the midpoint of the two given points.
 
 \begin{theorem}
 \label{thm:dyck_midpoint_sampling}
-There is an algorithm that given two points at distance $a$ and $b$ (with $a < b$) along a Dyck path of length $2n$,
+Given two positions $a$ and $b$ (and the associated heights) in a Dyck path of length $2n$
 with the guarantee that no position between $a$ and $b$ has been sampled yet,
-returns the height of the path halfway between $a$ and $b$.
+there is an algorithm that returns the height of the path halfway between $a$ and $b$.
 Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
 \end{theorem}
 \begin{proof}
-If $b-a$ is even, we can set $S = (b-a)/2$.
-Otherwise, we first sample a single step from $a$ to $a+1$, and then set $S = (b-a-1)/2$.
+If $b-a$ is even, we can set $B = (b-a)/2$.
+Otherwise, we first sample a single step from $a$ to $a+1$, and then set $B = (b-a-1)/2$.
 Since there are only two possibilities for a single step,
 we can explicitly compute an approximation of the probabilities, and then sample accordingly.
-Now, if $S > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
+Now, if $B > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
 to obtain a $\mathcal O(poly(\log n))$ algorithm.
 Otherwise, we sample each step induividually.
-Since there are only $2S = \Theta(\log^2 n)$ steps, the sampling is still efficient.
+Since there are only $2B = \Theta(\log^2 n)$ steps, the sampling is still efficient.
 \end{proof}
 
 \begin{theorem}
-\label{thm:dyck_sampling}
+\label{thm:dyck_height_sampling}
 There is an algorithm that provides sample access to a Dyck path of length $2n$,
 by answering queries of the form \func{Height}$(x)$ with the correctly sampled height of the Dyck path at position $x$
 using only $\mathcal O(poly(\log n))$ resources per query.
@@ -292,18 +313,14 @@ We will use the following asymptotic formula for \emph{close-to-central} binomia
 \begin{restatable}{lemma}{CentralBinomialCoefficients}
 \label{lem:CentralBinomialCoefficients}
 If $k = \frac{n \pm c\sqrt n}{2}$ where $c = o(n^{1/6})$,
-we can approximate $\binom{n}{k}$ up to constant factors by the expression:
-\[
-\frac{2^n}{\sqrt n}\cdot \mathlarger e^{-c^2/2}
-\]
+we can approximate $\binom{n}{k}$ up to constant factors by the expression $\frac{2^n}{\sqrt n}\cdot \mathlarger e^{-c^2/2}$.
 \end{restatable}
 
-We maintain a threshold $\mathcal T = \Theta(\log^7 n)$.
+We maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
 If an un-sampled interval in the Dyck path has length less than $\mathcal T$, then we sample the entire interval.
-So, for intervals with length $S > \mathcal T$,
-the maximum deviations are bounded by $\mathcal O(\log n\sqrt S) = \mathcal O(\log^{4.5}n)$ with high probability.
-Specifically, this means that if we write the deviation as $c\sqrt n$, we see that $c = \log n$ which is $o(S^{1/6})$.
-\todo{Formalize this notion of deviations}
+So, for intervals with length $B > \mathcal T$,
+the maximum deviations are bounded by $\mathcal O(\sqrt{B\log n}) = \mathcal O(\log^{2.5}n)$ with high probability.
+This means that if we write the deviation as $c\sqrt n$, we see that $c = \mathcal O(\sqrt{\log n})$ which is $o(B^{1/6})$.
 
 
 \subsubsection{Maintaining a Boundary Invariant}%
@@ -311,11 +328,15 @@ Specifically, this means that if we write the deviation as $c\sqrt n$, we see th
 \todo{Why?}
 Consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
 along with their corresponding heights $ \langle h_1, h_2,\cdots, h_m \rangle$.
-We maintain an invariant that for each $i < m$,
+\begin{proposition}
+\label{prop:boundary_invariant}
+For any two adjacent positions $x_i,x_{i+1}$ whose heights have been sampled as $h_i, h_{i+1}$,
 the Dyck path between positions $x_i$ and $x_{i+1}$ is constrained to lie above $min(h_i, h_{i+1})$.
+\end{proposition}
+
 \begin{figure}[htpb]
     \centering
-    \includegraphics[width=1.0\linewidth, trim={0 12cm 0 12cm}]{images/dyck_boundary_invariant.pdf}
+    \includegraphics[width=\textwidth]{images/dyck_boundary_invariant.pdf}
     \caption{Error in third segment.}
     \label{fig:dyck_boundary_invariant}
 \end{figure}
@@ -333,7 +354,7 @@ This proceeds as follows for the interval between $x_i$ and $x_{i+1}$
 Since $h$ is the minimum height along this interval, sampling the point $x$ suffices to preserve the invariant.
 
 
-\subsubsection{Sampling the Lowest Achievable Height}%
+\subsubsection{Sampling the Lowest Achievable Height in an Interval}%
 \label{ssub:sampling_the_lowest_achievable_height}
 For the first step, we need to sample the lowest height of the walk between $x_i$ and $x_{i+1}$.
 Notice that we can assume $x_i < x_{i+1}$ without loss of generality (if $x_i > x_{i+1}$, swap them and proceed).
@@ -353,14 +374,15 @@ until we find a $k$ such that the path reaches height $h_i-k+1$ (potentially mul
 
 
 
-\subsubsection{Sampling the Position of First Return}%
-\label{sec:sampling_the_location_of_first_return}
+\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}%
+\label{sec:sampling_first_position_touching_mandatory_boundary}
+
 Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to sample a position $x$ with height $h = x_i-k+1$.
 In fact, we will do something stronger by sampling the \emph{first} time the walk touches the boundary after $x_i$.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=1.0\linewidth, trim={0 6cm 0 5cm}]{images/dyck_return_sampling.pdf}
-    \caption{Zooming into (and flipping) the error in Figure~\ref{fig:dyck_return_sampling}}
+    \caption{Zooming into (and flipping) the error in Figure~\ref{fig:dyck_boundary_invariant}}
     \label{fig:dyck_return_sampling}
 \end{figure}
 
@@ -442,3 +464,59 @@ Q_d = \frac{\int\limits_1^{d+1} \hat q(d)}{\int\limits_1^{n} \hat q(d)}
 \]
 This allows us to sample from the distribution $q_d$ and use Lemma~\ref{lem:huge} to indirectly sample from $p_d$.
 \end{corollary}
+\todo{Needs a theorem}
+\begin{theorem}
+\label{thm:first_return_in_interval}
+Kinesthetics
+\end{theorem}
+
+
+
+\subsubsection{Finding the Correct Interval: $\func{First-Return}$ Query}
+As before, consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
+along with their corresponding heights $ \langle h_1, h_2,\cdots, h_m \rangle$.
+\begin{restatable}{lemma}{FirstReturnInterval}
+\label{lem:first_return_interval}
+For any position $x_i$, assuming that Proposition~\ref{prop:boundary_invariant} holds,
+we can find the interval $(x_{k-1},x_{k}]$ that contains $\func{First-Return}(x_i)$
+We do this by by setting $k$ to be either the smallest index $f>i$ such that $h_f\le h_i$ or setting $k=i+1$.
+\end{restatable}
+\begin{proof}
+We assume the contrary i.e. there exists some $k\not=f$ and $k\not=i+1$ such that the correct interval is $(x_{k-1},x_k]$.
+Since $h_f<h_i$, the position of first return to $h_i$ happens in the range $(x_i,x_f]$.
+So, the only possibility is $i+1 < k \le f-1$.
+By the definition of $h_f$, we know that both $h_k$ and $h_{k-1}$ are strictly larger than $h_i$.
+Proposition~\ref{prop:boundary_invariant} implies that the boundary for this interval $(h_{k-1},h_k]$ is at $\min(h_{k-1},h_k) > h_i$.
+So, it is not possible for the first return to be in this interval.
+\end{proof}
+
+The good news is that there are only two intervals that we need to worry about.
+Now the challenge is to find the smallest index $f>i$ such that $h_f\le h_i$.
+One solution is to maintain an interval tree \todo{cite} over the range $[2n]$ storing the position of the boundary.
+Specifically, we have a balanced binary tree with $2n$ leaves with the $i^{th}$ leaf storing the boundary at position $i$.
+Each internal node stores the minimum value amongst all the leaves in its sub-tree.
+In this setting, we can binary search for $f$ by guessing a bound $f'$ and performing a \emph{range minimum query} over the interval $(x_i,x_{f'}]$.
+Overall, this requires $\mathcal O(\log n)$ range queries each of which makes $\mathcal O(\log n)$ probes to the binary tree.
+
+However, we cannot explicitly maintain or even construct this tree, and updates can be as expensive as $\Theta(n)$.
+To mitigate this, we start with just a root node (indicating that the initial boundary is $1$ everywhere) and build the tree dynamically as needed.
+We perform updates using \emph{lazy propagation} \todo{cite} by only propagating updates down to the children (creating children if necessary) when needed.
+So, at any given time, some nodes in the tree may not hold the correct value, but the correct value must be present on the path to the root.
+\todo{This probably needs more explanation}
+
+\begin{theorem}
+\label{thm:dyck_first_return_sampling}
+There is an algorithm using $\mathcal O(poly(\log n))$ resources per query that provides sample access to a Dyck path of length $2n$
+by answering queries of the form \func{First-Return}$(x_i)$ with the correctly sampled position $y$;
+where $y>x_i$ is the position where the Dyck path first returns to $\func{Height}(x_i)$ after position $x_i$.
+\end{theorem}
+\begin{proof}
+We first query the interval $(x_i,x_{i+1}]$ to find a first return using Theorem~\ref{thm:first_return_in_interval}.
+If a return is not found, we calculate $f$ using \todo{what?}.
+Since $x_{f-1}<x_i\le x_f$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $h_i$.
+We sample a point in the middle of this interval and fix the boundary invariant by sampling another point,
+essentially breaking it up into $\mathcal O(1)$ sub-intervals each at most half the size of the original.
+Based on the new samples, we find the sub-interval containing the first return in $\mathcal O(1)$ time.
+We repeat up to $\mathcal O(\log n)$ times until the current interval size drops below the threshold $\mathcal T$.
+Then we spend $\tilde{\mathcal O}(\mathcal T)$ time to brute force sample this interval and find the first return position (if it wasn't revealed in previous steps).
+\end{proof}

@@ -6,7 +6,7 @@ Observe that the distribution of the graphs constructed by our generator is gove
 
 %Note that throughout the proof, we refer to the pair $\distr{F}(v,a,b), \distr{F}'(v,a,b)$ generically 
 
-\begin{restatable}{lem}{transition}\label{lemma:transition}
+\begin{restatable}{lemma}{transition}\label{lemma:transition}
 If Algorithm~\ref{alg:fill} (the \func{Fill} operation) is repeatedly invoked to construct a graph $G$ by drawing the value $u$ for at most $S$ times in total, each of which comes from some distribution $\distr{F}'(v,a,b)$ that is $\epsilon$-close in $L_1$-distance to the correct distribution $\distr{F}(v,a,b)$ that perfectly generates the desired distribution $\distr{G}$ over all graphs, then the distribution $\distr{G}'$ of the generated graph $G$ is $(\epsilon S)$-close to $\distr{G}$ in the $L_1$-distance.
 \end{restatable}
 \begin{proof}

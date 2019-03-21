@@ -1,0 +1,176 @@
+\section{Random Coloring of a Graph}%
+\label{sec:random_coloring_of_a_graph}
+
+We wish to locally sample an uniformly random coloring of a graph.
+A $q$-coloring of a graph $G = (V, E)$ is a function $\sigma : V\rightarrow [q]$,
+such that for all $(u,v)\in E$, $\sigma_u \not= \sigma_v$.
+We will consider only bounded degree graphs, i.e. graphs with max degree $\le \Delta$.
+Otherwise, the coloring problem becomes NP-hard\todo{cite}.
+
+Using the technique of path-coupling, Vigoda \todo{cite} showed that for $q > 2\Delta$,
+one can sample an uniformly random coloring by using a MCMC algorithm.
+
+The Markov Chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
+Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
+
+In each step of the Markov process, a pair $(v, c)\in V\times [q]$ is sampled uniformly at random.
+Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in a conflict with $v$'s neighbors,
+i.e. $c\not\in \left\{ X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $X_v^{t+1}\leftarrow c$.
+
+After running the MC for $T = \mathcal{O}(n\log n)$ steps we reach the stationary distribution ($\epsilon$ close),
+and the coloring is an uniformly random one.
+
+\textbf{Exact Bound:}
+$t_{mix}(\epsilon) \le \left( \frac{q-\Delta}{q-2\Delta}\right)n\left( \log n + \log(1/\epsilon)\right)$
+\todo{cite book (Peres, Lyons)}
+
+
+
+\subsection{Modified Glauber Dynamics}%
+\label{sub:modified_glauber_dynamics}
+
+Now we define a modified Markov Chain that proceeds in epochs.
+We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
+In the $k^{th}$ epoch $\mathcal E_k$:
+\begin{itemize}
+    \item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the proposed color for vertex $v$.
+    \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$ if for all neighbors $w$ of $v$, $\vec X^k_w\not=c_v$ and $\vec X^{k-1}_w\not=c_v$.
+\end{itemize}
+%\begin{itemize}
+    %\item Pick a random permutation $\pi^{(i)}$ of the vertices $V$.
+    %\item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$.
+    %\item Perform the standard update using the pairs $\left\langle (\pi^{(i)}_1, c_1), (\pi^{(i)}_2, c_2), \cdots, (\pi^{(i)}_n, c_n)\right\rangle$.
+%\end{itemize}
+
+This procedure is a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
+The goal in \cite{mohsen} is to find a simultaneous update rule that causes few conflicts among neighbors (and converges to the correct distribution).
+Notice that we can have adjacent nodes update in the same epoch, and this can also be implemented locally using \todo{what?}.
+However for the sake of succinctness and because this would only improve a constant factor in the exponent,
+we use their update rule and avoid a tedious path coupling argument.
+\todo{Wording: a vertex needs to avoid $\le 2\Delta$ colors in order to be  accepted}
+
+\todo{Cite Path Coupling}
+For the path coupling argument, we define the standard pre-metric on the space for all possible colorings (not necessarily valid ones).
+Given two colorings $X$ and $Y$, we define $d(X,Y)$ as the number of vertices $v$ such that $X_v\not= Y_v$.
+
+We define a coupling $(X,Y)\rightarrow(X',Y')$ where $X$ and $Y$ differ only at a single vertex $v$ such that $X_v = c_X$ and $Y_v = c_Y$.
+Now, we pick a random permutation of the vertices along with uniformly sampled colors:
+\[
+\left\langle (v_1, c_1), (v_2, c_2), \cdots, (v_n, c_n)\right\rangle
+= \left\langle (\pi_1, c_1), (\pi_2, c_2), \cdots, (\pi_n, c_n)\right\rangle
+\]
+Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
+\begin{itemize}
+    \item If the current color of $v_i$ as well as $c_i$ is in $\{c_X,c_Y\}$,
+    then the $X$ chain picks the color $c_i$ and the $Y$ chain picks the other color.
+\end{itemize}
+
+\begin{lemma}
+\label{lem:mohsen_single_epoch_distance}
+If $q = \alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 1-\frac1\alpha\right)e^{-6/\alpha} + \frac{1/\alpha}{1-2/\alpha}$
+\end{lemma}
+\begin{corollary}
+\label{cor:single_epoch_distansce}
+If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{\sqrt{2}}$
+\end{corollary}
+
+\begin{theorem}
+\label{thm:modified_mixing_time}
+If $q\ge 9\Delta$, then the Markov Chain is mixed after $2\log n$ epochs.
+\end{theorem}
+\begin{proof}
+\todo{Write proof}
+\end{proof}
+
+
+
+
+\subsection{Local Coloring Algorithm}%
+\label{sub:local_coloring_algortihm}
+Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\log n$ epochs of \emph{Modified Glauber Dynamics}.
+We will define the number of colors as $q = \alpha\Delta$ where $\alpha > 1$.
+
+Each epoch can be implemented a local generator for a permutation of $V$.
+\todo{No need for this any more}
+%Specifically, each epoch is a sequence of vertex and color samples:
+%\[
+%\chi^{(i)}
+%= \left\langle (v^{(i)}_1, c^{(i)}_1), (v^{(i)}_2, c^{(i)}_2), (v^{(i)}_3, c^{(i)}_3), \cdots, (v^{(i)}_T, c^{(i)}_T)\right\rangle
+%\thicksim_{\mathcal U} \left( V\times [q]\right)^T
+%\]
+%Here, $\left\{ v^{(i)}_1, v^{(i)}_2,\cdots, v^{(i)}_n\right\}$ is a permutation of all the vertices.
+%A position $j$ in the sequence is labeled \emph{``ACCEPT''} if at the $j^{th}$ step,
+%$v^{(i)}_j$ was recolored to $c^{(i)}_j$ (no conflicts with neighbors).
+%Otherwise, position $j$ is marked \emph{``REJECT''}.
+%We define $X^{(i)}_v = 1$ if the sample for $v$ in the $i^{th}$ epoch $(v, c^{(i)}_j)$ is accepted and $X^{(i)}_v = 0$ otherwise.
+
+%We also define $\mathcal C^{(i)}_v$ to be the color sampled for vertex $v$ in the $i^{th}$ epoch,
+%and $\mathcal I^{(i)}_v$ to be the corresponding index $j$.
+
+Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^T$.
+We also use $\vec X^i$ to denote the final vector of vertex colors at the end of the $i^{th}$ epoch.
+Finally, we define indicator variables $\bm \chi^i_v$ to denote if the color for vertex $v$ was accepted at the $i^{th}$ epoch;
+$\bm \chi^i_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
+we satisfy the condition $\vec  C^i_v\not= \vec X^{i-1}_w$ and $\vec C^i_v\not= \vec C^i_w$.
+So, the color of a vertex $v$ after the $t^{th}$ epoch $X^t_v$ is set to be $C^i_v$
+where $i\le t$ is the largest index such that $\chi^i_v=1$.
+Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $X^t_v$.
+
+\begin{algorithm}[H]
+\caption{Generator}
+\begin{algorithmic}[1]
+
+\Procedure{Color}{$v, t$}
+    \For{$i \gets [ t, t-1, t-2 \cdots 1 ]$}
+        \If {\func{Accepted}($i, v$)}
+            \State \Return $C^i_v$
+        \EndIf
+    \EndFor
+\EndProcedure
+
+\Procedure{Accepted}{$v, t$}
+    \State {$c\gets C^t_v$}
+    \For{$w \gets \Gamma(v)$}
+        \State {$flag\gets \ZERO$}
+        \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
+            \If {$t' \not= t$ \textbf{or} $\mathcal I^{(t)}_w < \mathcal I^{(t)}_v$}
+                \If {$\mathcal C^{(t')}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
+                    \State $flag\gets \ONE$
+                    \While{$t' < t$}
+                        \State $t'\gets t' + 1$
+                        \If {\func{Accepted}($w, t'$)}
+                            \State $flag\gets \ZERO$
+                            \State \textbf{break}
+                        \EndIf
+                    \EndWhile
+                    \If {$flag = \ONE$}
+                        \State \Return $\ZERO$
+                    \EndIf
+                    \State \textbf{break}
+               \EndIf
+           \EndIf
+        \EndFor
+    \EndFor
+    \State \Return $\ONE$
+\EndProcedure
+
+\end{algorithmic}
+\label{alg:coloring}
+\end{algorithm}
+
+\begin{theorem}
+\label{thm:coloring_recurrence}
+Coloring recurrence.
+\end{theorem}
+\begin{proof}
+Here, $\mathcal B(p)$ refers to the Bernoulli random variable with parameter $p$.
+Assuming $t = k\log n$.
+\begin{align}
+T_{t} &\le \left|\Gamma(v)\right| \cdot \mathlarger\sum\limits_{i=1}^{t} \mathcal B\left( \frac{1}{\alpha\Delta}\right)\cdot
+\left[ T_{i} + T_{i+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{i+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{i+3} + \cdots\right]\\
+&\le 3\Delta \cdot \mathcal B\left(\frac{1}{\alpha\Delta}\right)\cdot T_{t-1} + T_{t-1}\\
+\implies \mathbb E[T_t] &\le \left( 1 + \frac{3}{\alpha}\right)\cdot \mathbb E[T_{t-1}]\\
+\implies \mathbb E[T_t] &\le \Delta\cdot \left( 1 + \frac{3}{\alpha}\right)^t = \Delta\cdot \mathlarger n^{k\log{\left(1 + \frac{3}{\alpha} \right)}}
+= \Delta\cdot \mathlarger n^{\frac{3k}{\alpha}}
+\end{align}
+\end{proof}

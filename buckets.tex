@@ -30,7 +30,7 @@ and $\mathbb E > L-1$ for every $i < |B_v|$
 
 Now, we show that with high probability, all the bucket sizes $|\Gamma^{(i)}(v)|=\mathcal{O}(\log n)$, and at least a $1/3$-fraction of the buckets are non-empty (i.e., $|\Gamma^{(i)}(v)|>0$), via the following lemmas.
 
-\begin{restatable}{lem}{max-bucket-size}
+\begin{restatable}{lemma}{max-bucket-size}
 \label{lem:max_bucket_size}
 With high probability, the number of neighbors in every bucket, $|\Gamma^{(i)}(v)|$, is at most $ \mathcal{O}(\log n)$.
 \end{restatable}
@@ -46,7 +46,7 @@ $$
 for any constant $c > 0$.
 \end{proof}
 
-\begin{restatable}{lem}{empty-bucket}
+\begin{restatable}{lemma}{empty-bucket}
 \label{lem:empty_bucket}
 With high probability, for every $v$ such that $|B_v| = \Omega(\log n)$ (i.e., $\mathbb E = \Omega(\log n)$), at least a $1/3$-fraction of the buckets $\{B_v^{(i)}\}_{i\in[|B_v|]}$ are non-empty.
 \end{restatable}
@@ -127,7 +127,7 @@ a valid neighbor is always returned.
 Further, $i$ is removed from $R$ only if $B_v^{(i)}$ does not contain any neighbors.
 So, if $v$ has any neighbor, $\func{Random-Neighbor}$ does not return $\bot$.
 We now proceed to showing the correctness of the algorithm and bound the number of iterations required for the rejection sampling process.
-\begin{restatable}{lem}{rand-gen-correct}
+\begin{restatable}{lemma}{rand-gen-correct}
 \label{lem:rand_gen_correct}
 Algorithm~\ref{alg:random} returns a uniformly random neighbor of vertex $v$.
 \end{restatable}
@@ -141,7 +141,7 @@ of the loop is $1/(|R|\cdot M)$, which is positive and independent of $u$.
 Therefore, each vertex is returned with the same probability.
 \end{proof}
 
-\begin{restatable}{lem}{rand-gen-fast}
+\begin{restatable}{lemma}{rand-gen-fast}
 \label{lem:rand_gen_fast}
 Algorithm~\ref{alg:random} terminates in $\mathcal{O}(\log n)$ iterations in expectation, or $\mathcal{O}(\log^2 n)$ iterations with high probability.
 \end{restatable}
@@ -189,7 +189,7 @@ Lastly, we describe the implementation of the $\func{Fill}$ procedure, employing
 
 As discussed in Section~\ref{sec:ER-rand}, while we have recorded all occurrences of $\ADJ[v][u]=\ONE$ in $P_v^{(i)}$, we need and efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss}, $\LAST$ serves this purpose by showing that $\ADJ[v][u]$ for all $u \leq \LAST[v]$ are decided as shown in Lemma~\ref{lem:cond-0}. Here instead, with our bucket structure, we maintain a single bit marking whether each bucket is \filled~or \unfilled: a \filled~bucket implies that $\ADJ[v][u]$ for all $u \in B_v^{(i)}$ are decided. The bucket structure along with mark bits, unlike $\LAST$, are capable of handling intermittent ranges of intervals, namely buckets, which is sufficient for our purpose, as shown in the following lemma. This yields the implementation Algorithm~\ref{alg:fill} for the $\func{Fill}$ procedure fulfilling the requirement previously given in Section~\ref{sec:bucket_filling}. 
 
-\begin{restatable}{lem}{cond}\label{lem:cond-0-fill}
+\begin{restatable}{lemma}{cond}\label{lem:cond-0-fill}
 The data structures $P_v^{(i)}$'s and the bucket marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{Fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B_v^{(i)}$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B_v^{(i)}$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
 \end{restatable}
 \begin{proof}
@@ -206,7 +206,7 @@ Further, observe that the coin-flips are simulated independently of the state of
 
 By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B_v^{(i)}$, or for the value $u$ from the CDF of $\distr{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
 
-\begin{restatable}{lem}{fill_time}
+\begin{restatable}{lemma}{fill_time}
 \label{lem:fill_time}
 Each execution of Algorithm~\ref{alg:fill} (the \func{Fill} operation) on an \unfilled~bucket $B_v^{(i)}$, in expectation:
 \begin{itemize}
@@ -250,8 +250,6 @@ there exists a local-access generator for the random graph family that supports 
 Between these two assumptions, we first remove the assumption of perfect-precision arithmetic in the upcoming Section~\ref{sec:remove-perfect}.
 Later in Section~\ref{sec:applications}, we show applications of our generator to the $G(n,p)$ model,
 and the Stochastic Block model under random community assignment, by providing formulas and by constructing data structures for computing the quantities specified in the second assumption, respectively.
-%The new idea in Section~\ref{sec:applications} is a procedure to sample from the 
-%multivariate hypergeometric distribution (Section~\ref{sec:partition}).
 
 \iffalse
 In this section, we describe the implementation of the $\func{Fill}$ procedure.
@@ -280,7 +278,7 @@ This is only possible if $F_u$ contains the bucket $j$, (where $v\in B_u^{(j)}$)
 i.e. the bucket of vertex $u$ containing $v$ has already been filled.
 Note that since $u\not\in P_v^{(i)}$, we have $A[u][v]\not=1$.
 So, $A[u][v]$ was sampled to be $\ZERO$.
-\begin{restatable}{lem}{fill-correct}
+\begin{restatable}{lemma}{fill-correct}
 \label{lem:fill_correct}
 Algorithm~\ref{alg:fill} samples the neighbors in $B_v^{(i)}$,
 from the correct distribution.

@@ -357,25 +357,25 @@
 \setlength\leftmarginv  {1.2em}
 \setlength\leftmarginvi {1.2em}
 \renewcommand\labelenumi{%
-  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
 \renewcommand\labelenumii{%
-  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
 \renewcommand\labelenumiii{%
-  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
 \renewcommand\labelenumiv{%
-  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
 \renewcommand\labelitemi{%
-  \textcolor[rgb]{0.6,0.6,0.61}{\ifnum\@listdepth=\@ne
+  \textcolor{CadetBlue}{\ifnum\@listdepth=\@ne
                                   \rule{0.67em}{0.33em}%
                                 \else
                                   \rule{0.45em}{0.225em}%
                                 \fi}}
 \renewcommand\labelitemii{%
-  \textcolor[rgb]{0.6,0.6,0.61}{\rule{0.45em}{0.225em}}}
+  \textcolor{CadetBlue}{\rule{0.45em}{0.225em}}}
 \renewcommand\labelitemiii{%
-  \textcolor[rgb]{0.6,0.6,0.61}{\sffamily\bfseries\textasteriskcentered}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\textasteriskcentered}}
 \renewcommand\labelitemiv{%
-  \textcolor[rgb]{0.6,0.6,0.61}{\sffamily\bfseries\textperiodcentered}}
+  \textcolor{CadetBlue}{\sffamily\bfseries\textperiodcentered}}
 \renewenvironment{description}
                {\list{}{\advance\partopsep\topsep\topsep\z@\@plus\p@
                         \labelwidth\z@ \itemindent-\leftmargin
@@ -447,10 +447,11 @@
    \rlap{\color[rgb]{0.51,0.50,0.52}\vrule\@width\textwidth\@height1\p@}%
    \hspace*{7mm}\fboxsep1.5mm\colorbox[rgb]{1,1,1}{\raisebox{-0.4ex}{%
      \normalsize\sffamily\bfseries\refname}}%
-   \@xsect{1ex \@plus.2ex}%
+   \@xsect{3ex \@plus.1ex}%
    \list{\@biblabel{\@arabic\c@enumiv}}%
-        {\leftmargin8.5mm
+        {\leftmargin15mm
          \labelsep\leftmargin
+         \itemsep2mm
          \settowidth\labelwidth{\@biblabel{#1}}%
          \advance\labelsep-\labelwidth
          \usecounter{enumiv}%
@@ -744,7 +745,7 @@
                       Acknowledgements\enskip}}
 \RequirePackage{amsthm}
 \thm@headfont{%
-  \textcolor{darkgray}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
+  \textcolor{Orchid}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
 \def\th@remark{%
   \thm@headfont{%
     \textcolor{darkgray}{$\blacktriangleright$}\nobreakspace\sffamily}%
@@ -753,7 +754,7 @@
   \thm@postskip\thm@preskip
 }
 \def\@endtheorem{\endtrivlist}%\@endpefalse
-\renewcommand\qedsymbol{\textcolor{darkgray}{\ensuremath{\blacktriangleleft}}}
+\renewcommand\qedsymbol{\textcolor{CadetBlue}{\ensuremath{\square}}}
 \renewenvironment{proof}[1][\proofname]{\par
   \pushQED{\qed}%
   \normalfont \topsep6\p@\@plus6\p@\relax

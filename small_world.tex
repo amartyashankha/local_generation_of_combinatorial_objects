@@ -99,7 +99,7 @@ Observe that to support different values of $c$ in the probability function $c/(
 \subsubsection{Case $c < 1$}
 We use rejection sampling in order to construct a new Bernoulli process.
 
-\begin{restatable}{lem}{res:small-c}
+\begin{restatable}{lemma}{res:small-c}
 Given a process $\mathcal{P}$ outputting the indices of successful Bernoulli trials with bias $\langle p_i\rangle$, there exists a process $\mathcal{P}^c$ outputting the indices of successful Bernoulli trials with bias $\langle c\cdot p_i\rangle$ where $c<1$,
 using one additional $N$-bit word overhead for each answer of $\mathcal{P}$.
 \end{restatable}
@@ -125,7 +125,7 @@ Since we aim to sample with larger probabilities, we instead consider making $k\
 Intuitively, we hope that the probability that one of these process returns an index $i$ will be at least $c\cdot p_i$, so that we may perform rejection sampling to decide whether to keep $i$ or not.
 Unfortunately such a process cannot handle the case where $c\cdot p_i$ is large, notably when $c\cdot p_i > 1$ is truncated down to $1$, while there is always a possibility that none of the processes return $i$.
 
-\begin{restatable}{lem}{rem:large-c}
+\begin{restatable}{lemma}{rem:large-c}
 Let $k>1$ be a constant integer. Given a process $\mathcal{P}$ outputting the indices of successful Bernoulli trials with bias $\langle p_i\rangle$, there exists a process $\mathcal{P}^c$ outputting the indices of successful Bernoulli trials with bias $\langle \min\{c\cdot p_i, 1\}\rangle$ where $c>1$ and $c \cdot p_i \leq 1-\frac{1}{k}$ for every $i$,
 using one additional $N$-bit word overhead for each answer of $k\cdot c$ independent copies of $\mathcal{P}$.
 \end{restatable}

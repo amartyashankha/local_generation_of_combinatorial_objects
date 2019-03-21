@@ -64,7 +64,8 @@ There exists a data structure (generator) that samples a community for each vert
 The final algorithm in Section~\ref{sec:undirected} generates a random graph from the Stochastic Block model with randomly-assigned communities using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per query with high probability.
 \end{restatable}
 
-We provide the full details of the construction in the following Section~\ref{sec:partition}.
+\todo{Update}
+We provide the full details of the construction in the following Section~\ref{sec:multivariate_hypergeometric_sampling}.
 Our construction extends upon a similar generator in the work of \cite{huge} which only supports $r = 2$.
 Our overall data structure is a balanced binary tree,
 where the root corresponds to the entire range of indices $\{1, \ldots, n\}$,
@@ -81,82 +82,4 @@ The technical difficulties arise when generating the children,
 where one needs to sample ''half'' of the counts of the parent from the correct marginal distribution.
 To this end, we show how to sample such a count as described in the statement below.
 Namely, we provide an algorithm for sampling from the \emph{multivariate hypergeometric distribution}.
-
-\subsubsection{Sampling from the Multivariate Hypergeometric Distribution}
-\label{sec:partition}
-
-Consider the following random experiment. Suppose that we have an urn containing $B \leq n$ marbles (representing vertices), each occupies one of the $r$ possible colors (representing communities) represented by an integer from $[r]$. The number of marbles of each color in the urn is known: there are $C_k$ indistinguishable marbles of color $k \in [r]$, where $C_1 + \cdots + C_r = B$. Consider the process of drawing $\ell \leq B$ marbles from this urn \emph{without replacement}. We would like to sample how many marbles of each color we draw.
-
-More formally, let $\matr{C} = \langle c_1, \ldots, c_r \rangle$, then we would like to (approximately) sample a vector $\matr{S}^\matr{C}_\ell$ of $r$ non-negative integers such that
-\[\Pr[\matr{S}^\matr{C}_\ell = \langle s_1, \ldots, s_r \rangle]
-= \frac{{C_1\choose s_1}\cdot{C_2\choose s_2}\cdots{C_r\choose s_r}}{{B \choose C_1+C_2+ \cdots +C_r}}\]
-
-where the distribution is supported by all vectors satisfying $s_k \in \{0, \ldots, C_k\}$ for all $k \in [r]$ and $\sum_{k=1}^{r} s_k = \ell$. This distribution is referred to as the \emph{multivariate hypergeometric distribution}.
-
-The sample $\matr{S}^\matr{C}_\ell$ above may be generated easily by simulating the drawing process, but this may take $\Omega(\ell)$ iterations, which have linear dependency in $n$ in the worst case: $\ell = \Theta(B) = \Theta(n)$. Instead, we aim to generate such a sample in $O(r\,\poly(\log n))$ time with high probability. We first make use of the following procedure from \cite{huge}.
-
-\begin{restatable}{lem}{res:ggn-marble}\label{claim:ggn}
-Suppose that there are $T$ marbles of color $1$ and $B-T$ marbles of color $2$ in an urn,
-where $B \leq n$ is even. There exists an algorithm that samples $\langle s_1, s_2 \rangle$,
-the number of marbles of each color appearing when drawing $B/2$ marbles from the urn without replacement,
-in $O(\poly(\log n))$ time and random words.
-Specifically, the probability of sampling a specific pair $\langle s_1, s_2 \rangle$ where $s_1 + s_2 = T$
-is approximately ${B/2 \choose s_1}{B/2 \choose T-s_1}/{B \choose T}$ with error of at most $n^{-c}$ for any constant $c>0$.
-\end{restatable}
-
-In other words, the claim here only applies to the two-color case,
-where we sample the number of marbles when drawing exactly half of the marbles from the entire urn ($r=2$ and $\ell = B/2$).
-First we generalize this claim to handle any desired number of drawn marbles $\ell$ (while keeping $r=2$).
-
-\begin{restatable}{lem}{res:new-marble2}\label{thm:colors2}
-Given $C_1$ marbles of color $1$ and $C_2 = B-C_1$ marbles of color $2$,
-there exists an algorithm that samples $\langle s_1, s_2 \rangle$,
-the number of marbles of each color appearing when drawing $l$ marbles from the urn without replacement,
-in $O(\poly(\log n))$ time and random words.
-\end{restatable}
-\begin{proof}
-For the base case where $B=1$, we trivially have $\matr{S}^\matr{C}_1=\matr{C}$ and $\matr{S}^\matr{C}_0=\vec{\matr{0}}$.
-Otherwise, for even $B$, we apply the following procedure.
-\begin{itemize}
-\item If $\ell \leq B/2$, generate $\matr{C}'=\matr{S}^\matr{C}_{B/2}$ using Claim~\ref{claim:ggn}.
-\begin{itemize}
-\item If $\ell = B/2$ then we are done.
-\item Else, for $\ell < B/2$ we recursively generate $\matr{S}^\matr{C'}_{\ell}$.
-\end{itemize}
-\item Else, for $\ell > B/2$, we generate $\matr{S}^\matr{C'}_{B-\ell}$ as above, then output $\matr{C}-\matr{S}^\matr{C'}_{B-\ell}$.
-\end{itemize}
-On the other hand, for odd $B$, we simply simulate drawing a single random marble
-from the urn before applying the above procedure on the remaining $B-1$ marbles in the urn.
-That is, this process halves the domain size $B$ in each step, requiring $\log B$ iterations to sample $\matr{S}^\matr{C}_\ell$.
-\end{proof}
-
-Lastly we generalize to support larger $r$.
-\begin{restatable}{theorem}{res:new-marble}\label{thm:colors}
-Given $B$ marbles of $r$ different colors, such that there are $C_i$ marbles of color $i$,
-there exists an algorithm that samples $\langle s_1, s_2,\cdots, s_r \rangle$,
-the number of marbles of each color appearing when drawing $l$ marbles from the urn without replacement,
-in $O(r\cdot\poly(\log n))$ time and random words.
-\end{restatable}
-\begin{proof}
-Observe that we may reduce $r>2$ to the two-color case by sampling the number of marbles of the first color,
-collapsing the rest of the colors together.
-Namely, define a pair $\hat{\matr{C}}=\langle C_1, C_2+\cdots+C_r \rangle$,
-then generate $\matr{S}^{\hat{\matr{C}}}_{\ell}=\langle s_1, s_2+\ldots+s_r\rangle$ via the above procedure.
-At this point we have obtained the first entry $s_1$ of the desired $\matr{S}^{\matr{C}}_{\ell}$.
-So it remains to generate the number of marbles of each color from the remaining $r-1$ colors in $\ell-s_1$ remaining draws.
-In total, we may generate $\matr{S}^{\matr{C}}_{\ell}$ by performing $r$ iterations of the two-colored case.
-The error in the $L_1$-distance may be established similarly to the proof of Lemma~\ref{lemma:transition}.
-\end{proof}
-
-\subsubsection{Data structure}
-We now show that Theorem~\ref{thm:colors} may be used in order to create the following data structure. Recall that $\distr{R}$ denote the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex). Our data structure generates and maintains random variables $X_1, \ldots, X_n$, each of which is drawn independently at random from $\distr{R}$: $X_i$ denotes the community of vertex $i$. Then given a pair $(i, j)$, it returns the vector $\matr{C}(i, j) = \langle c_1, \ldots, c_r \rangle$ where $c_k$ counts the number of variables $X_i, \ldots, X_j$ that takes on the value $k$. Note that we may also find out $X_i$ by querying for $(i, i)$ and take the corresponding index.
-
-We maintain a complete binary tree whose leaves corresponds to indices from $[n]$.
-Each node represents a range and stores the vector $\matr{C}$ for the corresponding range.
-The root represents the entire range $[n]$, which is then halved in each level.
-Initially the root samples $\matr{C}(1, n)$ from the multinomial distribution according to $\distr{R}$
-(see e.g., Section 3.4.1 of \cite{knuth}).
-Then, the children are generated on-the-fly using the lemma above.
-Thus, each query can be processed within $O(r\,\poly(\log n))$ time, yielding Theorem~\ref{thm:sbm-data}.
-Then, by embedding the information stored by the data structure into the state (as in the proof of Lemma~\ref{lemma:transition}),
-we obtain the desired Corollary~\ref{cor:sbm-construct}.
+\todo{Link back to previous section}
