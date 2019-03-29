@@ -107,17 +107,7 @@ We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 %We also define $\mathcal C^{(i)}_v$ to be the color sampled for vertex $v$ in the $i^{th}$ epoch,
 %and $\mathcal I^{(i)}_v$ to be the corresponding index $j$.
 
-Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^n$.
-Note that these values are fully independent and as such any $\vec C^i_v$ can be sampled trivially.
-We also use $\vec X^i$ to denote the final vector of vertex colors at the end of the $i^{th}$ epoch.
-Finally, we define indicator variables $\bm \chi^i_v$ to denote if the color for vertex $v$ was accepted at the $i^{th}$ epoch;
-$\bm \chi^i_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
-we satisfy the condition $\vec  C^i_v\not= \vec X^{i-1}_w$ and $\vec C^i_v\not= \vec C^i_w$.
-So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
-where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
-Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
-
-\begin{wrapfigure}[21]{l}{0.51\textwidth}
+\begin{wrapfigure}[21]{L}{0.51\textwidth}
 \vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -152,6 +142,16 @@ Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
+
+Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^n$.
+Note that these values are fully independent and as such any $\vec C^i_v$ can be sampled trivially.
+We also use $\vec X^i$ to denote the final vector of vertex colors at the end of the $i^{th}$ epoch.
+Finally, we define indicator variables $\bm \chi^i_v$ to denote if the color for vertex $v$ was accepted at the $i^{th}$ epoch;
+$\bm \chi^i_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
+we satisfy the condition $\vec  C^i_v\not= \vec X^{i-1}_w$ and $\vec C^i_v\not= \vec C^i_w$.
+So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
+where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
+Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
 
 When the algorithm is asked for the final color of $v$, it finds the last epoch in which $v$ was accepted.
 Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the subroutine $\func{Accept}$ that samples the value of $\bm\chi^t_v$.
