@@ -28,7 +28,7 @@ $t_{mix}(\epsilon) \le \left( \frac{q-\Delta}{q-2\Delta}\right)n\left( \log n + 
 
 
 \subsection{Modified Glauber Dynamics}%
-\label{sub:modified_glauber_dynamics}
+\label{sec:modified_glauber_dynamics}
 
 Now we define a modified Markov Chain that proceeds in epochs.
 We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
@@ -87,7 +87,7 @@ and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the dis
 
 
 \subsection{Local Coloring Algorithm}%
-\label{sub:local_coloring_algortihm}
+\label{sec:local_coloring_algortihm}
 Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\ln n$ epochs of \emph{Modified Glauber Dynamics}.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
@@ -117,9 +117,10 @@ So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
 Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
 
-\begin{wrapfigure}[22]{l}{0.51\textwidth}
-\vspace{-2em}
+\begin{wrapfigure}[21]{l}{0.51\textwidth}
+\vspace{-1.5em}
 \begin{framed}
+    \renewcommand\figurename{Algorithm}
     \caption{Generator}
     \label{alg:coloring}
     \begin{algorithmic}[1]
@@ -237,10 +238,10 @@ Finally, we note that each probe potentially takes time $\mathcal O(t\Delta)$ to
 resulting in a total runtime of $\mathcal O(t\Delta e^{2t/\alpha})$.
 \end{proof}
 
-\begin{corollary}
-\label{cor:coloring_improved_probes}
-Instead of looking through all the epochs in order, we can use the coloring generator \todo{where?} to find the locations directly.
-\end{corollary}
+%\begin{corollary}
+%\label{cor:coloring_improved_probes}
+%Instead of looking through all the epochs in order, we can use the coloring generator \todo{where?} to find the locations directly.
+%\end{corollary}
 
 \begin{theorem}
 \label{thm:coloring_generator_main}

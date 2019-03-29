@@ -3,6 +3,18 @@
 \subsection{Local-Access Generators}
 \label{sec:oracle_model}
 
+We begin by formalizing a model of {\em local-access generators} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
+\todo{Not good}
+Our work provides local-access generators for various basic classes of graphs described in the following, with 
+\func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries.
+In all of our results, each query is processed using $\poly(\log n)$ time, random bits, and additional space, with \emph{no initialization overhead}.
+These guarantees hold even in the case of adversarial queries.
+Our bounds assume constant computation time for each arithmetic operation with $O(\log n)$-bit precision.
+Each of our generators constructs a random graph drawn from a distribution that is $1/\poly(n)$-close to the desired distribution in the $L_1$-distance.
+\footnote{The \emph{$L_1$-distance} between two probability distributions $\distr{p}$ and $\distr{q}$ over domain $D$
+is defined as $\|\distr{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
+We say that $\distr{p}$ and $\distr{q}$ are $\epsilon$-close if $\|\distr{p-q}\|_1 \leq \epsilon$.}
+
 We consider the problem of locally generating random graphs $G = (V,E)$ drawn from the desired families of simple unweighted graphs, undirected or directed. We denote the number of vertices $n = |V|$, and refer to each vertex simply via its unique ID from $[n]$. For undirected $G$, the set of neighbors of $v \in V$ is defined as $\Gamma(v) = \{u \in V: \{v,u\} \in E\}$; denote its degree by $\deg(v) = |\Gamma(v)|$.
 Inspired by the goals and results of \cite{reut}, we define a model of local-access generators as follows.
 \begin{definition}

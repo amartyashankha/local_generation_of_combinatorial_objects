@@ -15,13 +15,19 @@ This result is particularly interesting --  although the graphs in this model ar
 the oracle is able to locally generate arbitrary portions of it and answer queries in polylogarithmic time.
 Though preferential attachment graphs are sparse, they contain vertices of high degree,
 thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
+\todo{Segway}
 
-We construct oracles that allow queries to both the adjacency matrix and adjacency list representation
-of \emph{undirected graphs} with \emph{independent edge probabilities} (Erd\"{o}s-R\'{e}nyi graphs are an important special case).
-Our oracles provide \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries
-\footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$
-each time it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).}
-where each edge is chosen as an independent Bernoulli random variable.
+
+
+\subsection{Undirected Graphs}
+\label{sec:undirected_graphs}
+In Section~\ref{sec:undirected}, we implement queries to both the adjacency matrix and adjacency list representation
+for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
+where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
+Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
+We implement \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}
+\footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$ each time
+it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).} queries.
 Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
 our implementations support all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
 In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
@@ -32,124 +38,55 @@ While \func{Vertex-Pair} and \func{Next-Neighbor} queries, as well as \func{All-
 have been considered in the prior works of \cite{reut, huge_old, huge, sparse}, we provide the first implementation (to the best of our knowledge)
 of \func{Random-Neighbor} queries, which do not follow trivially from the \func{All-Neighbor} queries in \emph{non-sparse graphs}.
 Such queries are useful, for instance, for sub-linear algorithms that employ random walk processes.
-\func{Random-Neighbor} queries present particularly interesting challenges,  since as we note in Section~\ref{par:random_neighbor_queries},
-(1) \func{Random-Neighbor} queries affect the conditional probabilities of the remaining neighbors in a non-trivial manner, and
-(2) our implementation does not resort to explicitly sampling the degree of any vertex in order to generate a random neighbor.
-First, sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} generators,
-because this quantity alone imposes dependence on the existence of \emph{all} of its potential incident edges.
-Therefore, our generator needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
-without resorting to ``knowing'' its degree.
-Second, even without committing to the degrees, answers to \func{Random-Neighbor} queries
-affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner
--- that is, from the point of view of the \emph{agent} interacting with the generator.
-The generator, however, must somehow maintain and leverage its additional \emph{internal knowledge}
-of the partially-generated graph, to keep its computation tractable throughout the entire graph generation process.
-
-We then consider local-access generators for directed graphs in Kleinberg's Small World model.
-In this case, the probabilities are based on distances in a 2-dimensional grid.
-Using a modified version of our previous sampling procedure, we present such a generator supporting \func{All-Neighbors} queries in
-$\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs are sparse, the other queries follow directly).
-
-We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
-\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
-and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
-\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
-Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
-This constraint introduces complicated non-local dependencies on the distribution of positions.
-Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
-such as bracketed expressions, random rooted trees, and random binary trees
-\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
-and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
-}.
-
-Finally, we introduce a new model for implementating huge random objects with \emph{huge description size}.
-In this model, we implement query access to random $q$-colorings of arbitrary graphs with maximum degree $\Delta$.
-A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates and accepting the ones that do not create a conflict (Glauber dynamics).
-This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
-Moreover, unlike the previously considered random objects, this one has no succint representation,
-and we can only uncover the proper distribution by probing the graph (in the manner of \emph{local computation algorithms} \cite{LCA}).
-Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
-We are able to construct an efficient implementation that returns the final color of a vertex using only a sub-linear number of probes when $q>12\Delta$.
-
-For additional related work, see Section~\ref{sec:related_work}.
-
-
-
-
-\section{Our Contributions and Techniques}
-
-We begin by formalizing a model of {\em local-access generators} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
-\todo{Not good}
-Our work provides local-access generators for various basic classes of graphs described in the following, with 
-\func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries.
-In all of our results, each query is processed using $\poly(\log n)$ time, random bits, and additional space, with \emph{no initialization overhead}.
-These guarantees hold even in the case of adversarial queries.
-Our bounds assume constant computation time for each arithmetic operation with $O(\log n)$-bit precision.
-Each of our generators constructs a random graph drawn from a distribution that is $1/\poly(n)$-close to the desired distribution in the $L_1$-distance.
-\footnote{The \emph{$L_1$-distance} between two probability distributions $\distr{p}$ and $\distr{q}$ over domain $D$
-is defined as $\|\distr{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
-We say that $\distr{p}$ and $\distr{q}$ are $\epsilon$-close if $\|\distr{p-q}\|_1 \leq \epsilon$.}
-
-
-
-\subsection{Undirected Graphs}
-\label{sec:undirected_graphs}
-In Section~\ref{sec:undirected} we construct local access generators for the generic
-class of undirected graphs
-with {\em independent edge probabilities} $\left\{ p_{u,v} \right\}_{u,v\in V}$,
-where $p_{u,v}$ denote the probability that there is an edge between $u$ and $v$.
-Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
-We assume that we can compute various values pertaining to consecutive
-edge probabilities for the class of graphs, as detailed below.
-We then show that such values can be computed for graphs
-generated according to the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model
-and the Stochastic Block model.
+\func{Random-Neighbor} queries present particularly interesting challenges that are outlined below.
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
-We note that the next neighbor of a vertex can be found trivially by generating consecutive
-entries of the adjacency matrix, but for small edge probabilities $p_{u,v} = o(1)$
-this implementation can be too slow.  In our algorithms, we achieve speed-up by sampling multiple 
-neighbor values at once for a given vertex $u$; more specifically,  
-we sample for the number of ``non-neighbors'' preceding
-the next neighbor.
-To do this, we assume that we have access to
-an oracle which can estimate the ``skip'' probabilities 
-$F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
-where $F(v,a,b)$ is the probability that $v$ 
-has no neighbors in the range $[a,b]$.
-We later show that it is possible to compute this quantity efficiently
-for the $G(n,p)$ and Stochastic block models.
+We note that the next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
+but for small edge probabilities $p_{uv} = o(1)$ this implementation can be too slow.
+In our algorithms, we achieve speed-up by sampling multiple neighbor values at once for a given vertex $u$; more specifically,
+we sample for the number of ``non-neighbors'' preceding the next neighbor.
+To do this, we assume that we have access to an oracle which can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
+where $F(v,a,b)$ is the probability that $v$ has no neighbors in the range $[a,b]$.
+We later show that it is possible to compute this quantity efficiently for the $G(n,p)$ and Stochastic block models.
 
-A main difficulty in our setup, as compared to \cite{reut},
-arises from the fact that our graph is undirected, and thus
+A main difficulty in our setup, as compared to \cite{reut}, arises from the fact that our graph is undirected, and thus
 we must design a data structure that ``informs'' all (potentially $\Theta(n)$) non-neighbors once we decide on the query vertex's next neighbor.
 %Unlike in the case of directed graphs, each $\func{Next-Neighbor}$ query
 %can affect the probabilities of a large number of other vertices.
 More concretely, if $u'$ is sampled as the next neighbor of $v$ after its previous neighbor $u$,
-we must maintain consistency in subsequent steps
-by ensuring that none of the vertices in the range $(u,u')$
-return $v$ as a neighbor. This update will become even more complicated as we later handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
+we must maintain consistency in subsequent steps by ensuring that none of the vertices in the range $(u,u')$ return $v$ as a neighbor.
+This update will become even more complicated as we later handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
 
-In Section~\ref{sec:ER-rand}, we present a very simple randomized generator
-(Algorithm~\ref{alg:oblivious-coin-toss}) that supports \func{Next-Neighbor}
-queries efficiently, albeit the analysis of its performance is rather complicated.
-We remark that this approach may be extended to support \func{Vertex-Pair} queries with superior performance (given that we do not to support \func{Random-Neighbor} queries) and to provide deterministic resource usage guarantee -- the full analysis can be found in Section~\ref{sec:reroll-cont} and \ref{sec:ER-det}, respectively.
+In Section~\ref{sec:ER-rand}, we present a very simple randomized generator (Algorithm~\ref{alg:oblivious-coin-toss})
+that supports \func{Next-Neighbor} queries efficiently, albeit the analysis of its performance is rather complicated.
+We remark that this approach may be extended to support \func{Vertex-Pair} queries with superior performance
+(given that we do not to support \func{Random-Neighbor} queries) and to provide deterministic resource usage guarantee
+\todo{What is deterministic here?}
+-- the full analysis can be found in Section~\ref{sec:reroll-cont} and \ref{sec:ER-det}, respectively.
 
 \paragraph*{\func{Random-Neighbor} Queries}
 \label{par:random_neighbor_queries}
+
 We provide efficient \func{Random-Neighbor} queries (Section~\ref{sec:buckets}).
-The ability to do so is surprising.  First, note that after performing a \func{Random-Neighbor} query
-all other conditional probabilities will be affected in a non-trivial way.
-\footnote{Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
+The ability to do so is surprising since:
+(1) \func{Random-Neighbor} queries affect the conditional probabilities of the remaining neighbors in a non-trivial manner
+\footnote{\label{conditional}Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
 such that vertices will have $\tilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
-After $\tilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries,
-we will have uncovered all the neighbors (w.h.p.),
-so that the conditional probability of the remaining
-$\Theta(n)$ edges should now be close to zero.}
+After $\tilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
+so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}, and
+(2) our implementation does not resort to explicitly sampling the degree of any vertex $v$
+in order to generate a random neighbor with the correct probability $\frac{1}{d_v}$.
+First, even without committing to the degrees, answers to \func{Random-Neighbor} queries
+affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner \footref{conditional}
+-- that is, from the point of view of the \emph{agent} interacting with the generator.
+Second, sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} generators,
+because this quantity alone imposes dependence on the existence of \emph{all} of its potential incident edges.
+Therefore, our generator needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
+without resorting to ``knowing'' its degree.
+The generator, however, must somehow maintain and leverage its additional \emph{internal knowledge}
+of the partially-generated graph, to keep its computation tractable throughout the entire graph generation process.
 This requires a way of implicitly keeping track of all the resulting changes.
-Second, we can sample a \func{Random-Neighbor} with the correct probability $1/\deg(v)$,
-even though we do not sample or know the degree of the vertex.
 
 We formulate a {\em bucketing approach} (Section~\ref{sec:buckets})
 which samples multiple consecutive edges at once, in such a way
@@ -228,6 +165,12 @@ The only requirement is that the CDF of the probability sequences can be efficie
 
 \subsection{Directed Graphs}
 \label{sec:directed_graphs}
+We then consider local-access generators for directed graphs in Kleinberg's Small World model.
+In this case, the probabilities are based on distances in a 2-dimensional grid.
+Using a modified version of our previous sampling procedure, we present such a generator supporting \func{All-Neighbors} queries in
+$\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs are sparse, the other queries follow directly).
+\todo{This is duplicate}
+
 Lastly, we consider Kleinberg's Small World model (\cite{kleinberg, klein}) in Section~\ref{sec:small_world}.
 While Small-World models are proposed to capture 
 properties of observed data such as small shortest-path 
@@ -246,36 +189,35 @@ we design generators supporting \func{All-Neighbor} queries.
 
 
 \subsection{Catalan Objects}%
-\label{sub:catalan_objects}
-We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
-\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
-and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
-\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
-Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
-This constraint introduces complicated non-local dependencies on the distribution of positions.
-Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
-such as bracketed expressions, random rooted trees, and random binary trees
-\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
-and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
-}.
+\label{sec:catalan_objects}
+We also consider the problem of sampling of very long ($2n$ step) one dimensional random walks,
+One obvious query of interest is $\func{Height}(t)$ which returns the position of the walk at time $t$.
+\func{Height} queries for the simple unconstrained random walk
+follow trivially from the implementation of interval summable functions presented in \cite{huge}.
+Instead, we focus on an important generalization by considering balanced random walks (equal number of up and down steps)
+that are constrained to be always positive (commonly known as Dyck Paths).
+The added constraint introduces complicated non-local dependencies on the distribution of positions.
+However, we are able to support both queries using $\mathcal O(\poly(\log n))$ resources.
+
+Dyck paths are one type of Catalan object, and they have natural bijections to other Catalan objects
+such as bracketed expressions, random rooted trees and binary trees
+Thus, we can use our Dyck Path implementation to obtain useful implementations of other random Catalan objects.
+For instance, $\func{Height}$ queries correspond to $\func{Depth}$ queries on rooted trees and bracketed expressions
+(Section~\ref{sec:bijections_to_other_catalan_objects}).
+
+However, we might want to support more interesting qaueries; for example,
+finding the children of a node in a random tree or finding the matching bracket in a random bracketed expression.
+To achieve this, we will also support \func{First-Return} queries
+where $\func{First-Return}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$.
+In Section~\ref{sec:bijections_to_other_catalan_objects}, we will see that $\func{First-Return}$ queries correspond to
+$\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
+
 
 
 
 
 \subsection{Random Coloring of Graphs}%
-\label{sub:random_coloring_of_graphs}
-We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
-\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
-and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
-\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
-Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
-This constraint introduces complicated non-local dependencies on the distribution of positions.
-Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
-such as bracketed expressions, random rooted trees, and random binary trees
-\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
-and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
-}.
-
+\label{sec:random_coloring_of_graphs}
 Finally, we introduce a new model for implementating huge random objects with \emph{huge description size}.
 In this model, we implement query access to random $q$-colorings of arbitrary graphs with maximum degree $\Delta$.
 A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates and accepting the ones that do not create a conflict (Glauber dynamics).
@@ -284,3 +226,5 @@ Moreover, unlike the previously considered random objects, this one has no succi
 and we can only uncover the proper distribution by probing the graph (in the manner of \emph{local computation algorithms} \cite{LCA}).
 Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
 We are able to construct an efficient implementation that returns the final color of a vertex using only a sub-linear number of probes when $q>12\Delta$.
+
+For additional related work, see Section~\ref{sec:related_work}.
