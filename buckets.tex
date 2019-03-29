@@ -83,33 +83,29 @@ For the sake of presentation, we postpone our description of the implementation 
 \subsubsection{Putting it all together: \func{Random-Neighbor} queries}
 \label{sec:random_neighbor}
 
-      \begin{algorithm}[H]
-      % TODO: Better Name <28-10-17, shankha> %
-        \caption{Bucketing Generator}
-        \begin{algorithmic}
-\Procedure{Random-Neighbor}{$v$}
-    \State{$R \gets [|B_v|]$}
-    % TODO: Set correct value for M_v <28-10-17, shankha> %
-%    \State{$M_v \gets \max_i{|P_v^{(i)}|}$}
-    \Repeat
-        \State{\textbf{sample} $i \in R$ u.a.r.}
-        \If {$B_v^{(i)}$ is not \emph{filled}}
-            \State$\func{Fill}\left( v,i\right)$
-        \EndIf
-        \If {$|P_v^{(i)}| > 0$}
-            \State{\textbf{with probability} $\frac{|P_v^{(i)}|}{M}$}
-            \State{\hspace{\algorithmicindent}\textbf{sample} $u\in P_v^{(i)}$ u.a.r }
-            \State{\hspace{\algorithmicindent}\Return $u$}
-        \Else
-        % TODO: Is his necessary? <28-10-17, shankha> %
-            \State{$R \gets R\setminus\{i\}$}
-        \EndIf
-    \Until{$R=\emptyset$}
-    \State \Return $\bot$
-\EndProcedure
-        \end{algorithmic}
-\label{alg:random}
-      \end{algorithm}
+\begin{wrapfigure}[18]{L}{0.5\textwidth}
+    \caption{Bucketing Generator}
+    \label{alg:random}
+    \begin{algorithmic}
+        \Procedure{Random-Neighbor}{$v$}
+            \State{$R \gets [|B_v|]$}
+            \While{$R=\emptyset$}
+                \State{\textbf{sample} $i \in R$ u.a.r.}
+                \If {$B_v^{(i)}$ is not \emph{filled}}
+                    \State$\func{Fill}\left( v,i\right)$
+                \EndIf
+                \If {$|P_v^{(i)}| > 0$}
+                    \State{\textbf{with probability} $\frac{|P_v^{(i)}|}{M}$}
+                    \State{\hspace{\algorithmicindent}\textbf{sample} $u\in P_v^{(i)}$ u.a.r }
+                    \State{\hspace{\algorithmicindent}\Return $u$}
+                \Else
+                    \State{$R \gets R\setminus\{i\}$}
+                \EndIf
+            \EndWhile
+            \State \Return $\bot$
+        \EndProcedure
+    \end{algorithmic}
+\end{wrapfigure}
 
 Consider Algorithm~\ref{alg:random} for generating a random neighbor via rejection sampling, in a rather similar overall framework as the simple implementation in Section~\ref{sec:ER-naive}.
 For simplicity, throughout the analysis, we assume $|B_v| = \Omega(\log n)$; otherwise, invoke $\func{Fill}(v,i)$ for all $i \in [|B_v|]$ to obtain the entire neighbor list $\Gamma(v)$. This does not affect the analysis because we will soon bound the number of calls that Algorithm~\ref{alg:random} makes to \func{Fill} by $O(\log n)$ (in expectation) for $|B_v| = \Omega(\log n)$.
@@ -160,30 +156,30 @@ Following the analysis above, the probability that some vertex from $P_v^{(i)}$ 
 \subsection{Implementation of \func{Fill}}
 \label{sec:fill_implement}
 
-\begin{algorithm}[H]
-\caption{Sampling in a Bucket}
-\begin{algorithmic}
-\Procedure{Fill}{$v,i$}
-\State{$(a,b) \gets B^{(i)}_j$}
-%	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
-%    \For{$b$ in $P_v^{(i)}\cup\{\END(v,i)\}$}
-        \Repeat
-            \State{\textbf{sample} $u\sim\distr{F}(v,a,b)$}
-            \State{$B_u^{(j)} \gets$ $u$'s bucket containing $v$}
-%            \State{$j\gets \BUCKET(u,v)$}
-            \If{$B_u^{(j)}$ is not \filled}
-                \State{$P_v^{(i)}\gets P_v^{(i)}\cup\{u\}$}
-                \State{$P_u^{(j)}\gets P_u^{(j)}\cup\{v\}$}
-            \EndIf
-            \State{$a \gets u$}
-        \Until{$a \ge b$}
-        \State{\textbf{mark} $B_u^{(j)}$ as \filled}
-%        \State \Return $P_v^{(i)}$
-%    \EndFor
-\EndProcedure
-\end{algorithmic}
-\label{alg:fill}
-\end{algorithm}
+\begin{wrapfigure}[15]{L}{0.5\textwidth}
+    \caption{Sampling in a Bucket}
+    \label{alg:fill}
+    \begin{algorithmic}
+    \Procedure{Fill}{$v,i$}
+    \State{$(a,b) \gets B^{(i)}_j$}
+    %	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
+    %    \For{$b$ in $P_v^{(i)}\cup\{\END(v,i)\}$}
+            \While{$a \ge b$}
+                \State{\textbf{sample} $u\sim\distr{F}(v,a,b)$}
+                \State{$B_u^{(j)} \gets$ $u$'s bucket containing $v$}
+    %            \State{$j\gets \BUCKET(u,v)$}
+                \If{$B_u^{(j)}$ is not \filled}
+                    \State{$P_v^{(i)}\gets P_v^{(i)}\cup\{u\}$}
+                    \State{$P_u^{(j)}\gets P_u^{(j)}\cup\{v\}$}
+                \EndIf
+                \State{$a \gets u$}
+            \EndWhile
+            \State{\textbf{mark} $B_u^{(j)}$ as \filled}
+    %        \State \Return $P_v^{(i)}$
+    %    \EndFor
+    \EndProcedure
+    \end{algorithmic}
+\end{wrapfigure}
 
 Lastly, we describe the implementation of the $\func{Fill}$ procedure, employing the approach of skipping non-neighbors, as developed for Algorithm~\ref{alg:oblivious-coin-toss}. We aim to simulate the following process: perform coin-tosses $C_{v,u}$ with probability $p_{v,u}$ for every $u \in B_v^{(i)}$ and update $\ADJ[v][u]$'s according to these coin-flips unless they are decided (i.e., $\ADJ[v][u] \neq \PHI$). We directly generate a sequence of $u$'s where the coins $C_{v,u} = \ONE$, then add $u$ to $P_v$ and vice versa if $X_{v,u}$ has not previously been decided. Thus, once $B_v^{(i)}$ is \filled, we will obtain $P_v^{(i)} = \Gamma^{(i)}(v)$ as desired.
 

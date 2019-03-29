@@ -5,6 +5,9 @@ Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$
 with $p = O(\poly(\log n)/n)$, which answers $\poly(\log n)$ \func{All-Neighbors} queries, listing the neighbors of queried vertices.
 While these generators use polylogarithmic resources over their entire execution,
 they generate graphs that are  only guaranteed to {\em appear random} to algorithms that inspect a {\em limited portion} of the generated graph.
+For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
+Using our implementation, one can execute this algorithm on a random small world instance
+in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
 
 In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
 Unlike \cite{sparse}, their implementation allows for an arbitrary number of queries.
@@ -13,16 +16,14 @@ the oracle is able to locally generate arbitrary portions of it and answer queri
 Though preferential attachment graphs are sparse, they contain vertices of high degree,
 thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
 
-In this work, we begin by \emph{formalizing} a model of local-access generators implicitly used in \cite{reut}.
-We next construct oracles that allow queries to both the adjacency matrix and adjacency list representation of a basic class of random graph families,
-without generating the entire graph at the onset.
+We construct oracles that allow queries to both the adjacency matrix and adjacency list representation
+of \emph{undirected graphs} with \emph{independent edge probabilities} (Erd\"{o}s-R\'{e}nyi graphs are an important special case).
 Our oracles provide \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries
 \footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$
 each time it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).}
-for graphs with {\em independent edge probabilities}, that is, when each edge is chosen as an independent Bernoulli random variable.
-Using this framework, we construct the first \emph{efficient} local-access generators for undirected graph models,
-supporting all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits per query,
-under assumptions on the ability to compute certain values pertaining to consecutive edge probabilities.
+where each edge is chosen as an independent Bernoulli random variable.
+Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
+our implementations support all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
 In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
 and the Stochastic Block model with random community assignment.
 As in \cite{reut} (and unlike the generators in \cite{huge_old,huge,sparse}), our techniques allow unlimited queries.
@@ -48,6 +49,27 @@ We then consider local-access generators for directed graphs in Kleinberg's Smal
 In this case, the probabilities are based on distances in a 2-dimensional grid.
 Using a modified version of our previous sampling procedure, we present such a generator supporting \func{All-Neighbors} queries in
 $\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs are sparse, the other queries follow directly).
+
+We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
+\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
+and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
+\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
+Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
+This constraint introduces complicated non-local dependencies on the distribution of positions.
+Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
+such as bracketed expressions, random rooted trees, and random binary trees
+\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
+and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
+}.
+
+Finally, we introduce a new model for implementating huge random objects with \emph{huge description size}.
+In this model, we implement query access to random $q$-colorings of arbitrary graphs with maximum degree $\Delta$.
+A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates and accepting the ones that do not create a conflict (Glauber dynamics).
+This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
+Moreover, unlike the previously considered random objects, this one has no succint representation,
+and we can only uncover the proper distribution by probing the graph (in the manner of \emph{local computation algorithms} \cite{LCA}).
+Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
+We are able to construct an efficient implementation that returns the final color of a vertex using only a sub-linear number of probes when $q>12\Delta$.
 
 For additional related work, see Section~\ref{sec:related_work}.
 
@@ -219,3 +241,46 @@ we design generators supporting \func{All-Neighbor} queries.
 %In contrast to our previous cases, this model imposes an underlying
 %two-dimensional structure of the vertex set, which governs
 %the distance function as well as complicates the individual edge probabilities.
+
+
+
+
+\subsection{Catalan Objects}%
+\label{sub:catalan_objects}
+We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
+\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
+and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
+\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
+Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
+This constraint introduces complicated non-local dependencies on the distribution of positions.
+Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
+such as bracketed expressions, random rooted trees, and random binary trees
+\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
+and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
+}.
+
+
+
+
+\subsection{Random Coloring of Graphs}%
+\label{sub:random_coloring_of_graphs}
+We also consider the sampling of very long one dimensional random walks where we will be interested in \func{Height} and \func{First-Return}
+\footnote{$\func{Height}(t)$ returns the position of the walk at time $t$
+and $\func{FirstReturn}(t)$ returns the first time when the random walk returns to the same level as it was at time $t$} queries.
+\func{Height} queries for the simple unbiased random walk follow trivially from the implementation of interval summable functions presented in \cite{huge}.
+Here, we will consider random \emph{Dyck Paths}; balanced random walks constrained to be always positive.
+This constraint introduces complicated non-local dependencies on the distribution of positions.
+Since Dyck paths are an example of Catalan objects, we can use this oracle to obtain implementations of other random Catalan objects
+such as bracketed expressions, random rooted trees, and random binary trees
+\footnote{Specifically, $\func{Height}$ queries correspond to $\func{Depth}$ queries on trees and bracketed expressions,
+and $\func{First-Return}$ queries correspond to $\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions.
+}.
+
+Finally, we introduce a new model for implementating huge random objects with \emph{huge description size}.
+In this model, we implement query access to random $q$-colorings of arbitrary graphs with maximum degree $\Delta$.
+A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates and accepting the ones that do not create a conflict (Glauber dynamics).
+This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
+Moreover, unlike the previously considered random objects, this one has no succint representation,
+and we can only uncover the proper distribution by probing the graph (in the manner of \emph{local computation algorithms} \cite{LCA}).
+Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
+We are able to construct an efficient implementation that returns the final color of a vertex using only a sub-linear number of probes when $q>12\Delta$.

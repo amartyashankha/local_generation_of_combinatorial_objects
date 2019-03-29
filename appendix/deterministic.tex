@@ -6,29 +6,29 @@ In what follows, we first focus on the $G(n,p)$ model, starting with \func{Next-
 
 \subsection{Data structure for next-neighbor queries in the Erd\"{o}s-R\'{e}nyi model}\label{sec:det-er}
 
-\begin{algorithm}[H]
-\caption{Alternative Generator}
-\begin{algorithmic}
-\Procedure{Next-Neighbor}{$v$}
-	\State{$w \gets \min K_v$, or $n+1$ if $K_v = \emptyset$}
-	\State{$t \gets$ \func{count}$(v)$}
-	\State{\textbf{sample} $F\sim\distr{ExactF}(p,t)$}
-	\If{$F \leq t$}
-		\State{$u \gets$ \func{pick}$(v,F)$}
-		\State{$K_u \gets K_u \cup \{v\}$}
-	\Else
-		\State{$u \gets w$}
-		\If{$u \neq n+1$}
-			\State{$K_v \gets K_v \setminus \{u\}$}
-		\EndIf
-	\EndIf
-	\State{\func{update}$(v,u)$}
-	\State{$\LAST[v] \gets u$}
-	\State \Return $u$
-\EndProcedure
-\end{algorithmic}
-\label{alg:exact-coin-toss}
-\end{algorithm}
+\begin{wrapfigure}[17]{L}{0.5\textwidth}
+    \caption{Alternative Generator}
+    \label{alg:exact-coin-toss}
+    \begin{algorithmic}
+        \Procedure{Next-Neighbor}{$v$}
+            \State{$w \gets \min K_v$, or $n+1$ if $K_v = \emptyset$}
+            \State{$t \gets$ \func{count}$(v)$}
+            \State{\textbf{sample} $F\sim\distr{ExactF}(p,t)$}
+            \If{$F \leq t$}
+                \State{$u \gets$ \func{pick}$(v,F)$}
+                \State{$K_u \gets K_u \cup \{v\}$}
+            \Else
+                \State{$u \gets w$}
+                \If{$u \neq n+1$}
+                    \State{$K_v \gets K_v \setminus \{u\}$}
+                \EndIf
+            \EndIf
+            \State{\func{update}$(v,u)$}
+            \State{$\LAST[v] \gets u$}
+            \State \Return $u$
+        \EndProcedure
+    \end{algorithmic}
+\end{wrapfigure}
 
 Recall that \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{v,u} = 1\}$ (or $n+1$ if no satisfying $u$ exists). To aid in computing this quantity, we define:
 \begin{align*}

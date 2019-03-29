@@ -45,10 +45,8 @@ In the $k^{th}$ epoch $\mathcal E_k$:
 
 This procedure is a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
 The goal in \cite{mohsen} is to find a simultaneous update rule that causes few conflicts among neighbors (and converges to the correct distribution).
-Notice that we can have adjacent nodes update in the same epoch, and this can also be implemented locally using \todo{what?}.
-However for the sake of succinctness and because this would only improve a constant factor in the exponent,
-we use their update rule and avoid a tedious path coupling argument.
-\todo{Wording: a vertex needs to avoid $\le 2\Delta$ colors in order to be  accepted}
+Notice that we \emph{can} have adjacent nodes update in the same epoch.
+However for the sake of succinctness we use their update rule and avoid a tedious path coupling argument.
 
 \todo{Cite Path Coupling}
 For the path coupling argument, we define the standard pre-metric on the space for all possible colorings (not necessarily valid ones).
@@ -62,10 +60,11 @@ Now, we pick a random permutation of the vertices along with uniformly sampled c
 \]
 Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
 \begin{itemize}
-    \item If the current color of $v_i$ as well as $c_i$ is in $\{c_X,c_Y\}$,
+    \item If the current color of $v_i$ as well as $c_i$ are both in $\{c_X,c_Y\}$,
     then the $X$ chain picks the color $c_i$ and the $Y$ chain picks the other color.
+    \item Otherwise, both chains pick the same color $c_i$ for the vertex $v_i$.
 \end{itemize}
-
+We use the following result from \cite{mohsen} that bounds the coupled distance.
 \begin{lemma}
 \label{lem:mohsen_single_epoch_distance}
 If $q = 2\alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
@@ -77,10 +76,11 @@ If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{e^{1/3}
 
 \begin{theorem}
 \label{thm:modified_mixing_time}
-If $q\ge 9\Delta$, then the Markov Chain is mixed after $\tau_{mix}(\epsilon) = 3\ln n + 3\ln(1/\epsilon)$ epochs.
+If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left( \ln n + \ln(\frac1{\epsilon})\right)$ epochs.
 \end{theorem}
 \begin{proof}
-\todo{Write proof}
+Starting for a maximum distance of $n$, the distance decreases to $1$ after at most $3\ln n$ epochs,
+and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the distance to $\epsilon$.
 \end{proof}
 
 
@@ -89,7 +89,7 @@ If $q\ge 9\Delta$, then the Markov Chain is mixed after $\tau_{mix}(\epsilon) = 
 \subsection{Local Coloring Algorithm}%
 \label{sub:local_coloring_algortihm}
 Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\ln n$ epochs of \emph{Modified Glauber Dynamics}.
-We will define the number of colors as $q = \alpha\Delta$ where $\alpha > 1$.
+We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
 %Each epoch can be implemented a local generator for a permutation of $V$.
 %Specifically, each epoch is a sequence of vertex and color samples:
@@ -117,57 +117,50 @@ So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
 Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
 
-\begin{algorithm}[H]
-\caption{Generator}
-\begin{algorithmic}[1]
-
-\Procedure{Color}{$v, t$}
-    \For{$i \gets [ t, t-1, t-2 \cdots 1 ]$}
-        \If {\func{Accepted}($i, v$)}
-            \State \Return $C^i_v$
-        \EndIf
-    \EndFor
-\EndProcedure
-
-\Procedure{Accepted}{$v, t$}
-    \State {$c\gets C^t_v$}
-    \For{$w \gets \Gamma(v)$}
-        \State {$flag\gets \ZERO$}
-        \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
-            \If {$t' \not= t$ \textbf{or} $\mathcal I^{(t)}_w < \mathcal I^{(t)}_v$}
-                \If {$\mathcal C^{(t')}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
-                    \State $flag\gets \ONE$
-                    \While{$t' < t$}
-                        \State $t'\gets t' + 1$
-                        \If {\func{Accepted}($w, t'$)}
-                            \State $flag\gets \ZERO$
-                            \State \textbf{break}
+\begin{wrapfigure}[22]{l}{0.51\textwidth}
+\vspace{-2em}
+\begin{framed}
+    \caption{Generator}
+    \label{alg:coloring}
+    \begin{algorithmic}[1]
+        \Procedure{Accept}{$v, t$}
+            \State {$c\gets C^t_v$}
+            \For{$w \gets \Gamma(v)$}
+                \If {$C_w^t = c$}
+                    \State \Return 0
+                \EndIf
+                \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
+                    \If {$\mathcal C^{t'}_w = c$ \textbf{and} \func{Accept}($w, t'$)}
+                        \State $flag\gets \ONE$
+                        \While{$t' < t-1$}
+                            \State $t'\gets t' + 1$
+                            \If {\func{Accept}($w, t'$)}
+                                \State $flag\gets \ZERO$
+                                \State \textbf{break}
+                            \EndIf
+                        \EndWhile
+                        \If {$flag = \ONE$}
+                            \State \Return $\ZERO$
                         \EndIf
-                    \EndWhile
-                    \If {$flag = \ONE$}
-                        \State \Return $\ZERO$
-                    \EndIf
-                    \State \textbf{break}
-               \EndIf
-           \EndIf
-        \EndFor
-    \EndFor
-    \State \Return $\ONE$
-\EndProcedure
-
-\end{algorithmic}
-\label{alg:coloring}
-\end{algorithm}
+                        \State \textbf{break}
+                   \EndIf
+                \EndFor
+            \EndFor
+            \State \Return $\ONE$
+        \EndProcedure
+    \end{algorithmic}
+\end{framed}
+\end{wrapfigure}
 
 When the algorithm is asked for the final color of $v$, it finds the last epoch in which $v$ was accepted.
-Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the subroutine $\func{Accepted}$ that samples the value of $\bm\chi^t_v$.
+Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the subroutine $\func{Accept}$ that samples the value of $\bm\chi^t_v$.
 The algorithm iterates through the neighbors $w$ of $v$, and check for conflicts with the proposed color $c=\vec C^t_v$.
 The condition $c\not= \vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$ in the current epoch.
 If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
 We first iterate through all the epochs in reverse order to check whether the color $c$ was ever proposed for vertex $w$.
 If not, we can ignore $w$, and otherwise let's say that the last proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
-Now, we need to recursively check if this proposal was $\func{Accepted}$.
+Now, we need to recursively check if this proposal was $\func{Accept}$.
 If it was, we move to epoch $t'+1$ to see if $w$'s color was replaced.
 If not, we check epoch $t'+2$ and so on until we reach epoch $t-1$.
 At this point we have seen that $\bm\chi^{t'}_w = 1$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected
@@ -203,7 +196,7 @@ We will use $\mathcal B(p)$ to refer to the Bernoulli random variable with bias 
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
 (technically, only the last occurence matters, but we are looking for an upper bound).
 If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
-Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accepted}$ proposal is found.
+Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accept}$ proposal is found.
 Adding an extra $T_{t'}$ term to Equation~\ref{eq:color_overwrite} and summing up over all neighbors and epochs we get the following:
 \begin{align}
 T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
