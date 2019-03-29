@@ -34,7 +34,7 @@ Now we define a modified Markov Chain that proceeds in epochs.
 We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch $\mathcal E_k$:
 \begin{itemize}
-    \item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the proposed color for vertex $v$.
+    \item Sample $|V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the proposed color for vertex $v$.
     \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$ if for all neighbors $w$ of $v$, $\vec X^k_w\not=c_v$ and $\vec X^{k-1}_w\not=c_v$.
 \end{itemize}
 %\begin{itemize}

@@ -1,59 +1,44 @@
 \section{Introduction}
 
-The problem of computing local information of huge random objects
-was pioneered in \cite{huge_old,huge}. 
-Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$ graphs
-from the Erd\"{o}s-R\'{e}nyi model \cite{er}, with $p = O(\poly(\log n)/n)$,
-which answers $\poly(\log n)$ \func{All-Neighbors} queries,
-listing the neighbors of queried vertices.
-While these generators use polylogarithmic resources over their entire execution, 
-they generate graphs that are  only guaranteed to {\em appear random} to algorithms
-that inspect a {\em limited portion} of the generated graph.
+The problem of computing local information of huge random objects was pioneered in \cite{huge_old,huge}.
+Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
+with $p = O(\poly(\log n)/n)$, which answers $\poly(\log n)$ \func{All-Neighbors} queries, listing the neighbors of queried vertices.
+While these generators use polylogarithmic resources over their entire execution,
+they generate graphs that are  only guaranteed to {\em appear random} to algorithms that inspect a {\em limited portion} of the generated graph.
 
-In \cite{reut}, the authors construct an oracle for the generation of recursive trees,
-and BA preferential attachment graphs.
+In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
 Unlike \cite{sparse}, their implementation allows for an arbitrary number of queries.
-This result is particularly interesting --  
-although the graphs in this model are generated via a sequential process,
-the oracle is able to locally generate arbitrary portions of it
-and answer queries in polylogarithmic time.
-Though preferential attachment graphs are sparse,
-they contain vertices of high degree,
-thus \cite{reut} provides access to 
-the adjacency list through \func{Next-Neighbor} queries.
-%On a high level, this is due to the fact that the BA model is directed, and all edges are independent.
+This result is particularly interesting --  although the graphs in this model are generated via a sequential process,
+the oracle is able to locally generate arbitrary portions of it and answer queries in polylogarithmic time.
+Though preferential attachment graphs are sparse, they contain vertices of high degree,
+thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
 
-In this work, we begin by \emph{formalizing} a model of local-access generators
-implicitly used in \cite{reut}.
-We next construct oracles that allow queries to both the adjacency matrix
-and adjacency list representation of a basic class of random
-graph families, without generating the entire graph at the onset.
-Our oracles
-provide \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries\footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$ each time it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).}
-for graphs with {\em independent edge probabilities}, that is,
-when each edge is chosen as an independent Bernoulli random variable. 
-Using this framework, we construct the first \emph{efficient} local-access generators for undirected graph models, supporting all three types of queries
-using $\mathcal{O}(\poly(\log n))$ time, space, and random bits
-per query, under assumptions on the ability to compute certain values
-pertaining to consecutive edge probabilities. In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$), and the Stochastic Block model with random community assignment. 
-As in \cite{reut} (and unlike the generators in \cite{huge_old,huge,sparse}), 
-our techniques allow unlimited queries.%(i.e. the entire graph can be generated).
+In this work, we begin by \emph{formalizing} a model of local-access generators implicitly used in \cite{reut}.
+We next construct oracles that allow queries to both the adjacency matrix and adjacency list representation of a basic class of random graph families,
+without generating the entire graph at the onset.
+Our oracles provide \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries
+\footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$
+each time it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).}
+for graphs with {\em independent edge probabilities}, that is, when each edge is chosen as an independent Bernoulli random variable.
+Using this framework, we construct the first \emph{efficient} local-access generators for undirected graph models,
+supporting all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits per query,
+under assumptions on the ability to compute certain values pertaining to consecutive edge probabilities.
+In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
+and the Stochastic Block model with random community assignment.
+As in \cite{reut} (and unlike the generators in \cite{huge_old,huge,sparse}), our techniques allow unlimited queries.
 
-While \func{Vertex-Pair} and \func{Next-Neighbor} queries, as well as \func{All-Neighbors} queries for sparse graphs, have been considered in the prior works of \cite{reut, huge_old, huge, sparse}, we provide the first implementation (to the best of our knowledge)
-of \func{Random-Neighbor} queries, which do not follow trivially from the
-\func{All-Neighbor} queries in \emph{non-sparse graphs}.
+While \func{Vertex-Pair} and \func{Next-Neighbor} queries, as well as \func{All-Neighbors} queries for sparse graphs,
+have been considered in the prior works of \cite{reut, huge_old, huge, sparse}, we provide the first implementation (to the best of our knowledge)
+of \func{Random-Neighbor} queries, which do not follow trivially from the \func{All-Neighbor} queries in \emph{non-sparse graphs}.
 Such queries are useful, for instance, for sub-linear algorithms that employ random walk processes.
-\func{Random-Neighbor} queries
-present particularly interesting challenges,  since as we note in 
-Section~\ref{par:random_neighbor_queries},
-(1) \func{Random-Neighbor} queries affect the conditional probabilities
-of the remaining neighbors in a non-trivial manner, and
+\func{Random-Neighbor} queries present particularly interesting challenges,  since as we note in Section~\ref{par:random_neighbor_queries},
+(1) \func{Random-Neighbor} queries affect the conditional probabilities of the remaining neighbors in a non-trivial manner, and
 (2) our implementation does not resort to explicitly sampling the degree of any vertex in order to generate a random neighbor.
 First, sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} generators,
 because this quantity alone imposes dependence on the existence of \emph{all} of its potential incident edges.
 Therefore, our generator needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
 without resorting to ``knowing'' its degree.
-Second, even without committing to the degrees, answers to \func{Random-Neighbor} querie
+Second, even without committing to the degrees, answers to \func{Random-Neighbor} queries
 affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner
 -- that is, from the point of view of the \emph{agent} interacting with the generator.
 The generator, however, must somehow maintain and leverage its additional \emph{internal knowledge}
@@ -61,10 +46,8 @@ of the partially-generated graph, to keep its computation tractable throughout t
 
 We then consider local-access generators for directed graphs in Kleinberg's Small World model.
 In this case, the probabilities are based on distances in a 2-dimensional grid.
-Using a modified version of our previous sampling procedure,
-we present such a generator supporting \func{All-Neighbors} queries in 
-$\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs
-are sparse, the other queries follow directly).
+Using a modified version of our previous sampling procedure, we present such a generator supporting \func{All-Neighbors} queries in
+$\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs are sparse, the other queries follow directly).
 
 For additional related work, see Section~\ref{sec:related_work}.
 
@@ -73,24 +56,17 @@ For additional related work, see Section~\ref{sec:related_work}.
 
 \section{Our Contributions and Techniques}
 
-We begin by formalizing a model of {\em local-access generators}
-(Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
-Our work provides local-access generators for various
-basic classes of graphs described in the following, with 
-\func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}
-queries.  In all of our results,
-each query is processed using $\poly(\log n)$
-time, random bits, and additional space, with \emph{no initialization overhead}.
+We begin by formalizing a model of {\em local-access generators} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
+\todo{Not good}
+Our work provides local-access generators for various basic classes of graphs described in the following, with 
+\func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries.
+In all of our results, each query is processed using $\poly(\log n)$ time, random bits, and additional space, with \emph{no initialization overhead}.
 These guarantees hold even in the case of adversarial queries.
-Our bounds assume constant computation time for each arithmetic operation with
-$O(\log n)$-bit precision. Each of our generators constructs a random graph
-drawn from a distribution that is $1/\poly(n)$-close
-to the desired distribution in the $L_1$-distance.\footnote{The \emph{$L_1$-distance} between two probability distributions $\distr{p}$
-and $\distr{q}$ over domain $D$ is defined as $\|\distr{p-q}\|_1 = 
-\sum_{x \in D } |p(x)-q(x)|$.
-We say that $\distr{p}$ and $\distr{q}$ are $\epsilon$-close if $\|\distr{p-q}\|_1 \leq \epsilon$.
-%Note that the \emph{total variation distance} is related to the $L_1$-distance as $d_{\mathrm{TV}}(\matr{p},\matr{q})=\frac{1}{2}\|\distr{p-q}\|_1$.
-}
+Our bounds assume constant computation time for each arithmetic operation with $O(\log n)$-bit precision.
+Each of our generators constructs a random graph drawn from a distribution that is $1/\poly(n)$-close to the desired distribution in the $L_1$-distance.
+\footnote{The \emph{$L_1$-distance} between two probability distributions $\distr{p}$ and $\distr{q}$ over domain $D$
+is defined as $\|\distr{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
+We say that $\distr{p}$ and $\distr{q}$ are $\epsilon$-close if $\|\distr{p-q}\|_1 \leq \epsilon$.}
 
 
 
