@@ -60,13 +60,18 @@
 \def\ADJ{\matr{A}}
 
 \newcommand{\sectioninput}{\input}
+\newcommand{\hagu}{k}
 
 \usepackage{bm}
 \usepackage{wrapfig, framed, caption}
 \usepackage{footmisc}
+\usepackage[parfill]{parskip}
 
 \renewcommand{\vec}[1]{\mathbf{#1}}
 \graphicspath{{./images/}}
+
+\theoremstyle{plain}
+\newtheorem{invariant}[theorem]{Invariant}
 
 
 \bibliographystyle{alpha}
@@ -95,15 +100,15 @@
 \tableofcontents
 \newpage
 
-\input{introduction}
-\input{model}
-\input{building_blocks}
-\input{undirected_graphs}
-\input{buckets}
-\input{precision}
-\input{undirected_applications}
-\input{small_world}
-\input{permutation}
+%\input{introduction}
+%\input{model}
+%\input{building_blocks}
+%\input{undirected_graphs}
+%\input{buckets}
+%\input{precision}
+%\input{undirected_applications}
+%\input{small_world}
+%\input{permutation}
 \input{catalan}
 %\input{domino}
 \input{coloring}

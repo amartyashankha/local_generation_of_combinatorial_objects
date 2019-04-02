@@ -30,7 +30,8 @@ $t_{mix}(\epsilon) \le \left( \frac{q-\Delta}{q-2\Delta}\right)n\left( \log n + 
 \subsection{Modified Glauber Dynamics}%
 \label{sec:modified_glauber_dynamics}
 
-Now we define a modified Markov Chain that proceeds in epochs.
+Now we define a modified Markov Chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
+The modified Markov chain procceds in epochs.
 We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch $\mathcal E_k$:
 \begin{itemize}
@@ -49,10 +50,11 @@ Notice that we \emph{can} have adjacent nodes update in the same epoch.
 However for the sake of succinctness we use their update rule and avoid a tedious path coupling argument.
 
 \todo{Cite Path Coupling}
-For the path coupling argument, we define the standard pre-metric on the space for all possible colorings (not necessarily valid ones).
-Given two colorings $X$ and $Y$, we define $d(X,Y)$ as the number of vertices $v$ such that $X_v\not= Y_v$.
 
-We define a coupling $(X,Y)\rightarrow(X',Y')$ where $X$ and $Y$ differ only at a single vertex $v$ such that $X_v = c_X$ and $Y_v = c_Y$.
+We can directly use the path coupling argument from \cite{mohsen} which be briefly describe below.
+Given two colorings $\vec X$ and $\vec Y$, we define $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$.
+We define the coupling $(\vec X,\vec Y)\rightarrow(\vec X',\vec Y')$ where $\vec X$ and $\vec Y$
+differ only at a single vertex $v$ such that $\vec X_v = c_X$ and $\vec Y_v = c_Y$.
 Now, we pick a random permutation of the vertices along with uniformly sampled colors:
 \[
 \left\langle (v_1, c_1), (v_2, c_2), \cdots, (v_n, c_n)\right\rangle
@@ -61,17 +63,18 @@ Now, we pick a random permutation of the vertices along with uniformly sampled c
 Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
 \begin{itemize}
     \item If the current color of $v_i$ as well as $c_i$ are both in $\{c_X,c_Y\}$,
-    then the $X$ chain picks the color $c_i$ and the $Y$ chain picks the other color.
+    then the $\vec X$ chain picks the color $c_i$ and the $\vec Y$ chain picks the other color.
     \item Otherwise, both chains pick the same color $c_i$ for the vertex $v_i$.
 \end{itemize}
 We use the following result from \cite{mohsen} that bounds the coupled distance.
 \begin{lemma}
 \label{lem:mohsen_single_epoch_distance}
-If $q = 2\alpha\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
+If $q = 2\alpha\Delta$ and $d(\vec X, \vec Y) = 1$,
+then $\mathbb E[d(\vec X',\vec Y')] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
 \end{lemma}
 \begin{corollary}
 \label{cor:single_epoch_distansce}
-If $q \ge 9\Delta$ and $d(X, Y) = 1$, then $\mathbb E[d(X',Y')] < \frac1{e^{1/3}}$
+If $q \ge 9\Delta$ and $d(\vec X, \vec Y) = 1$, then $\mathbb E[d(\vec X',\vec Y')] < \frac1{e^{1/3}}$
 \end{corollary}
 
 \begin{theorem}
@@ -88,26 +91,35 @@ and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the dis
 
 \subsection{Local Coloring Algorithm}%
 \label{sec:local_coloring_algortihm}
-Given a vertex $v$, the local-access generator has to output the color of $v$ after running $t \le 2\ln n$ epochs of \emph{Modified Glauber Dynamics}.
+Given query access to the adjacency matrix of a graph $G$ with maximum degree $\Delta$ and a vertex $v$,
+the algorithm has to output the color of $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
-%Each epoch can be implemented a local generator for a permutation of $V$.
-%Specifically, each epoch is a sequence of vertex and color samples:
-%\[
-%\chi^{(i)}
-%= \left\langle (v^{(i)}_1, c^{(i)}_1), (v^{(i)}_2, c^{(i)}_2), (v^{(i)}_3, c^{(i)}_3), \cdots, (v^{(i)}_T, c^{(i)}_T)\right\rangle
-%\thicksim_{\mathcal U} \left( V\times [q]\right)^T
-%\]
-%Here, $\left\{ v^{(i)}_1, v^{(i)}_2,\cdots, v^{(i)}_n\right\}$ is a permutation of all the vertices.
-%A position $j$ in the sequence is labeled \emph{``ACCEPT''} if at the $j^{th}$ step,
-%$v^{(i)}_j$ was recolored to $c^{(i)}_j$ (no conflicts with neighbors).
-%Otherwise, position $j$ is marked \emph{``REJECT''}.
-%We define $X^{(i)}_v = 1$ if the sample for $v$ in the $i^{th}$ epoch $(v, c^{(i)}_j)$ is accepted and $X^{(i)}_v = 0$ otherwise.
+The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$.
+Note that these values are fully independent and as such any $\vec C^t_v$ can be sampled trivially.
+We also use $\vec X^t$ to denote the final vector of vertex colors at the end of the $t^{th}$ epoch.
+Finally, we define indicator variables $\bm \chi^t_v$ to denote if the color for vertex $v$ was accepted at the $t^{th}$ epoch;
+$\bm \chi^t_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
+we satisfy the condition $\vec  C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$.
+So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
+where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
+While the proposals $\vec C^t_v$ are easy to sample, it is much less clear how we can sample the $\bm \chi^t_v$ values.
+Note that we can compute $\vec X^t_v$ quite easily if we know the values $\bm\chi^i_v$ for all $i\le t$.
+So, we focus our attention on the query $\func{Accept}(v,t)$ that returns $\bm\chi^t_v$.
 
-%We also define $\mathcal C^{(i)}_v$ to be the color sampled for vertex $v$ in the $i^{th}$ epoch,
-%and $\mathcal I^{(i)}_v$ to be the corresponding index $j$.
 
-\begin{wrapfigure}[21]{L}{0.51\textwidth}
+\subsubsection{Naive Coloring Implementations}%
+\label{sec:naive_coloring_implementations}
+The general strategy to implement this is to iterate over all neighbors $w$ of $v$,
+and for each of them check if they conflict with $v$'s proposed color.
+Given a neighbor $w$, one naive way to do this is to iterate backwards from epoch $t$ querying to find if $w$'s proposal was accepted
+until the first accepted proposal (from the latest epoch $t' < t$) is found.
+At this point, if $\mathcal C^{t'}_w = C^t_v$, then the current color of $w$ conflicts with $v$'s proposal.
+Otherwise there is no conflict and we can proceed to the next neighbor.
+THis process however makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
+This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired $t = \Omega(\log n)$.
+
+\begin{wrapfigure}[19]{r}{0.48\textwidth}
 \vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -143,31 +155,40 @@ We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 \end{framed}
 \end{wrapfigure}
 
-Each epoch is a vector of color samples $\vec C^{i} \thicksim_{\mathcal U} [q]^n$.
-Note that these values are fully independent and as such any $\vec C^i_v$ can be sampled trivially.
-We also use $\vec X^i$ to denote the final vector of vertex colors at the end of the $i^{th}$ epoch.
-Finally, we define indicator variables $\bm \chi^i_v$ to denote if the color for vertex $v$ was accepted at the $i^{th}$ epoch;
-$\bm \chi^i_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
-we satisfy the condition $\vec  C^i_v\not= \vec X^{i-1}_w$ and $\vec C^i_v\not= \vec C^i_w$.
-So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
-where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
-Algorithm~\ref{alg:coloring} shows the procedure for querying the value of $\vec X^t_v$.
+We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $C^t_v$ during \emph{some} epoch.
+In this case, the expected number of neighbors that have to be probed recursively is $\le t\Delta/q$
+(since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$).
+So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
+For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sublinear.
+This lower bound on $q$ is however asymptotically worse that the sequential requirement $q > 2\Delta = \mathcal O(\Delta)$.
 
-When the algorithm is asked for the final color of $v$, it finds the last epoch in which $v$ was accepted.
-Since there are only $\mathcal O(\log n)$ epochs, we focus our attention on the subroutine $\func{Accept}$ that samples the value of $\bm\chi^t_v$.
-The algorithm iterates through the neighbors $w$ of $v$, and check for conflicts with the proposed color $c=\vec C^t_v$.
+
+\subsubsection{Jumping Back to Past Epochs}
+\label{ssub:jumping_back_to_past_epochs}
+The expected number of neighbors that need to be checked can always be $t\Delta$ in the worst case.
+The crucial observation is that even though these recursive calls seem unavoidable,
+we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
+Because of the more complex structure of this epoch jumping process, the main challenge is to analyze the runtime.
+
+Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c = C^t_v$ is the color proposed by $v$ in epoch $t$.
+As before, we iterate through all neighbors $w$ of $v$.
 The condition $c\not= \vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$ in the current epoch.
 If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
-We first iterate through all the epochs in reverse order to check whether the color $c$ was ever proposed for vertex $w$.
+To achieve this, we iterate through all the epochs in reverse order (without making recursive calls)
+to check whether the color $c$ was ever proposed for vertex $w$.
 If not, we can ignore $w$, and otherwise let's say that the last proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
-Now, we need to recursively check if this proposal was $\func{Accept}$.
-If it was, we move to epoch $t'+1$ to see if $w$'s color was replaced.
-If not, we check epoch $t'+2$ and so on until we reach epoch $t-1$.
+Now, we directly ``jump'' to the $t'^{th}$ epoch and recursively check if this proposal was accepted.
+If the proposal $C^{t'}_w$ was not accepted, we keep iterating back until we find another candidate proposal for color $c$ or we run out of epochs.
+Otherwise if $\bm\chi^{t'}_w = 1$ (proposal accepted), we move to epoch $t'+1$ to see if $w$'s color was replaced.
+If not, we check epoch $t'+2$, $t'+3$, and so on until we reach epoch $t-1$.
 At this point we have seen that $\bm\chi^{t'}_w = 1$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected
 i.e. $\vec X^{t-1}_w = c$ and this leads to a conflict with $v$'s current proposal for color $c$ and hence $\bm\chi^t_v = 0$.
 If at any of the iterations, we see that a different proposal was accepted, then $w$ does not cause a conflict and we can move on to the next neighbor.
 If we exhaust all the neighbors and don't find any conflicts then $\bm\chi^t_v = 1$.
+
+Now we analyze the runtime of $\func{Accept}$ by constructing and solving a recurrence relation.
+We will use the following lemma to evaluate the expectation of products of relevant random variables.
 
 \begin{lemma}
 \label{lem:color_reject_probability}
@@ -179,6 +200,12 @@ A rejection can occur due to a conflict with at most $2\Delta$ possible values i
 Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/\alpha$.
 \end{proof}
 
+\begin{definition}
+\label{def:coloring_probes}
+\todo{What probes?}
+We define $T_t$ to be a random variable indicating the number of recursive calls performed during the execution of $\func{Accept}(v,t)$
+while sampling a single $\bm \chi_v^t$.
+\end{definition}
 So, the number of probes required to check whether a color $c$ (assigned at epoch $t'$) was overwritten at some epoch before $t$ is:
 \begin{align}
 \label{eq:color_overwrite}
@@ -189,13 +216,16 @@ So, the number of probes required to check whether a color $c$ (assigned at epoc
 
 \begin{lemma}
 \label{lem:coloring_recurrence}
-For $\alpha>4$, the expected time to sample a single $\bm\chi^t_v$ is $\mathbb E[T_t] = \mathcal{O}\left(t\Delta e^{2t/\alpha}\right)$.
+\todo{What probes? Given graph G and q colors ...}
+For $\alpha > 4.5$, the expected number of calls to the procedure $\func{Accept}$ while sampling a single $\bm\chi^t_v$
+is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
-We formulate a recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$ used by the algorithm.
+We start with the recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$
+(equivalently calls to $\func{Accept}$) used by the algorithm.
 We will use $\mathcal B(p)$ to refer to the Bernoulli random variable with bias $p$.
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
-(technically, only the last occurence matters, but we are looking for an upper bound).
+(in reality, only the last occurence matters, but we are looking for an upper bound).
 If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
 Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accept}$ proposal is found.
 Adding an extra $T_{t'}$ term to Equation~\ref{eq:color_overwrite} and summing up over all neighbors and epochs we get the following:
@@ -214,28 +244,30 @@ In the second step, we just group all the terms from the same epoch together.
 Using Lemma~\ref{lem:color_reject_probability} and the fact that $\mathbb P[C^{t'}_w = c]$ is independent of all other events,
 we can write a recurrence for the expected number of probes.
 \begin{align}
-\mathbb E[T_t]\le \Delta\cdot\frac{1}{\alpha\Delta}
+\mathbb E[T_t] \le \Delta\cdot\frac{1}{2\alpha\Delta}
 \left[
-\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} + \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot
-\left(1 + \frac1\alpha + \frac1{\alpha^2} + \cdots\right)
+\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} + \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \frac1\alpha + \frac1{\alpha^2} + \cdots\right)
 \right]
+\le \frac{1}{2\alpha}\cdot \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left[1 + \frac{\alpha}{\alpha-1} \right]
 \end{align}
-Now, we make the assumption that $\mathbb E[T_{t'}]\le e^{2t/\alpha}$ and show that this satisfies the expectation recurrence.
+Now, we make the assumption that $\mathbb E[T_{t'}]\le e^{\hagu t/\alpha}$,
+and show that this satisfies the expectation recurrence for the desired value of $k$.
 First, we sum the geometric series:
 \[
-\mathlarger\sum\limits_{t'=1}^{t-1} \mathbb E[T_{t'}] = \mathlarger\sum\limits_{t'=1}^{t-1} e^{2t'/\alpha}
-< \frac{e^{2t/\alpha}-1}{e^{2/\alpha}-1} < \frac{e^{2t/\alpha}}{e^{2/\alpha}-1}
+\mathlarger\sum\limits_{t'=1}^{t-1} \mathbb E[T_{t'}] = \mathlarger\sum\limits_{t'=1}^{t-1} e^{\hagu t'/\alpha}
+< \frac{e^{\hagu t/\alpha}-1}{e^{\hagu/\alpha}-1} < \frac{e^{\hagu t/\alpha}}{e^{\hagu/\alpha}-1}
 \]
 The expectation recurrence to be satisfied then becomes:
 \[
-\mathbb E[T_t]\le e^{2t/\alpha}\cdot \frac 1{\alpha}\cdot \frac{1}{e^{2/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
-= e^{2t/\alpha}\cdot \frac{2\alpha-1}{\alpha(\alpha-1)(e^{2/\alpha}-1)} = e^{2t/\alpha}\cdot f(\alpha)
+\mathbb E[T_t]\le \frac 1{2\alpha}\cdot \frac{e^{\hagu t/\alpha}}{e^{\hagu/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
+= e^{\hagu t/\alpha}\cdot \frac{2\alpha-1}{2\alpha(\alpha-1)(e^{\hagu/\alpha}-1)} = e^{\hagu t/\alpha}\cdot f(\alpha, k)
 \]
-We notice that $f(\alpha)$ is is upper bounded by $1$ in the domain $\alpha> 4$ (in fact $\lim\limits_{\alpha\to\infty}f(\alpha) = 1$).
-This can easily be verified by taking the derivatives and using L'H\^{o}spital's rule.
-Thus, our recurrence is satisfied.
+We notice that for $k=1.02$ and $\alpha > 4.5$, $f(\alpha) < 1$.
+This can easily be verified by checking that $f(\alpha,1.02)$ decreases monotonically with $\alpha$ in the range $\alpha > 4.5$.
+Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected number of calls is $\mathcal O(e^{1.02t/\alpha})$.
+
 Finally, we note that each probe potentially takes time $\mathcal O(t\Delta)$ to iterate through all the neighbors in all epochs
-resulting in a total runtime of $\mathcal O(t\Delta e^{2t/\alpha})$.
+resulting in a total runtime of $\mathcal O(t\Delta e^{\hagu t/\alpha})$.
 \end{proof}
 
 %\begin{corollary}
@@ -245,13 +277,16 @@ resulting in a total runtime of $\mathcal O(t\Delta e^{2t/\alpha})$.
 
 \begin{theorem}
 \label{thm:coloring_generator_main}
-Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta$ colors,
+Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
 we can sample the color of any given node in an ($1/n$-approximate) uniformly random coloring of the graph in a consistent manner
-using only $\mathcal O(n^{12/\alpha}\Delta\log n)$ time space and random bits.
-This is sublinear for $\alpha>12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
+using only $\mathcal O(n^{6.12/\alpha}\Delta\log n)$ time space and random bits.
+This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
 \end{theorem}
 \begin{proof}
-We use the mixing time from Theorem~\ref{thm:modified_mixing_time} $\tau_{mix}(1/n) = 6\ln n$ in conjunction with Lemma~\ref{lem:coloring_recurrence}.
-So, the overall runtime becomes $\mathcal O(n^{12/\alpha}\Delta\log n)$.
+We compute the mixing time from Theorem~\ref{thm:modified_mixing_time} to obtain $\tau_{mix}(1/n) = 6\ln n$ (this is valid since $q > 9\Delta$).
+Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
+the number of calls to $\func{Accept}$ is $\mathcal O(n^{6.12/\alpha}\Delta\log n)$  which is sublinear for $\alpha > 6.12$.
+Each call to $\func{Accept}(v,t)$ potentially spends $t\Delta$ time looking for neighbors in each epoch before $t$.
+Since $t \le 6\ln n$, the overall runtime becomes $\mathcal O(n^{6.12/\alpha}\Delta\log n)$.
 \end{proof}
 

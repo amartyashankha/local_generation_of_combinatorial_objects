@@ -59,15 +59,25 @@ We consider the $G(n, p)$ model: each edge $\{u,v\}$ exists independently with p
 Note that $p$ is not assumed to be constant, but may be a function of $n$.
 
 \paragraph*{Stochastic Block Model}
-This model is a generalization of the Erd\"{o}s-R\'{e}nyi Model. The vertex set $V$ is partitioned into $r$ communities $C_1, \ldots, C_r$. The probability that the edge $\{u,v\}$ exists is $p_{i,j}$ when $u\in C_i$ and $v\in C_j$, where the probabilities are given as an $r\times r$ symmetric matrix $\matr{P} = [p_{i,j}]_{i,j \in [r]}$.
-We assume that we are given explicitly the distribution $\distr{R}$ over the communities, and
-each vertex is assigned its community according to $\distr{R}$ independently at random.\footnote{Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$ are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}
+This model is a generalization of the Erd\"{o}s-R\'{e}nyi Model.
+The vertex set $V$ is partitioned into $r$ communities $C_1, \ldots, C_r$.
+The probability that the edge $\{u,v\}$ exists is $p_{i,j}$ when $u\in C_i$ and $v\in C_j$,
+where the probabilities are given as an $r\times r$ symmetric matrix $\matr{P} = [p_{i,j}]_{i,j \in [r]}$.
+We assume that we are given explicitly the distribution $\distr{R}$ over the communities,
+and each vertex is assigned its community according to $\distr{R}$ independently at random.
+\footnote{Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$ are given instead,
+where the assignment of vertices $V$ into these communities is chosen uniformly at random.}
 %The main difficulty here is being able to compute the uniformly sampled assignment of vertices to communities on-the-fly.
 
 \paragraph*{Small-World Model}
-In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$. Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$, and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$. Here, $c$ is an indicator of the number of long range directed edges present at each vertex. A common choice for $c$ is given by normalizing the distribution so that there is exactly one directed edge emerging from each vertex ($c = \Theta(1/\log n)$).
+In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$.
+Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,
+and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$.
+Here, $c$ is an indicator of the number of long range directed edges present at each vertex.
+A common choice for $c$ is given by normalizing the distribution so that there is exactly one directed edge emerging from each vertex ($c = \Theta(1/\log n)$).
 We will however support a range of values of $c=\log^{\pm\Theta(1)}n$.
-While not explicitly specified in the original model description of \cite{kleinberg}, we assume that the probability is rounded down to $1$ if $c/(\func{dist}(u,v))^{2} > 1$.
+While not explicitly specified in the original model description of \cite{kleinberg},
+we assume that the probability is rounded down to $1$ if $c/(\func{dist}(u,v))^{2} > 1$.
 
 
 \subsection{Miscellaneous}
