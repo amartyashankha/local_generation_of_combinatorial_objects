@@ -421,9 +421,10 @@ These values are the ones where $d < \log^4 n$ or $2d > U+D-k-\log^4 n$.
 Since $d$ is the number of up steps (in the left sub-interval), $d \ge 0$
 and since the length of the right sub-interval nust be non-negative, we get $U+D-2d-k+1 \ge 0$.
 Thus, we define the set
-\[
+\begin{align}
+\label{eq:SetDefinition}
     \mathcal R = \left\{ d\ \mathlarger|\ 0\le d < \log^4 n \textrm{\textbf{\ or\ }} -1 < 2d-U-D+k < \log^4 n \right\}
-\]
+\end{align}
 Clearly, we can bound the size of this set as $|\mathcal R| = \mathcal O(\log^4 n)$.
 An immediate consequence of Lemma~\ref{lem:ReturnDLeftBound} and Lemma~\ref{lem:ReturnDRightBound} is the following.
 
@@ -463,6 +464,7 @@ Given the piecewise continuous function
         && p_d = \Theta\left( \int\limits_d^{d+1} \hat q(\delta)\right)
     \end{align*}
 }
+Furthermore, $\hat q(\delta)$ has $\mathcal O(\log^4 n)$ continuous pieces.
 %Note that this integral has a closed form for a fixed value of $\floor{r(d)}$.
 \end{lemma}
 \begin{proof}
@@ -470,16 +472,31 @@ For $d \in \mathcal R$, the integral trivially evaluateds to exactly $p_d$.
 For $d\not\in \mathcal R$, it suffices to show that $p_d = \Theta\left( \hat q(\delta)\right)$ for all $\delta\in [d,d+1)$.
 We already know that $p_d = \Theta\left( \mathcal K\cdot f(d)\cdot e^{-r(d)}\right)$.
 Moreover, for any $\delta\in [d,d+1)$, the exponential term in $\hat q(\delta)$ is within a factor of $e$ of the original $e^{-r(d)}$ term.
+
+For all $\mathcal O(\log^4 n)$ values $d\in \mathcal R$, $\hat q(\delta)$ is constant on the interval $[d,d+1]$.
 \end{proof}
 
 Now, we have everything in place to define the distribution $\{ q_d\}$ that we will be sampling from.
 Specifically, we will define $q_d$ and it's CDF $Q_d$ as follows:
 \begin{align}
-    q_d = \frac{\int\limits_d^{d+1} \hat q(d)}{\mathcal N}
-    && Q_d = \frac{\int\limits_0^{d+1} \hat q(d)}{\mathcal N}
+    q_d = \frac{\int\limits_d^{d+1} \hat q(\delta)}{\mathcal N}
+    && Q_d = \frac{\int\limits_0^{d+1} \hat q(\delta)}{\mathcal N}
 \end{align}
-Here the normalizing factor $\mathcal N$ is $\int\limits_0^{d_{max}+1} \hat q(d)$.
+Here the normalizing factor $\mathcal N$ is $\int\limits_0^{d_{max}+1} \hat q(\delta)$.
 To show that these can be computed efficiently, it suffices to show that any integral of $\hat q_d$ can be efficiently evaluated.
+
+\begin{lemma}
+\label{lem:ReturnProbabilityPiecewiseContinuousIntegral}
+Given the function $\hat q_d$ defined in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous},
+it is possible to compute the integral $\int\limits_{d_1}^{d_2+1} \hat q(\delta)$ in $\poly(\log n)$ time for any valid $d_1, d_2$
+(i.e. the bounds must be such that $d_i \ge 0$ and $U+D-2d-k+1 \ge 0$).
+\end{lemma}
+\begin{proof}
+As noted in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous}, $\hat q(\delta)$ is piecewise continuous function with $\mathcal O(\log^4 n)$ pieces.
+For all $\mathcal O(\log^4 n)$ values $d\in \mathcal R$, $\hat q(\delta)$ is constant on the interval $[d,d+1]$.
+Now consider values
+We claim that the number of continuous segments in the \emph{valid} range is $\mathcal O(\log^4 n)$.
+\end{proof}
 
 \begin{theorem}
 \label{thm:first_return_in_interval}
