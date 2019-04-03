@@ -47,7 +47,7 @@ by replacing up and down steps with opening and closing brackets respectively.
 The $\func{Height}$ query corresponds to asking for the nesting depth at a certain position in the word,
 and $\func{First-Return}(i)$ returns the position of the matching bracket for position $i$.
 
-There is also a natural bijection between Dyck paths and rooted ordered trees by letting the path be a transcript of the DFS traversal of a tree.
+\todo{figure}
 Starting with the root, for each ``up-step'' we move to a new child of the current node, and for each ``down-step'', we backtrack towards the root.
 Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
 \todo{Figure? Degree queries by repeated application.}
