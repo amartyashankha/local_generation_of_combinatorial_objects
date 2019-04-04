@@ -138,26 +138,11 @@ This results in a different starting point, and the boundary constraint will als
 Hence, we define $k' = k + 2U - 2D$  to represent the new boundary constraint (since the final height of the $2B$-interval is $k'-1$).
 Finally, $S_{total}$ is the total number of possible paths in the interval (of length $2B$).
 
-We will use the following rejection sampling lemma from \cite{huge}.
-\todo{Frequently?}
-\begin{lemma}
-\label{lem:huge}
-Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
-\begin{enumerate}
-    \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
-    \item Generating an index $i$ according to $q_i$ is closely implementable.
-    \item There exists a $poly(log n)$-time recognizable set $B$ such that
-    \begin{itemize}
-        \item $1-\sum\limits_{i\in B} p_i$ is negligible
-        \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
-    \end{itemize}
-\end{enumerate}
-Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
-\end{lemma}
+We will use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling} from \cite{huge}.
 An important point to note is that in order to apply this lemma, we must be able to compute the $p_d$ values at least approximately.
 For now, we will assume that we have access to an oracle that will compute the value for us.
 Lemma~\ref{lem:probability_approximation_oracle} shows how to construct such an oracle.
-We also use the following lemmas to bound the deviation of the path.
+We also use the following lemma to bound the deviation of the path.
 \begin{restatable}{lemma}{DyckPathDeviationBound}
 \label{lem:DyckPathDeviationBound}
 Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
@@ -196,7 +181,7 @@ For the definitions in Section~\ref{sec:sampling_the_height}, we see that:
 \end{align}
 Here, $k' = k+2U-2D$, and so $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
 The distribution $\mathsf C_k(2U,2D)$ we wish to sample from has probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
-We will use rejection sampling (Lemma~\ref{lem:huge}) by constructing a different distribution $q_d$
+We will use rejection sampling (Lemma~\ref{lem:rejection_sampling}) by constructing a different distribution $q_d$
 that approximates $p_d$ up to logarithmic factors over the vast majority of its support
 (we ignore all $|d|>\Theta(\sqrt{B\log n})$ since the associated probability mass is negligible by Lemma~\ref{lem:DyckPathDeviationBound}).
 To invoke the rejection sampling lemma, we present a method to approximate the probabilities $p_d$ in Lemma~\ref{lem:probability_approximation_oracle}.
@@ -238,7 +223,7 @@ $S_{right} < c_2 \frac{k'\cdot \sqrt{log n}}{\sqrt{B}}\cdot{{B}\choose{U-d}}$ fo
 When $kk' \le 2U + 1$, $S_{total} < c_3 \frac{k\cdot k'}{B}\cdot{{2B}\choose{2D}}$ for some constant $c_3$.
 \end{restatable}
 
-We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log n)$ and invoke Lemma~\ref{lem:huge} to sample the value of $d$.
+We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log n)$ and invoke Lemma~\ref{lem:rejection_sampling} to sample the value of $d$.
 This gives us the height of the Dyck path at the midpoint of the two given points.
 
 \begin{theorem}
@@ -252,7 +237,7 @@ Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
 If $b-a$ is even, we can set $B = (b-a)/2$.
 Otherwise, we first sample a single step from $a$ to $a+1$, and then set $B = (b-a-1)/2$.
 Since there are only two possibilities for a single step, we can explicitly approximate the probabilities, and then sample accordingly.
-This allows us to apply the rejection sampling from Lemma~\ref{lem:huge} using $\{ q_d\}$ to obtain samples from $\{ p_d\}$ as defined above.
+This allows us to apply the rejection sampling from Lemma~\ref{lem:rejection_sampling} using $\{ q_d\}$ to obtain samples from $\{ p_d\}$ as defined above.
 %Now, if $B > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
 %to obtain a $\mathcal O(poly(\log n))$ algorithm.
 %Otherwise, we sample each step induividually.

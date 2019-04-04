@@ -1,8 +1,4 @@
-\section{Preliminaries}
-\label{sec:model}
-\subsection{Local-Access Generators}
-\label{sec:oracle_model}
-
+\section{Local-Access Generators}
 We begin by formalizing a model of {\em local-access generators} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
 \todo{Not good}
 Our work provides local-access generators for various basic classes of graphs described in the following, with 
@@ -80,11 +76,3 @@ While not explicitly specified in the original model description of \cite{kleinb
 we assume that the probability is rounded down to $1$ if $c/(\func{dist}(u,v))^{2} > 1$.
 
 
-\subsection{Miscellaneous}
-
-\paragraph*{Arithmetic operations} Let $N$ be a sufficiently large number of bits required to maintain a multiplicative error of at most a $\frac{1}{\poly(n)}$ factor over $\poly(n)$ elementary computations ($+, -, \cdot, /, \exp$).\footnote{In our application of $\exp$, we only compute $a^b$ for $b \in \mathbb{Z}^+$ and $0 < a \leq 1+\Theta(\frac{1}{b})$, where $a^b = \Bo(1)$. For this, $N=\Bo(\log n)$ bits are sufficient to achieve the desired accuracy, namely an additive error of $n^{-c}$.} We assume that each elementary operation on words of size $N$ bits can be performed in constant time. Likewise, a random $N$-bit integer can be acquired in constant time. We assume that the input is also given with $N$-bit precision. %Any other non-trivial operations will be justified later.
-
-\paragraph*{Sampling via a CDF}\label{para:CDF}
-Consider a probability distribution $\distr{X}$ over $O(n)$ consecutive integers, whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
-Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is
-$\frac{1}{\poly(n)}$-close to $\distr{X}$ in $L_1$-distance.\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\mathbb P[X\leq x] \geq r$.}

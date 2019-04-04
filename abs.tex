@@ -1,12 +1,12 @@
 \begin{abstract}
 
-Consider an algorithm performing a computation on a \em{huge random object} (for example a random graph or a ``long'' random walk).
+Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
 Such an \emph{implementation} would emulate the random object by answering appropriate queries in a consistent manner.
 Specifically, all responses to queries must be consistent with an instance of the random object sampled from the true distribution (or close to it).
 This paradigm is useful when the algorithm is sub-linear and thus,
-requiring the algo to sample the entir obj up front would ruin its efficieny.
+requiring the algorithm to sample the entire object up front would ruin its efficiency.
 
 Our first set of results focus on undirected graphs with independent edge probabilities,
 that is, each edge is chosen as an independent Bernoulli random variable.
@@ -17,7 +17,7 @@ As in previous local-access implementations for random graphs,
 we support \func{Vertex-Pair}, \func{Next-Neighbor} queries, and \func{All-Neighbors} queries.
 In addition, we introduce a new \func{Random-Neighbor} query.
 We also give the first local-access generation procedure for \func{All-Neighbors} queries in the (sparse and directed) Kleinberg's Small-World model.
-\textcolor{red}{ Note that, in the sparse case, an \func{All-Neighbors} query can be used to simulate the other types of queries efficiently.}
+\textcolor{Maroon}{Note that, in the sparse case, an $\func{All-Neighbors}$ query can be used to simulate the other types of queries efficiently.}
 All of our generators require no pre-processing time, and answer each query using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
 
 We next show how to implement random Catalan objects, specifically focusing on Dyck paths (balanced random walks that are always positive).
@@ -27,8 +27,9 @@ This generator can be used to implement $\func{Next-Neighbor}$ queries on random
 and $\func{Matching-Bracket}$ queries on random well bracketed expressions (the Dyck language).
 
 Finally, we study random $q$-colorings of graphs with maximum degree $\Delta$.
-This is a new setting where the random object also has a ``huge'' description (the underlying graph) that can be accessed through adjacency list queries.
-This setting is similar to Local Computation Algorithms \cite{LCA, LCA_space_efficient}
+This is a more difficult setting where the random object also has a ``huge'' description (the underlying graph)
+that can be accessed through adjacency list queries.
+\textcolor{Maroon}{This setting is similar to Local Computation Algorithms \cite{LCA, LCA_space_efficient}}
 with the added restriction that the output must follow a specific distribution in addition to being legal.
 We show how to sample the color of a single node in sub-linear time when $q > \alpha\Delta$ where $\alpha$ is a small constant.
 
