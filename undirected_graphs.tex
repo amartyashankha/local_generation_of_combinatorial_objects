@@ -30,7 +30,7 @@ For the sake of analysis, we will frequently consider the \emph{entire} table of
 and the algorithm simply ``uncovers'' these variables instead of making coin-flips.
 Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{uv}$ once the graph generation is complete.
 
-\paragraph*{Obstacles for maintaining $\ADJ$}
+\paragraph*{Obstacles for maintaining $\ADJ$ explicitly}
 First, consider a naive implemention that fills out the cells of $\ADJ$ one-by-one as required by each query.
 There are two problems with this approach.
 Firstly, the algorithm only finds a neighbor, for a \func{Random-Neighbor} or \func{Next-Neighbor} query, with probability $p_{uv}$,
@@ -63,22 +63,27 @@ See Section~\ref{sec:reroll-cont} for full details.
 
 \subsubsection{Data structure}\label{sec:nn-ds}
 
-From the definition of $X_{uv}$, \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{vu} = \ONE\}$ (or $n+1$ if no satisfying $u$ exists). Let
-$P_v = \{u: \ADJ[v][u]=1\}$ be the set of known neighbors of $v$, and $w_v = \min \{(P_v \cap (\LAST[v], n]) \cup \{n+1\}\}$ be its first known neighbor not yet reported by a $\func{Next-Neighbor}(v)$ query, or equivalently, the next occurrence of $\ONE$ in $v$'s row on $\ADJ$ after $\LAST[v]$. Note that $w_v = n+1$ denotes that there is no known neighbor of $v$ after $\LAST[v]$.
-Consequently, $\ADJ[v][u] \in \{\PHI,\ZERO\}$ for all $u \in (\LAST[v], w_v)$, so \func{Next-Neighbor}$(v)$ is
-either the index $u$ of the first occurrence of $X_{vu} = \ONE$ in this range, or $w_v$ if no such index exists.
+From the definition of $X_{uv}$, \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{vu} = \ONE\}$.
+Let $P_v = \{u: \ADJ[v][u]=1\}$ be the set of known neighbors of $v$, and $w_v = \min \{(P_v \cap (\LAST[v], n])\}$ be its first known neighbor
+not yet reported by a $\func{Next-Neighbor}(v)$ query, or equivalently, the next occurrence of $\ONE$ in $v$'s row on $\ADJ$ after $\LAST[v]$.
+If there is no known neighbor of $v$ after $\LAST[v]$, we set $w_v = n+1$.
+Consequently, $\ADJ[v][u] \in \{\PHI,\ZERO\}$ for all $u \in (\LAST[v], w_v)$,
+so \func{Next-Neighbor}$(v)$ is either the index $u$ of the first occurrence of $X_{vu} = \ONE$ in this range, or $w_v$ if no such index exists.
 
-We keep track of $\LAST[v]$ in a dictionary, where the key-value pair $(v,\LAST[v])$ is stored only when $\LAST[v] \neq 0$: this removes any initialization overhead.
-Each $P_v$ is maintained as an ordered set, which is also only instantiated when it becomes non-empty.
-We maintain $P_v$ simply by adding $u$ to $v$ if a call \func{Next-Neighbor}$(v)$ returns $u$, and vice versa. Clearly, $\ADJ[v][u]=1$ if and only if $u \in P_v$ by construction.
-
-As discussed in the previous section, we cannot maintain $\ADJ$ explicitly, as updating it requires replacing up to $\Theta(n)$ $\PHI$'s to $\ZERO$'s for a single \func{Next-Neighbor} query in the worst case. Instead, we argue that $\LAST$ and $P_v$'s provide a succinct representation of $\ADJ$ via the following observation. For simplicity, we say that $X_{uv}$ is \emph{decided} if $\ADJ[u][v] \neq \PHI$, and call it \emph{undecided} otherwise.
+We keep track of $\LAST[v]$ in a dictionary, to avoid any initialization overhead.
+Each $P_v$ is maintained as an ordered set, which is also instantiated when it becomes non-empty.
+When \func{Next-Neighbor}$(v)$ returns $u$, we add $v$ to $P_u$ and $u$ to $P_v$.
+We do not attempt to maintain $\ADJ$ explicitly, as updating it requires replacing up to $\Theta(n)$ $\PHI$'s to $\ZERO$'s
+for a single \func{Next-Neighbor} query in the worst case.
+Instead, we argue that $\LAST$ and $P_v$'s provide a succinct representation of $\ADJ$ via the following observation.
 
 \begin{restatable}{lemma}{cond}\label{lem:cond-0}
 The data structures $\LAST$ and $P_v$'s together provide a succinct representation of $\ADJ$ when only \func{Next-Neighbor} queries are allowed. In particular, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v$. Otherwise, $\ADJ[v][u]=\ZERO$ when $u <\LAST[v]$ or $v < \LAST[u]$. In all remaining cases, $\ADJ[v][u]=\PHI$.
 \end{restatable}
 \begin{proof}
-The condition for $\ADJ[v][u]=\ONE$ clearly holds by constuction. Otherwise, observe that $\ADJ[v][u]$ becomes decided (that is, its value is changed from $\PHI$ to $\ZERO$) precisely during the first call of \func{Next-Neighbor}$(v)$ that returns a value $u' > u$ which thereby sets $\LAST[v]$ to $u'$ yielding $u<\LAST[v]$, or vice versa.
+The condition for $\ADJ[v][u]=\ONE$ clearly holds by constuction.
+Otherwise, observe that $\ADJ[v][u]$ becomes \emph{decided} (i.e. its value is changed from $\PHI$ to $\ZERO$)
+during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$ thereby setting $\LAST[v] = u' \implies u<\LAST[v]$, or vice versa.
 \end{proof}
 
 \begin{wrapfigure}[15]{R}{0.5\textwidth}
@@ -108,34 +113,35 @@ The condition for $\ADJ[v][u]=\ONE$ clearly holds by constuction. Otherwise, obs
 
 
 
-\subsubsection{Queries and Updates}\label{sec:nn-correctness}
-We now provide our generator (Algorithm~\ref{alg:oblivious-coin-toss}), and discuss the correctness of its sampling process. The argument here is rather subtle and relies on viewing the random process as an ``uncovering'' process on the table of RVs $X_{uv}$'s as previously introduced in Section~\ref{sec:ER-naive}.
-Algorithm~\ref{alg:oblivious-coin-toss}, considers the following experiment for sampling the next neighbor of $v$ in the range $(\LAST[v],w_v)$.
+\subsubsection{Queries and Updates}
+\label{sec:nn-correctness}
+We now present Algorithm~\ref{alg:oblivious-coin-toss}, and discuss the correctness of its sampling process.
+The argument here is rather subtle and relies on viewing the random process as an ``uncovering'' process on the table of RVs $X_{uv}$
+(introduced in Section~\ref{sec:undirected}).
+Consider the following experiment for sampling the next neighbor of $v$ in the range $(\LAST[v],w_v)$.
 Suppose that we generate a sequence of $w_v-\LAST[v]-1$ independent coin-tosses,
-where the $i^\textrm{th}$ coin $C_{vu}$ corresponding to $u = \LAST[v]+i$ has bias $p_{vu}$,
-regardless of whether $X_{vu}$'s are decided or not.
+where the $i^{th}$ coin $C_{vu}$ corresponding to $u = \LAST[v]+i$ has bias $p_{vu}$, regardless of whether $X_{vu}$'s are decided or not.
 Then, we use the sequence $\langle C_{vu} \rangle$ to assign values to \emph{undecided} random variable $X_{vu}$.
-The crucial observation here is that, the \emph{decided} random variables $X_{vu} = \ZERO$ do not need coin-flips, and the corresponding coin result $C_{vu}$ can simply be discarded.
-Thus, we need to generate coin-flips up until we encounter some $u$ satisfying
-both (i) $C_{vu} = \ONE$, and (ii) $\ADJ[v][u] = \PHI$.
-
-%\anak{Due to Shankha's change, $\mathsf{F}$ here and $\mathsf{ExactF}$ in the deterministic construction have rather different meaning; consider using a different name altogether in the latter.}
+The main observation here is that, the \emph{decided} random variables $X_{vu} = \ZERO$ do not need coin-flips,
+and the corresponding coin result $C_{vu}$ can simply be discarded.
+Thus, we generate coin-flips up until we encounter some $u$ satisfying both $C_{vu} = \ONE$, and $\ADJ[v][u] = \PHI$.
 
 Let $\mathsf{F}(v,a,b)$ denote the probability distribution of the occurrence $u$ of the first coin-flip $C_{vu} = \ONE$ among the neighbors in $(a, b)$.
 More specifically, $F\sim\mathsf{F}(v,a,b)$ represents the event that $C_{v,a+1}=\cdots=C_{v,F-1}=\ZERO$ and $C_{v,F}=\ONE$,
 which happens with probability $\mathbb P[F=f]=\prod_{u=a+1}^{f-1} (1-p_{vu}) \cdot p_{vf}$.
 For convenience, let $F = b$ denote the event where all $C_{vu}=\ZERO$. Our algorithm samples $F_1\sim\mathsf{F}(v,\LAST[v],w_v)$ to find the first occurrence of $C_{v,F_1} = \ONE$, then samples $F_2\sim\mathsf{F}(v,F_1,w_v)$ to find the second occurrence $C_{v,F_2} = \ONE$, and so on.
 These values $\{F_i\}$ are iterated as $u$ in Algorithm~\ref{alg:oblivious-coin-toss}.
-As this process generates $u$ satisfying (i) in the increasing order, we repeat until we find one that also satisfies (ii).
+As this process generates $u$ satisfying $C_{vu}=1$ in the increasing order, we repeat until we find one that also satisfies $\ADJ[u][v]=\phi$.
 Note that once the process terminates at some $u$, we make no implications on the results of any uninspected coin-flips after $C_{vu}$.
 
 \paragraph*{Obstacles for extending beyond \func{Next-Neighbor} queries}
 There are two main issues that prevent this method from supporting \func{Random-Neighbor} queries.
-Firstly, while one might consider applying \func{Next-Neighbor} from some random location $u$ to find the minimum $u' \geq u$ where $\ADJ[v][u']=\ONE$, the probability of choosing $u'$ will depend on the probabilities $p_{vu}$'s, and is generally not uniform.
-While a rejection sampling method may be applied to balance out the probabilities of choosing neighbors, these arbitrary $p_{vu}$'s may distribute the neighbors rather unevenly: some small contiguous locations may contain so many neighbors that the rejection sampling approach requires too many iterations to obtain a single uniform neighbor.
-
- Secondly, in developing Algorithm~\ref{alg:oblivious-coin-toss}, we observe that $\LAST[v]$ and $P_v$ together provide a succinct representation of $\ADJ[v][u] = \ZERO$ only for contiguous cells $\ADJ[v][u]$ where $u \leq \LAST[v]$ or $v \leq \LAST[u]$: they cannot handle $\ZERO$ anywhere else.
- Unfortunately, in order to extend our construction to support \func{Random-Neighbor} queries using the idea suggested in Algorithm~\ref{alg:naive}, we must unavoidably assign $\ADJ[v][u]$ to $\ZERO$ in random locations beyond $\LAST[v]$ or $\LAST[u]$, which cannot be captured by the current data structure.
- Furthermore, unlike $\ONE$'s, we cannot record $\ZERO$'s using a data structure similarly to that of $P_v$.
- More specifically, to speed-up the sampling process for small $p_{vu}$'s, we must generate many random non-neighbors at once as suggested in Algorithm~\ref{alg:oblivious-coin-toss}, but we cannot afford to spend time linear in the number of created $\ZERO$'s to update our data structure.
- We remedy these issues via the following bucketing approach.
+Firstly, while one might consider applying \func{Next-Neighbor} starting from some random location $u$ to find the minimum $u' \geq u$
+where $\ADJ[v][u']=\ONE$, the probability of choosing $u'$ will depend on the probabilities $p_{vu}$'s, and is generally not uniform.
+Secondly, in Section~\ref{sec:nn-ds}, we observe that $\LAST[v]$ and $P_v$ together provide a succinct representation of $\ADJ[v][u] = \ZERO$
+only for contiguous cells $\ADJ[v][u]$ where $u \leq \LAST[v]$ or $v \leq \LAST[u]$: they cannot handle $\ZERO$ anywhere else.
+Unfortunately, in order to support \func{Random-Neighbor} queries, we will likely need to assign $\ADJ[v][u]$ to $\ZERO$ in random locations
+beyond $\LAST[v]$ or $\LAST[u]$, which cannot be captured by the current data structure.
+Specifically, to speed-up the sampling process for small $p_{vu}$'s, we must generate many random non-neighbors at once,
+but we cannot afford to spend time linear in the number of created $\ZERO$'s to update our data structure.
+We remedy these issues via the following bucketing approach.

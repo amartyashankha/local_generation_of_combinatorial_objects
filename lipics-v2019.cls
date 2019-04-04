@@ -214,13 +214,13 @@
 \renewcommand\Large{\@setfontsize\Large{12}{14}}
 \setlength\parindent{1.5em}
 \setlength\headheight{3mm}
-\setlength\headsep   {10mm}
+\setlength\headsep{10mm}
 \setlength\footskip{3mm}
-\setlength\textwidth{150mm}
-\setlength\textheight{222mm}
-\setlength\oddsidemargin{30mm}
-\setlength\evensidemargin{30mm}
-\setlength\marginparwidth{25mm}
+\setlength\textwidth{160mm}
+\setlength\textheight{230mm}
+\setlength\oddsidemargin{25mm}
+\setlength\evensidemargin{25mm}
+\setlength\marginparwidth{20mm}
 \setlength\topmargin{13mm}
 \setlength{\skip\footins}{2\baselineskip \@plus 4\p@ \@minus 2\p@}
 \def\@listi{\leftmargin\leftmargini
@@ -247,22 +247,22 @@
                    \llap{\hbox to0.5\oddsidemargin{  \ifx\@hideLIPIcs\@undefined\ifx\@ArticleNo\@empty\textcolor{blue}{XX}\else\@ArticleNo\fi:\fi\thepage\hss}}\leftmark\hfil}%
     \def\@oddhead{\large\sffamily\bfseries\rightmark\hfil
                   \rlap{\hbox to0.5\oddsidemargin{\hss  \ifx\@hideLIPIcs\@undefined\ifx\@ArticleNo\@empty\textcolor{blue}{XX}\else\@ArticleNo\fi:\fi\thepage}}}%
-    \def\@oddfoot{\hfil
-                  \rlap{%
-                    \vtop{%
-                      \vskip10mm
-                      \colorbox[rgb]{0.99,0.78,0.07}
-                                    {\@tempdima\evensidemargin
-                                     \advance\@tempdima1in
-                                     \advance\@tempdima\hoffset
-                                     \hb@xt@\@tempdima{%
-                                       \ifx\@hideLIPIcs\@undefined
-                                         \textcolor{darkgray}{\normalsize\sffamily
-                                         \bfseries\quad
-                                         \expandafter\textsolittle
-                                         \expandafter{\@EventShortTitle}}%
-                                       \fi
-                                     \strut\hss}}}}}
+    %\def\@oddfoot{\hfil
+                  %\rlap{%
+                    %\vtop{%
+                      %\vskip10mm
+                      %\colorbox[rgb]{0.99,0.78,0.07}
+                                    %{\@tempdima\evensidemargin
+                                     %\advance\@tempdima1in
+                                     %\advance\@tempdima\hoffset
+                                     %\hb@xt@\@tempdima{%
+                                       %\ifx\@hideLIPIcs\@undefined
+                                         %\textcolor{darkgray}{\normalsize\sffamily
+                                         %\bfseries\quad
+                                         %\expandafter\textsolittle
+                                         %\expandafter{\@EventShortTitle}}%
+                                       %\fi
+                                     %\strut\hss}}}}}
     \let\@evenfoot\@empty
     \let\@mkboth\markboth
   \let\sectionmark\@gobble

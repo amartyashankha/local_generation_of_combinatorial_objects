@@ -1,82 +1,57 @@
-\subsection{Final Generator via the Bucketing Approach}
+\subsection{Final Implementation via the Bucketing Approach}
 \label{sec:buckets}
 
-We now resolve both of the above issues via the bucketing approach, allowing our generator to support all remaining types of queries.
-We begin this section by focusing first on \func{Random-Neighbor} queries, then extend the construction to the remaining ones. In order to handle \func{Random-Neighbor}$(v)$,
-we divide the neighbors of $v$ into \emph{buckets} $B_v = \{ B_v^{(1)}, B_v^{(2)},\ldots\}$,
+We now resolve both of the above issues, and present an implementation that supports all types of queries.
+We begin this section by focusing first on \func{Random-Neighbor} queries, then extend the construction to the remaining ones.
+In order to handle \func{Random-Neighbor}$(v)$, we divide the neighbors of $v$ into \emph{buckets} $\vec B_v = \{ B^{(i)}_v, B^{(i)}_v,\ldots\}$,
 so that each bucket contains, in expectation, roughly the same number of neighbors of $v$.
-We may then implement \func{Random-Neighbor}$(v)$ by randomly selecting a bucket $B_v^{(i)}$,
-fill in entries $\ADJ[v][u]$ for $u \in B_v^{(i)}$ with $\ONE$'s and $\ZERO$'s, then report a random neighbor from this bucket.
-As the bucket size may be too large when the probabilities are small, instead of using a linear scan, our \func{Fill} subroutine will be implemented with the \func{Next-Neighbor} subroutine in Algorithm~\ref{alg:oblivious-coin-toss} previously developed in Section~\ref{sec:ER-rand}.
-Since the number of iterations required by this subroutine is roughly proportional to the number of neighbors, we choose to allocate a constant number of neighbors in expectation to each bucket: with constant probability the bucket contains some neighbors, and with high probability it has at most $O(\log n)$ neighbors.
+We implement \func{Random-Neighbor}$(v)$ by randomly selecting a bucket $B^{(i)}_v$,
+filling in entries $\ADJ[v][u]$ for $u \in B^{(i)}_v$ with $\ONE$'s and $\ZERO$'s, and then reporting a random neighbor from this bucket.
+As the bucket size may be large when the probabilities are small, instead of using a linear scan,
+our \func{Fill} subroutine will be implemented using the ``run-of-$\ZERO$s'' sampling from  Algorithm~\ref{alg:oblivious-coin-toss}
+(see Section~\ref{sec:ER-rand}).
+Since the number of iterations required by this subroutine is roughly proportional to the number of neighbors,
+we choose to allocate a constant number of neighbors in expectation to each bucket:
+with constant probability the bucket contains some neighbors, and with high probability it has at most $O(\log n)$ neighbors.
 
-Nonetheless, as the actual number of neighbors appearing in each bucket may be different, we balance out these discrepancies by performing \emph{rejection sampling}, equalizing the probability of choosing any neighbor implicitly, again without the knowledge of $\deg(v)$ as previously done in Section~\ref{sec:ER-naive}.
-Leveraging the fact that the maximum number of neighbors in any bucket is $\Bo(\log n)$, we show not only that the probabability of success in the rejection sampling process is at least $1/\poly(\log n)$, but the number of iterations required by \func{Next-Neighbor} is also bounded by $\poly(\log n)$, achieving the overall $\poly(\log n)$ complexities.
-Here in this section, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices, $\sum_{u=a}^b p_{vu}$, can be computed efficiently.
+Nonetheless, as the actual number of neighbors appearing in each bucket may be different,
+we balance out these discrepancies by performing \emph{rejection sampling}, equalizing the probability of choosing any neighbor implicitly,
+again without the knowledge of $\deg(v)$.
+Leveraging the fact that the maximum number of neighbors in any bucket is $\Bo(\log n)$,
+we show not only that the probabability of success in the rejection sampling process is at least $1/\poly(\log n)$,
+but the number of iterations required by \func{Next-Neighbor} is also bounded by $\poly(\log n)$, achieving the overall $\poly(\log n)$ complexities.
+Here in this section, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices,
+$\sum_{u=a}^b p_{vu}$, can be approximated efficiently.
 
-\subsubsection{Partitioning into buckets}
-\label{sec:bucket_partition}
-More formally, we fix some sufficiently large constant $L$,
-and assign the vertex $u$ to the $\lceil\sum^{u}_{i=1} p_{vi}/L\rceil^\textrm{th}$ bucket of $v$.
-%So the total number of buckets is $|B_v| = \lceil\sum^{n}_{i=1} p_{vi}/L\rceil$.
-Essentially, each bucket represents a contiguous range of vertices,
-where the expected number of neighbors of $v$ in the bucket is (mostly) in the range $[L-1,L+1]$
+\subsubsection{Partitioning and Filling the Buckets}
+\label{sec:bucket_partitioning_and_filling}
+We fix some sufficiently large constant $L$, and assign the vertex $u$ to the $\lceil\sum^{u}_{i=1} p_{vi}/L\rceil^\textrm{th}$ bucket of $v$.
+Essentially, each bucket represents a contiguous range of vertices, where the expected number of neighbors of $v$ in the bucket is in $[L-1,L+1]$
 (for example, for $G(n,p)$, each bucket contains roughly $L/p$ vertices).
-Let us define $\Gamma^{(i)}(v) = \Gamma(v) \cap B_v^{(i)}$,
-the actual neighbors appearing in bucket $B^{(i)}_v$.
-Our construction ensures that $\mathbb E \left[|\Gamma^{(i)}(v)|\right] < L+1$ for every bucket,
-and $\mathbb E > L-1$ for every $i < |B_v|$
-(i.e., the condition holds for all buckets but possibly the last one).
+Let us define $\Gamma^{(i)}(v) = \Gamma(v) \cap B^{(i)}_v$, the actual neighbors appearing in bucket $B^{(i)}_v$.
+Our construction ensures that $L-1 < \mathbb E \left[|\Gamma^{(i)}(v)|\right] < L+1$ for every $i < |\vec B_v|$
+(i.e., the condition holds for all buckets except possibly the last one).
 
-Now, we show that with high probability, all the bucket sizes $|\Gamma^{(i)}(v)|=\mathcal{O}(\log n)$, and at least a $1/3$-fraction of the buckets are non-empty (i.e., $|\Gamma^{(i)}(v)|>0$), via the following lemmas.
+Now, we show that with high probability, all the bucket sizes $|\Gamma^{(i)}(v)|=\mathcal{O}(\log n)$, and at least a $1/3$-fraction of the buckets are non-empty (i.e., $|\Gamma^{(i)}(v)|>0$), via the following lemmas (proven in Section~\ref{sec:undirected_omitted}).
 
-\begin{restatable}{lemma}{max-bucket-size}
-\label{lem:max_bucket_size}
+\begin{restatable}{lemma}{MaxBucketSize}
+\label{lem:MaxBucketSize}
 With high probability, the number of neighbors in every bucket, $|\Gamma^{(i)}(v)|$, is at most $ \mathcal{O}(\log n)$.
 \end{restatable}
-\begin{proof}
-Fix a bucket $B_v^{(i)}$, and consider the Bernoulli RVs $\left\{ X_{vu}\right\}_{u\in B_v^{(i)}}$.
-The expected number of neighbors in this bucket is
-$ \textstyle\mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{vu} \right] < L+1$.
-Via the Chernoff bound,
-\[
-\mathbb{P} \left[ |\Gamma^{(i)}(v)|> (1+3c\log n)\cdot L \right]
-\le e^{-\frac{3c\log n\cdot L}{3}} = n^{-\Theta(c)}
-\]
-for any constant $c > 0$.
-\end{proof}
 
-\begin{restatable}{lemma}{empty-bucket}
-\label{lem:empty_bucket}
-With high probability, for every $v$ such that $|B_v| = \Omega(\log n)$ (i.e., $\mathbb E = \Omega(\log n)$), at least a $1/3$-fraction of the buckets $\{B_v^{(i)}\}_{i\in[|B_v|]}$ are non-empty.
+\begin{restatable}{lemma}{EmptyBucket}
+\label{lem:EmptyBucket}
+With high probability, for every $v$ such that $|\vec B_v| = \Omega(\log n)$ (i.e., $\mathbb E = \Omega(\log n)$), at least a $1/3$-fraction of the buckets $\{B^{(i)}_v\}_{i\in[|\vec B_v|]}$ are non-empty.
 \end{restatable}
-\begin{proof}
-For $i < |B_v|$, since $ \mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{vu} \right] > L-1$, we bound the probability that $B_v^{(i)}$ is empty:
-\[
-\mathbb P[B_v^{(i)}\textrm{ is empty}] = \prod_{u\in B_v^{(i)}} (1-p_{vu}) \leq e^{-\sum_{u\in B_v^{(i)}} p_{vu}} \leq e^{1-L}=c
-\]
-for any arbitrary small constant $c$ given sufficienty large constant $L$. Let $T_{i}$ be the indicator for the event that $B_v^{(i)}$ is \emph{not} empty, so $\mathbb E 1-c$. By the Chernoff bound, the probability that less than $|B_v|/3$ buckets are non-empty is 
-\[
-\textstyle
-\mathbb P\left[\sum_{i\in[|B_v|]} T_i<\frac{|B_v|}{3}\right]<\mathbb P\left[\sum_{i\in[|B_v|-1]} T_i<\frac{|B_v-1|}{2}\right]\leq e^{-\Theta(|B_v|-1)} = n^{-\Omega(1)}
-\] as $|B_v| = \Omega(\log n)$ by assumption.
-\end{proof}
 
-
-
-
-\subsubsection{Filling a bucket}
-\label{sec:bucket_filling}
-
-We consider buckets to be in two possible states -- \filled~or \unfilled.
-Initially, all buckets are considered \unfilled.
-In our algorithm we will maintain, for each bucket $B^{(i)}_v$, the set $P^{(i)}_v$ of known neighbors of $u$ in bucket $B^{(i)}_v$; this is a refinement of the set $P_v$ in Section~\ref{sec:ER-rand}. 
-We define the behaviors of the procedure $\func{Fill}(v,i)$ as follows. When invoked on an unfilled bucket $B_v^{(i)}$, $\func{Fill}(v,i)$ performs the following tasks:
-\begin{itemize}
-\item decide whether each vertex $u \in B_v^{(i)}$ is a neighbor of $v$ (implicitly setting $\ADJ[v][u]$ to $\ONE$ or $\ZERO$) unless $X_{vu}$ is already decided; in other words, update $P_v^{(i)}$ to $\Gamma^{(i)}(v)$
-\item mark $B_v^{(i)}$ as \filled.
-\end{itemize}
-For the sake of presentation, we postpone our description of the implementation of $\func{Fill}$ to Section~\ref{sec:fill_implement}. For now, let us use $\func{Fill}$ as a black-box operation.
+We consider buckets to be in two possible states -- \filled~or \unfilled. Initially, all buckets are considered \unfilled.
+In our algorithm we will maintain, for each bucket $B^{(i)}_v$, the set $P^{(i)}_v$ of known neighbors of $u$ in bucket $B^{(i)}_v$;
+this is a refinement of the set $P_v$ in Section~\ref{sec:ER-rand}.
+We define the behaviors of the procedure $\func{Fill}(v,i)$ as follows.
+When invoked on an unfilled bucket $B^{(i)}_v$, $\func{Fill}(v,i)$ decides whether each vertex $u \in B^{(i)}_v$ is a neighbor of $v$
+(implicitly setting $\ADJ[v][u]$ to $\ONE$ or $\ZERO$) unless $X_{vu}$ is already decided; in other words, update $P_v^{(i)}$ to $\Gamma^{(i)}(v)$.
+Then $B^{(i)}_v$ is marked as \filled.
+We postpone the description of our implementation of $\func{Fill}$ to Section~\ref{sec:fill_implement}, instead using it as a black box.
 
 
 
@@ -84,62 +59,53 @@ For the sake of presentation, we postpone our description of the implementation 
 
 \subsubsection{Putting it all together: \func{Random-Neighbor} queries}
 \label{sec:random_neighbor}
-
-\begin{wrapfigure}[17]{R}{0.44\textwidth}
-\vspace{-1.5em}
+\begin{wrapfigure}[11]{R}{0.42\textwidth}
+\vspace{-1.2em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Bucketing Generator}
     \label{alg:random}
     \begin{algorithmic}
         \Procedure{Random-Neighbor}{$v$}
-            \State{$R \gets [|B_v|]$}
-            \While{$R=\emptyset$}
-                \State{\textbf{sample} $i \in R$ u.a.r.}
-                \If {$B_v^{(i)}$ is not \emph{filled}}
+            \While{True}
+                \State{\textbf{sample} $B^{(i)}_v \thicksim_{\mathcal U} \vec B_v$ u.a.r.}
+                \If {$B^{(i)}_v$ is not \emph{filled}}
                     \State$\func{Fill}\left( v,i\right)$
                 \EndIf
-                \If {$|P_v^{(i)}| > 0$}
-                    \State{\textbf{with probability} $\frac{|P_v^{(i)}|}{M}$}
-                    \State{\hspace{\algorithmicindent}\textbf{sample} $u\in P_v^{(i)}$ u.a.r }
-                    \State{\hspace{\algorithmicindent}\Return $u$}
-                \Else
-                    \State{$R \gets R\setminus\{i\}$}
-                \EndIf
+                \State{\textbf{with probability} $\frac{|P_v^{(i)}|}{M}$}
+                    \State{\hspace{\algorithmicindent}\Return $u\thicksim_{\mathcal U} P_v^{(i)}$ u.a.r }
             \EndWhile
-            \State \Return $\bot$
         \EndProcedure
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
 
-Consider Algorithm~\ref{alg:random} for generating a random neighbor via rejection sampling, in a rather similar overall framework as the simple implementation in Section~\ref{sec:ER-naive}.
-For simplicity, throughout the analysis, we assume $|B_v| = \Omega(\log n)$; otherwise, invoke $\func{Fill}(v,i)$ for all $i \in [|B_v|]$ to obtain the entire neighbor list $\Gamma(v)$. This does not affect the analysis because we will soon bound the number of calls that Algorithm~\ref{alg:random} makes to \func{Fill} by $O(\log n)$ (in expectation) for $|B_v| = \Omega(\log n)$.
+Consider Algorithm~\ref{alg:random} for generating a random neighbor via rejection sampling.
+For simplicity, throughout the analysis, we assume $|\vec B_v| = \Omega(\log n)$;
+otherwise, invoke $\func{Fill}(v,i)$ for all $i \in [|\vec B_v|]$ to obtain the entire neighbor list $\Gamma(v)$.
 
-To obtain a random neighbor, we first choose a bucket $B_v^{(i)}$ uniformly at random.
-% TODO: Reference to Anak's section <28-10-17, shankha> %
-If the bucket is not yet filled, we invoke $\func{Fill}(v,i)$ and fill this bucket.
-Then, we \emph{accept} the sampled bucket for generating our random neighbor with probability proportional to $|P_v^{(i)}|$. More specifically, let $M = \Theta(\log n)$ be the upper bound on the maximum number of neighbors in any bucket, as derived in Lemma~\ref{lem:max_bucket_size}; we accept this bucket with probability $|P_v^{(i)}|/M$, which is well-defined (i.e., does not exceed $1$) with high probability. 
-(Note that if $P_v^{(i)} = \emptyset$, we remove $i$ from the pool, then repeat as usual.) 
-If we choose to accept this bucket, we return a random neighbor from $P_v^{(i)}$.
+To obtain a random neighbor, we first choose a bucket $B^{(i)}_v$ uniformly at random, and invoke $\func{Fill}(v,i)$ if the bucket is \emph{unfilled}.
+Then, we \emph{accept} the sampled bucket for generating our random neighbor with probability proportional to $|P_v^{(i)}|$.
+More specifically, if $M = \Theta(\log n)$ is an upper bound on the maximum number of neighbors in any bucket (see Lemma~\ref{lem:MaxBucketSize}),
+we accept bucket $B^{(i)}_v$ with probability $|P_v^{(i)}|/M$, which is well-defined (i.e., does not exceed $1$) with high probability.
+Note that if $P_v^{(i)} = \emptyset$, we sample another bucket.
+If we choose to accept $B^{(i)}_v$, we return a random neighbor from $P_v^{(i)}$.
 Otherwise, \emph{reject} this bucket and repeat the process again.
 
-Since the returned value is always a member of $P_v^{(i)}$,
-a valid neighbor is always returned.
-Further, $i$ is removed from $R$ only if $B_v^{(i)}$ does not contain any neighbors.
-So, if $v$ has any neighbor, $\func{Random-Neighbor}$ does not return $\bot$.
-We now proceed to showing the correctness of the algorithm and bound the number of iterations required for the rejection sampling process.
+Since the returned vertex is always a member of $P_v^{(i)}$, a valid neighbor is always returned.
+We now show that the algorithm correctly samples a uniformly random neighbor
+and bound the number of iterations required for the rejection sampling process.
 \begin{restatable}{lemma}{rand-gen-correct}
 \label{lem:rand_gen_correct}
 Algorithm~\ref{alg:random} returns a uniformly random neighbor of vertex $v$.
 \end{restatable}
 \begin{proof}
 It suffices to show that the probability that any neighbor in $\Gamma(v)$ is return with uniform positive probability, within the same iteration.
-Fix a single iteration and consider a vertex $u\in P_v^{(i)}$:
-we compute the probability that $u$ is accepted.
-The probability that $i$ is picked is $1/|R|$, the probability that $B_v^{(i)}$ is accepted is $|P_v^{(i)}|/M$, and the probability that $u$ is chosen among $P_v^{(i)}$ is $1/|P_v^{(i)}|$.
+Fixing a single iteration and consider a vertex $u\in P_v^{(i)}$, we compute the probability that $u$ is accepted.
+The probability that $B^{(i)}_vi$ is chosen is $1/|\vec B_v|$, the probability that $B^{(i)}_v$ is accepted is $|P_v^{(i)}|/M$,
+and the probability that $u$ is chosen among $P_v^{(i)}$ is $1/|P_v^{(i)}|$.
 Hence, the overall probability of returning $u$ in a single iteration
-of the loop is $1/(|R|\cdot M)$, which is positive and independent of $u$.
+of the loop is $1/(|\vec B_v|\cdot M)$, which is positive and independent of $u$.
 Therefore, each vertex is returned with the same probability.
 \end{proof}
 
@@ -148,12 +114,11 @@ Therefore, each vertex is returned with the same probability.
 Algorithm~\ref{alg:random} terminates in $\mathcal{O}(\log n)$ iterations in expectation, or $\mathcal{O}(\log^2 n)$ iterations with high probability.
 \end{restatable}
 \begin{proof}
-Following the analysis above, the probability that some vertex from $P_v^{(i)}$ is accepted in an iteration is at least $1/(|R|\cdot M)$. From Lemma~\ref{lem:empty_bucket}, a $(1/3)$-fraction of the buckets are non-empty (with high probability), so the probability of choosing a non-empty bucket is at least $1/3$. Further, $M = \Theta(\log n)$ by Lemma~\ref{lem:max_bucket_size}. Hence, the success probability of each iteration is at least $1/(3M)=\Omega(1/\log n)$. Thus, with high probability, the number of iterations required is  $O(\log^2 n)$ with high probability.
+From Lemma~\ref{lem:EmptyBucket}, a $(1/3)$-fraction of the buckets are non-empty with high probability,
+and hence the probability of choosing a non-empty bucket is at least $1/3$.
+Since $M = \Theta(\log n)$ by Lemma~\ref{lem:MaxBucketSize}, the success probability of each iteration is at least $1/(3M)=\Omega(1/\log n)$,
+Thus, the number of iterations required is $O(\log^2 n)$ with high probability.
 \end{proof}
-
-% TODO: Overall runtime <28-10-17, shankha> %
-%So, the algorithm calls the procedure $\func{Fill}(v,i)$, $ \mathcal{O}(\log^2 n)$ times with high probability.
-%It remains to implement and analyze the performance of $\func{Fill}(v,i)$.
 
 
 
@@ -191,30 +156,38 @@ Following the analysis above, the probability that some vertex from $P_v^{(i)}$ 
 \end{framed}
 \end{wrapfigure}
 
-Lastly, we describe the implementation of the $\func{Fill}$ procedure, employing the approach of skipping non-neighbors, as developed for Algorithm~\ref{alg:oblivious-coin-toss}. We aim to simulate the following process: perform coin-tosses $C_{vu}$ with probability $p_{vu}$ for every $u \in B_v^{(i)}$ and update $\ADJ[v][u]$'s according to these coin-flips unless they are decided (i.e., $\ADJ[v][u] \neq \PHI$). We directly generate a sequence of $u$'s where the coins $C_{vu} = \ONE$, then add $u$ to $P_v$ and vice versa if $X_{vu}$ has not previously been decided. Thus, once $B_v^{(i)}$ is \filled, we will obtain $P_v^{(i)} = \Gamma^{(i)}(v)$ as desired.
+Lastly, we describe the implementation of the $\func{Fill}$ procedure, employing the approach of skipping non-neighbors, as developed for Algorithm~\ref{alg:oblivious-coin-toss}. We aim to simulate the following process: perform coin-tosses $C_{vu}$ with probability $p_{vu}$ for every $u \in B^{(i)}_v$ and update $\ADJ[v][u]$'s according to these coin-flips unless they are decided (i.e., $\ADJ[v][u] \neq \PHI$). We directly generate a sequence of $u$'s where the coins $C_{vu} = \ONE$, then add $u$ to $P_v$ and vice versa if $X_{vu}$ has not previously been decided. Thus, once $B^{(i)}_v$ is \filled, we will obtain $P_v^{(i)} = \Gamma^{(i)}(v)$ as desired.
 
-As discussed in Section~\ref{sec:ER-rand}, while we have recorded all occurrences of $\ADJ[v][u]=\ONE$ in $P_v^{(i)}$, we need and efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss}, $\LAST$ serves this purpose by showing that $\ADJ[v][u]$ for all $u \leq \LAST[v]$ are decided as shown in Lemma~\ref{lem:cond-0}. Here instead, with our bucket structure, we maintain a single bit marking whether each bucket is \filled~or \unfilled: a \filled~bucket implies that $\ADJ[v][u]$ for all $u \in B_v^{(i)}$ are decided. The bucket structure along with mark bits, unlike $\LAST$, are capable of handling intermittent ranges of intervals, namely buckets, which is sufficient for our purpose, as shown in the following lemma. This yields the implementation Algorithm~\ref{alg:fill} for the $\func{Fill}$ procedure fulfilling the requirement previously given in Section~\ref{sec:bucket_filling}. 
+As discussed in Section~\ref{sec:ER-rand}, while we have recorded all occurrences of $\ADJ[v][u]=\ONE$ in $P_v^{(i)}$,
+we need and efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss},
+$\LAST$ serves this purpose by showing that $\ADJ[v][u]$ for all $u \leq \LAST[v]$ are decided as shown in Lemma~\ref{lem:cond-0}.
+Here instead, with our bucket structure, we maintain a single bit marking whether each bucket is \filled~or \unfilled:
+a \filled~bucket implies that $\ADJ[v][u]$ for all $u \in B^{(i)}_v$ are decided.
+The bucket structure along with mark bits, unlike $\LAST$, are capable of handling intermittent ranges of intervals,
+namely buckets, which is sufficient for our purpose, as shown in the following lemma.
+This yields the implementation Algorithm~\ref{alg:fill} for the $\func{Fill}$ procedure
+fulfilling the requirement previously given in Section~\ref{sec:bucket_partitioning_and_filling}. 
 
 \begin{restatable}{lemma}{cond}\label{lem:cond-0-fill}
-The data structures $P_v^{(i)}$'s and the bucket marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{Fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B_v^{(i)}$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B_v^{(i)}$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
+The data structures $P_v^{(i)}$'s and the bucket marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{Fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B^{(i)}_v$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B^{(i)}_v$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
 \end{restatable}
 \begin{proof}
 The condition for $\ADJ[v][u]=\ONE$ still holds by constuction. Otherwise, observe that $\ADJ[v][u]$ becomes decided precisely during a \func{Fill}$(v,i)$ or a \func{Fill}$(u,j)$ operation, which thereby marks one of the corresponding buckets as \filled.
 \end{proof}
 
 
-%More formally, let $u \in B_v^{(i)}$ and $v \in B_u^{(j)}$. Similarly to For $\ADJ[v][u] \neq \ONE$ (i.e., $u \notin B_v^{(i)}$ and $v \notin B_u^{(i)}$), we maintain the following invariant: $\ADJ[v][u]\neq \PHI$ if and only if at least one of $B_v^{(i)}$ or $B_u^{(j)}$ is \filled. Ensuring this invariant is very simple for Algorithm~\ref{alg:random}: fill an entire bucket at a time. Thus, we obtain the following criteria for computing $\ADJ[v][u]$ while filling $B_v^{(i)}$: if $u \in P_v$ then $\ADJ[v][u]=\ONE$; else if $B_u^{(j)}$ is \filled~then $\ADJ[v][u] = \ZERO$; else $\ADJ[v][u] = \PHI$.
+%More formally, let $u \in B^{(i)}_v$ and $v \in B_u^{(j)}$. Similarly to For $\ADJ[v][u] \neq \ONE$ (i.e., $u \notin B^{(i)}_v$ and $v \notin B_u^{(i)}$), we maintain the following invariant: $\ADJ[v][u]\neq \PHI$ if and only if at least one of $B^{(i)}_v$ or $B_u^{(j)}$ is \filled. Ensuring this invariant is very simple for Algorithm~\ref{alg:random}: fill an entire bucket at a time. Thus, we obtain the following criteria for computing $\ADJ[v][u]$ while filling $B^{(i)}_v$: if $u \in P_v$ then $\ADJ[v][u]=\ONE$; else if $B_u^{(j)}$ is \filled~then $\ADJ[v][u] = \ZERO$; else $\ADJ[v][u] = \PHI$.
 Note that $P_v^{(i)}$'s, maintained by our generator, are initially empty but may not still be empty at the beginning of the \func{Fill} function call. These $P_v^{(i)}$'s are again instantiated and stored in a dictionary once they become non-empty.
-Further, observe that the coin-flips are simulated independently of the state of $P_v^{(i)}$, so the number of iterations of Algorithm~\ref{alg:fill} is the same as the number of coins $C_{vu} = \ONE$ which is, in expectation, a constant (namely $\sum_{u\in B_v^{(i)}} \mathbb P[C_{vu}=\ONE] = \sum_{u\in B_v^{(i)}} p_{vu} \leq L+1$). % at most $M = O(\log n)$ with high probability (over the entire process of filling all $O(n^2)$ buckets throughout the iteration of the generator).
+Further, observe that the coin-flips are simulated independently of the state of $P_v^{(i)}$, so the number of iterations of Algorithm~\ref{alg:fill} is the same as the number of coins $C_{vu} = \ONE$ which is, in expectation, a constant (namely $\sum_{u\in B^{(i)}_v} \mathbb P[C_{vu}=\ONE] = \sum_{u\in B^{(i)}_v} p_{vu} \leq L+1$). % at most $M = O(\log n)$ with high probability (over the entire process of filling all $O(n^2)$ buckets throughout the iteration of the generator).
 %Identifying $B_u^{(j)}$ containing $v$ requires a binary search, adding $O(\log n)$ time per iteration.
 
 
 
-By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B_v^{(i)}$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
+By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B^{(i)}_v$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
 
 \begin{restatable}{lemma}{fill_time}
 \label{lem:fill_time}
-Each execution of Algorithm~\ref{alg:fill} (the \func{Fill} operation) on an \unfilled~bucket $B_v^{(i)}$, in expectation:
+Each execution of Algorithm~\ref{alg:fill} (the \func{Fill} operation) on an \unfilled~bucket $B^{(i)}_v$, in expectation:
 \begin{itemize}
 \item terminates within $\bo(1)$ iterations (of its \textup{\textbf{repeat}} loop);
 \item computes $\bo(\log n)$ quantities of $\prod_{u \in [a,b]} (1-p_{vu})$ and $\sum_{u\in[a,b]} p_{vu}$ each;
@@ -239,7 +212,7 @@ Each execution of Algorithm~\ref{alg:random} (the \func{Random-Neighbor} query),
 We finally extend our algorithm to support other query types as follows.
 \begin{itemize}
 \item \func{Vertex-Pair}(u,v): We simply need to make sure that Lemma~\ref{lem:cond-0-fill} holds, so we first apply \func{Fill}$(u,j)$ on bucket $B_u^{(j)}$ containing $v$ (if needed), then answer accordingly.
-\item \func{Next-Neighbor}(v): We maintain $\LAST$, and keep invoking \func{Fill} until we find a neighbor. Recall that by Lemma~\ref{lem:empty_bucket}, the probability that a particular bucket is empty is a small constant. Then with high probability, there exists no $\omega(\log n)$ \emph{consecutive} empty buckets $B_v^{(i)}$'s for any vertex $v$, and thus \func{Next-Neighbor} only invokes up to $\bo(\log n)$ calls to \func{Fill}.
+\item \func{Next-Neighbor}(v): We maintain $\LAST$, and keep invoking \func{Fill} until we find a neighbor. Recall that by Lemma~\ref{lem:EmptyBucket}, the probability that a particular bucket is empty is a small constant. Then with high probability, there exists no $\omega(\log n)$ \emph{consecutive} empty buckets $B^{(i)}_v$'s for any vertex $v$, and thus \func{Next-Neighbor} only invokes up to $\bo(\log n)$ calls to \func{Fill}.
 \end{itemize}
 
 We summarize the results so far with through the following theorem.
