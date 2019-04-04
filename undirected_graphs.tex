@@ -2,7 +2,7 @@
 \label{sec:undirected}
 
 In this section, we provide an efficient local access implementations for random undirected graphs
-when the probabilities $p_{uv}=\mathbb P[(u,v)\in E]$ are given, and we can efficiently compute the following quantities:
+when the probabilities $p_{uv}=\mathbb P[(u,v)\in E]$ are given, and we can efficiently approximate the following quantities:
 (1) the probability that there is no edge between a vertex $u$ and a range of consecutive vertices $[a,b]$, namely $\prod_{u=a}^b (1-p_{v,u})$, and
 (2) the sum of the edge probabilities (i.e., the expected number of edges) between $u$ and vertices from $[a,b]$, namely $\sum_{u=a}^b p_{v,u}$.
 In Section~\ref{sec:applications}, we provide subroutines for computing these values for the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model.
@@ -32,7 +32,6 @@ The deterministic guarantee comes at the cost of more complicated data-structure
 
 
 \subsection{Na\"{i}ve Generator with an Explicit Adjacency Matrix}\label{sec:ER-naive}
-%\begin{wrapfigure}[10]{R}{0.4\textwidth}
 \begin{figure}
     \caption{Na\"{i}ve Generator}
     \label{alg:naive}
@@ -67,28 +66,14 @@ The deterministic guarantee comes at the cost of more complicated data-structure
         \EndProcedure
     \end{algorithmic}
 \end{figure}
-%\end{wrapfigure}
 
-First, consider a na\"{i}ve implemention that simply fills out the cells of the $n\times n$ adjacency matrix $\ADJ$ of $G$ one-by-one as required by each query.
-Each entry $\ADJ[u][v]$ occupies exactly one of following three states:
-$\ADJ[u][v] = \ONE$ or $\ZERO$ if the generator has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$, respectively, and $\ADJ[u][v] = \PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices.
-\iffalse
-\begin{itemize}
-\item $\ONE$ if the generator has determined that $\{u,v\} \in E$.
-\item $\ZERO$ if the generator has determined that $\{u,v\} \notin E$.
-\item $\PHI$ if whether $\{u,v\} \in E$ or not will be determined by future random choices. In particular, %since the decisions to include any edges are independent in this model,
-the marginal probability that $\{u,v\} \in E$, conditioned on the current state of $\ADJ$, is still exactly $p_{u,v}$. %(including the case $u = v$ due to our simplifying assumption).
-\end{itemize}
-\fi
-Aside from $\ADJ$, our generator also maintains the vector $\LAST$, where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
-This definition of $\LAST$ was introduced in \cite{reut}.
+First, consider a naive implemention that fills out the cells of the adjacency matrix $\ADJ$ of $G$ one-by-one as required by each query.
+Each entry $\ADJ[u][v]$ can exist in three possible states:
+$\ADJ[u][v] = \ONE$ or $\ZERO$ if the generator has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$ respectively,
+and $\ADJ[u][v] = \PHI$ if the marginal probability of $\mathbb P[(u,v)\in E]$ conditioned on all prior samples is $p_{uv}$.
+Our generator also maintains the vector $\LAST$ (used in the same sense as \cite{reut}),
+where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
 All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
-%, and note that $\LAST[v]=n+1$ if the last call returned $n+1$.
-\iffalse
-We initialize the data structure by setting all entries of $\ADJ$ to $\PHI$ and those of $\LAST$ to $0$. %Each $\ADJ[u][v]$ will become $\ONE$ with probability $p_{u,v}$, or $\ZERO$ with probability $1-p_{u,v}$.
-At any point during the execution, $\ADJ$ will be symmetric, composed entirely of $\ONE, \ZERO$ and $\PHI$. Entries $\ADJ[u][v]$ and $\ADJ[v][u]$ correspond to the same edge and will always be updated together.
-\fi
-We refer to Algorithm~\ref{alg:naive} for its straightforward implemention, but highlight some notations and useful observations here.
 
 \paragraph*{Characterizing random choices via $X_{u,v}$'s}
 Algorithm~\ref{alg:naive} updates the cell $\ADJ[u][v] = \PHI$ to the value of the Bernoulli random variable (RV) $X_{u,v} \sim \mathsf{Bern}(p_{u,v})$
