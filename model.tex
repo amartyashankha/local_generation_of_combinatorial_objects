@@ -1,17 +1,6 @@
 \subsection{Local-Access Generators}
-We begin by formalizing a model of \emph{local-access implementations} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
-\todo{Not good}
-Our work provides local-access generators for various basic classes of graphs described in the following, with 
-\func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries.
-In all of our results, each query is processed using $\poly(\log n)$ time, random bits, and additional space, with \emph{no initialization overhead}.
-These guarantees hold even in the case of adversarial queries.
-Our bounds assume constant computation time for each arithmetic operation with $O(\log n)$-bit precision.
-Each of our generators constructs a random graph drawn from a distribution that is $1/\poly(n)$-close to the desired distribution in the $L_1$-distance.
-\footnote{The \emph{$L_1$-distance} between two probability distributions $\mathsf{p}$ and $\mathsf{q}$ over domain $D$
-is defined as $\|\mathsf{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
-We say that $\mathsf{p}$ and $\mathsf{q}$ are $\epsilon$-close if $\|\mathsf{p-q}\|_1 \leq \epsilon$.}
-
-Inspired by the goals and results of \cite{reut}, we define a model of local-access generators as follows.
+We begin by formalizing the model of \emph{local-access implementations} \textcolor{Maroon}{(trutuful implementation from \cite{huge}?)}.
+Our work provides local-access implementations for various random objects described below.
 
 \begin{definition}
 \label{def:local_access}
@@ -40,6 +29,7 @@ In particular, we allow queries to be made adversarially and non-deterministical
 
 
 \subsection{Basic Tools for Efficient Sampling}
+\todo[inline]{This section is incomplete.}
 \label{sec:basic_tools_for_efficient_sampling}
 \begin{lemma}
 \label{lem:rejection_sampling}

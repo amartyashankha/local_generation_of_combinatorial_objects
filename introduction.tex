@@ -9,35 +9,9 @@ requiring the algorithm to sample the entire object up front would ruin its effi
 The problem of sampling partial information about huge random objects was pioneered in \cite{huge_old,huge}.
 Further work in \cite{sparse,reut} considers the generation of different random graph models.
 
-Our first set of results focus on undirected graphs with independent edge probabilities,
-that is, each edge is chosen as an independent Bernoulli random variable.
-We provide a general implementation for generators in this model.
-Then, we use this construction to obtain the first efficient local implementations for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model
-for arbitrary values of $p$, and the Stochastic Block model.
-As in previous local-access implementations for random graphs,
-we support \func{Vertex-Pair}, \func{Next-Neighbor} queries, and \func{All-Neighbors} queries.
-In addition, we introduce a new \func{Random-Neighbor} query.
-We also give the first local-access generation procedure for \func{All-Neighbors} queries in the (sparse and directed) Kleinberg's Small-World model.
-All of our generators for graphs require no pre-processing time,
-and answer each query using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
-
-We next show how to implement random Catalan objects, specifically focusing on Dyck paths (balanced random walks that are always positive).
-Here, we support $\func{Height}$ queries to find the location of the walk,
-and $\func{First-Return}$ queries to find the time when the walk returns to a specified location.
-This generator can be used to implement $\func{Next-Neighbor}$ queries on random rooted and binary trees,
-and $\func{Matching-Bracket}$ queries on random well bracketed expressions (the Dyck language) using polylogarithmic resources.
-
-Finally, we study random $q$-colorings of graphs with maximum degree $\Delta$.
-This is a more difficult setting where the random object also has a ``huge'' description (the underlying graph)
-that can be accessed through adjacency list queries.
-\textcolor{Maroon}{This setting is similar to Local Computation Algorithms \cite{LCA, LCA_space_efficient}}
-with the added restriction that the output must follow a specific distribution in addition to being legal.
-We show how to sample the color of a single node in sub-linear time when $q > \alpha\Delta$ where $\alpha$ is a small constant.
 
 
 
-
-\todo[inline,color=Red!20]{Section on undirected graphs.}
 \subsection{Random Graphs}%
 \label{sec:random_graphs}
 In Section~\ref{sec:undirected}, we implement queries to both the adjacency matrix and adjacency list representation
@@ -60,14 +34,12 @@ Such queries are useful, for instance, for sub-linear algorithms that employ ran
 \func{Random-Neighbor} queries present particularly interesting challenges that are outlined below.
 
 
-
-\paragraph*{Directed Random Graphs}
+\paragraph*{Directed Random Graphs: The Small World Model}
 \label{par:directed_random_graphs}
 We then consider local-access generators for directed graphs in Kleinberg's Small World model.
 In this case, the probabilities are based on distances in a 2-dimensional grid.
-Using a modified version of our previous sampling procedure, we present such a generator supporting \func{All-Neighbors} queries in
-$\mathcal{O}(\poly(\log n))$ time, space and random bits per query (since such graphs are sparse, the other queries follow directly).
-\todo{This is duplicate}
+Using a modified version of our previous sampling procedure, we implement \func{All-Neighbors} queries using
+$\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graphs are sparse, the other queries follow directly).
 
 
 
