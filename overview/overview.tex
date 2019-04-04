@@ -1,0 +1,27 @@
+\section{Overview of Our Results and Techniques}%
+\label{sec:overview_of_our_results_and_techniques}
+
+\begin{lemma}
+\label{lem:rejection_sampling}
+Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
+\begin{enumerate}
+    \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
+    \item Generating an index $i$ according to $q_i$ is closely implementable.
+    \item There exists a $poly(log n)$-time recognizable set $B$ such that
+    \begin{itemize}
+        \item $1-\sum\limits_{i\in B} p_i$ is negligible
+        \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
+    \end{itemize}
+\end{enumerate}
+Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
+\end{lemma}
+
+\subsection{CDF based Sampling}%
+\label{sec:cdf_based_sampling}
+Consider a probability distribution $\distr{X}$ over $O(n)$ consecutive integers,
+whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
+Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is $\frac{1}{\poly(n)}$-close to $\distr{X}$ in $L_1$-distance.
+\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\mathbb P[X\leq x] \geq r$.}
+
+
+\input{overview/graphs}
