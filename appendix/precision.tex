@@ -1,4 +1,5 @@
-\subsection{Removing the Perfect-Precision Arithmetic Assumption}\label{sec:remove-perfect}
+\section{Removing the Perfect-Precision Arithmetic Assumption}
+\label{sec:remove-perfect}
 
 In this section we remove the prefect-precision arithmetic assumption. Instead, we only assume that it is possible to compute $\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ to $N$-bit precision, as well as drawing a random $N$-bit word, using polylogarithmic resources. Here we will focus on proving that the family of the random graph we generate via our procedures is statistically close to that of the desired distribution. The main technicality of this lemma arises from the fact that, not only the generator is randomized, but the agent interacting with the generator may choose his queries arbitrarily (or adversarially): our proof must handle any sequence of random choices the generator makes, and any sequence of queries the agent may make.
 

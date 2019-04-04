@@ -1,10 +1,22 @@
-\section{Local-Access Generators for Random Undirected Graphs}\label{sec:undirected}
+\section{Local-Access Implementations for Random Undirected Graphs}
+\label{sec:undirected}
 
-In this section, we provide an efficient implementation of local-access generators for random undirected graphs when the probabilities $p_{u,v} = \mathbb P[\{u,v\} \in E]$ are given. More specifically, we assume that the following quantities can be efficiently computed:
-(1) the probability that there is no edge between a vertex $u$ and a range of consecutive vertices from $[a,b]$, namely $\prod_{u=a}^b (1-p_{v,u})$, and
-(2) the sum of the edge probabilities (i.e., the expected number of edges) between $u$ and vertices from $[a,b]$, namely $\sum_{u=a}^b p_{v,u}$. We will later give subroutines for computing these values for the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model with randomly-assigned communities in Section~\ref{sec:applications}. We also begin by assuming perfect-precision arithmetic, until Section~\ref{sec:remove-perfect} where we show how to relax this assumption to $N = \Theta(\log n)$-bit precision.
+In this section, we provide an efficient local access implementations for random undirected graphs
+when the probabilities $p_{uv}=\mathbb P[(u,v)\in E]$ are given, and we can efficiently compute the following quantities:
+(1) the probability that there is no edge between a vertex $u$ and a range of consecutive vertices $[a,b]$, namely $\prod_{u=a}^b (1-p_{v,u})$, and
+(2) the sum of the edge probabilities (i.e., the expected number of edges) between $u$ and vertices from $[a,b]$, namely $\sum_{u=a}^b p_{v,u}$.
+In Section~\ref{sec:applications}, we provide subroutines for computing these values for the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model.
+We also begin by assuming perfect-precision arithmetic, which we relax in Section~\ref{sec:remove-perfect}.
 
-First, we propose a simple implementation of our generator in Section~\ref{sec:ER-naive} that sequentially fills out the adjacency matrix; while we do not focus on its efficiency, we establish some basic concepts for further analysis in this section. Next, we improve our subroutine for \func{Next-Neighbor} queries in Section~\ref{sec:ER-rand}: this algorithm samples for the next candidate of the next neighbor in a more direct manner to speed-up the process. Extending this construction, we obtain our main algorithm in Section~\ref{sec:buckets} via the bucketing technique: partition the vertex set into contiguous ranges to normalize the expected number of neighbors in each bucket, allowing an efficient \func{Random-Neighbor} implementation by picking a random neighbor from a random bucket. The subroutine that samples for neighbors within a bucket, along with the remaining analysis of the algorithm, is given later in Section~\ref{sec:fill_implement}. Lastly, Section~\ref{sec:remove-perfect} handles the errors that may occur due to the use of finite precision.
+First, we propose a simple implementation of our generator in Section~\ref{sec:ER-naive} that sequentially fills out the adjacency matrix;
+while we do not focus on its efficiency, we establish some basic concepts for further analysis in this section.
+Next, we improve our subroutine for \func{Next-Neighbor} queries in Section~\ref{sec:ER-rand}:
+this algorithm samples for the next candidate of the next neighbor in a more direct manner to speed-up the process.
+Extending this construction, we obtain our main algorithm in Section~\ref{sec:buckets} via the bucketing technique:
+partition the vertex set into contiguous ranges to normalize the expected number of neighbors in each bucket,
+allowing an efficient \func{Random-Neighbor} implementation by picking a random neighbor from a random bucket.
+The subroutine that samples for neighbors within a bucket, along with the remaining analysis of the algorithm,
+is given later in Section~\ref{sec:fill_implement}.
 
 \iffalse
 {\color{blue}

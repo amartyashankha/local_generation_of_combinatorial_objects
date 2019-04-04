@@ -238,51 +238,13 @@ We summarize the results so far with through the following theorem.
 
 \begin{restatable}{theorem}{res:grand}
 \label{thm:grand}
-Under the assumption of
-\begin{enumerate}
-\item perfect-precision arithmetic, including the generation of random real numbers in $[0, 1)$, and 
-\item the quantities $\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ of the random graph family can be computed with perfect precision in logarithmic time, space and random bits,
-\end{enumerate}
-there exists a local-access generator for the random graph family that supports \func{Random-Neighbor}, \func{Vertex-Pair} and \func{Next-Neighbor} queries that uses polylogarithmic running time, additional space, and random words per query.
-\end{restatable} 
-Between these two assumptions, we first remove the assumption of perfect-precision arithmetic in the upcoming Section~\ref{sec:remove-perfect}.
-Later in Section~\ref{sec:applications}, we show applications of our generator to the $G(n,p)$ model,
-and the Stochastic Block model under random community assignment, by providing formulas and by constructing data structures for computing the quantities specified in the second assumption, respectively.
-
-\iffalse
-In this section, we describe the implementation of the $\func{Fill}$ procedure.
-We may use a set $F_v\subseteq [n]$ to store the bucket indices $i$
-(corresponding to $B_v^{(i)}$) that have already been filled.
-Initially, $F_v$ is empty for all $v$.
-We will also maintain the set $P_v^{(i)}$
-(defined in Section~\ref{sec:bucket_partition})
-which stores all the neighbors of $v$ in bucket $i$. For an unfilled bucket,
-this set contains only the indirectly exposed neighbors of $v$.
-
-We will use the skip-sampling procedure outlined in Algorithm~\ref
-{alg:oblivious-coin-toss}, in order to find the remaining entries in $P_v^{(i)}$.
-We do this by dividing up the bucket into intervals
-separated by the existing (indirectly uncovered) values in $P_v^{(i)}$.
-For each of these intervals $[a,b)$, we sample $u\sim\mathsf{F}(v,a,b)$
-repeatedly until $u \ge b$, each time setting $a\leftarrow u$.
-For each sampled $u$, if $A[u][v] = \phi$, we add $u$ to $P_v^{(i)}$.
-We also have to add $v$ to $P_u^{(j)}$ (where $v\in B_u^{(j)}$).
-Finally, after we have processed all the intervals, we add the index $i$ to $F_v$,
-indicating that the $i^{th}$ bucket has been filled.
-
-The only tricky part is identifying whether $A[u][v]$
-has already been sampled to be $\ZERO$.
-This is only possible if $F_u$ contains the bucket $j$, (where $v\in B_u^{(j)}$),
-i.e. the bucket of vertex $u$ containing $v$ has already been filled.
-Note that since $u\not\in P_v^{(i)}$, we have $A[u][v]\not=1$.
-So, $A[u][v]$ was sampled to be $\ZERO$.
-\begin{restatable}{lemma}{fill-correct}
-\label{lem:fill_correct}
-Algorithm~\ref{alg:fill} samples the neighbors in $B_v^{(i)}$,
-from the correct distribution.
+Given a random graph model defined by the probabilty matrix $\{ p_{uv}\}$ and assuming that we can compute the the quantities
+$\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ in polylogarithmic time,
+there exists a local-access implementation for this random graph model that supports \func{Random-Neighbor},
+\func{Vertex-Pair} and \func{Next-Neighbor} queries using polylogarithmic running time, additional space, and random words per query.
 \end{restatable}
-\begin{proof}
-Coins \ldots
-\end{proof}
-\fi
 
+We have also been implicitly assuming perfect-precision arithmetic and we relax this assumption in Section~\ref{sec:remove-perfect}.
+In the following Section~\ref{sec:applications}, we show applications of Theorem~\ref{thm:grand} to the $G(n,p)$ model,
+and the Stochastic Block model under random community assignment,
+by providing formulas and by constructing data structures for computing the quantities specified in Theorem~\ref{thm:grand}.

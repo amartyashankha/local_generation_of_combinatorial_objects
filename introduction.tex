@@ -23,9 +23,9 @@ We implement \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor
 it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).} queries.
 Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
 our implementations support all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
-In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
+In particular, our construction yields local-access implementations for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
 and the Stochastic Block model with random community assignment.
-As in \cite{reut} (and unlike the generators in \cite{huge_old,huge,sparse}), our techniques allow unlimited queries.
+As in \cite{reut} (and unlike the implementations in \cite{huge_old,huge,sparse}), our techniques allow unlimited queries.
 
 While \func{Vertex-Pair} and \func{Next-Neighbor} queries, as well as \func{All-Neighbors} queries for sparse graphs,
 have been considered in the prior works of \cite{reut, huge_old, huge, sparse}, we provide the first implementation (to the best of our knowledge)
@@ -36,7 +36,7 @@ Such queries are useful, for instance, for sub-linear algorithms that employ ran
 
 \paragraph*{Directed Random Graphs: The Small World Model}
 \label{par:directed_random_graphs}
-We then consider local-access generators for directed graphs in Kleinberg's Small World model.
+We then consider local-access implementations for directed graphs in Kleinberg's Small World model.
 In this case, the probabilities are based on distances in a 2-dimensional grid.
 Using a modified version of our previous sampling procedure, we implement \func{All-Neighbors} queries using
 $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graphs are sparse, the other queries follow directly).
