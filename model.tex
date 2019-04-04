@@ -1,5 +1,5 @@
-\section{Local-Access Generators}
-We begin by formalizing a model of {\em local-access generators} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
+\subsection{Local-Access Generators}
+We begin by formalizing a model of \emph{local-access implementations} (Section~\ref{sec:oracle_model}), implicitly used in \cite{reut}.
 \todo{Not good}
 Our work provides local-access generators for various basic classes of graphs described in the following, with 
 \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries.
@@ -7,72 +7,59 @@ In all of our results, each query is processed using $\poly(\log n)$ time, rando
 These guarantees hold even in the case of adversarial queries.
 Our bounds assume constant computation time for each arithmetic operation with $O(\log n)$-bit precision.
 Each of our generators constructs a random graph drawn from a distribution that is $1/\poly(n)$-close to the desired distribution in the $L_1$-distance.
-\footnote{The \emph{$L_1$-distance} between two probability distributions $\distr{p}$ and $\distr{q}$ over domain $D$
-is defined as $\|\distr{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
-We say that $\distr{p}$ and $\distr{q}$ are $\epsilon$-close if $\|\distr{p-q}\|_1 \leq \epsilon$.}
+\footnote{The \emph{$L_1$-distance} between two probability distributions $\mathsf{p}$ and $\mathsf{q}$ over domain $D$
+is defined as $\|\mathsf{p-q}\|_1 = \sum_{x \in D } |p(x)-q(x)|$.
+We say that $\mathsf{p}$ and $\mathsf{q}$ are $\epsilon$-close if $\|\mathsf{p-q}\|_1 \leq \epsilon$.}
 
-We consider the problem of locally generating random graphs $G = (V,E)$ drawn from the desired families of simple unweighted graphs, undirected or directed. We denote the number of vertices $n = |V|$, and refer to each vertex simply via its unique ID from $[n]$. For undirected $G$, the set of neighbors of $v \in V$ is defined as $\Gamma(v) = \{u \in V: \{v,u\} \in E\}$; denote its degree by $\deg(v) = |\Gamma(v)|$.
 Inspired by the goals and results of \cite{reut}, we define a model of local-access generators as follows.
+
 \begin{definition}
-A \emph{local-access generator} of a random graph $G$ sampled from a distribution $\distr{D}$,
-is a data structure that provides access to $G$ by answering various types of
-\emph{supported queries}, while satisfying the following:
+\label{def:local_access}
+Given a distribution $X$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
+of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X\rightarrow \{0,1\}$,
+provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathbb X$ and a given query $F_i$, while satisfying the following:
 %For clarity, we assume that the generator is invoked until its entire graph $G$ is exposed.
-%The local-access generator for a probability distribution $\distr{D}$ of the desired random graph model must satisfy the following properties:
+%The local-access generator for a probability distribution $\mathsf{D}$ of the desired random graph model must satisfy the following properties:
 \begin{itemize}
-\item \textbf{Consistency.} The responses of the local-access generator to all probes throughout the entire execution must be consistent with a single graph $G$.
-\item \textbf{Distribution equivalence.} 
-The random graph $G$ provided by the generator must be sampled from some distribution $\distr{D}'$
-that is $\epsilon$-close to the desired distribution $\distr{D}$ in the $L_1$-distance.
-In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
-As for \func{Random-Neighbor}$(v)$, the distribution from which a neighbor is returned
-must be $\epsilon$-close to the uniform distribution over neighbors of $v$
-with respect to the sampled random graph $G$ (w.h.p $1-n^{-c}$ for each query).
-\item \textbf{Performance.} The resources, consisting of (1) computation time, (2) additional random bits required, and (3) additional space required, in order to compute an answer to a single query and update the data structure, must be sub-linear, preferably $\poly(\log n)$.
+    \item \textbf{Consistency:}
+    All the values $F_i(X)$ returned by the local-access implementation throughout the entire execution
+    must be consistent with a single $X\in \mathbb X$.
+    \item \textbf{Distribution equivalence:}
+    The random object $X\in \mathbb X$ consistent with the responses $\{ F_i(X)\}$ must be sampled from some distribution $\mathsf{X}'$
+    that is $\epsilon$-close to the desired distribution $\mathsf{X}$ in $L_1$-distance.
+    In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
+    \item \textbf{Performance:}
+    The computation time, additional random bits, and additional space required to answer a single query must be sub-linear,
+    and preferably $\poly(\log n)$ with high probability.
 \end{itemize}
 \end{definition}
 In particular, we allow queries to be made adversarially and non-deterministically. The adversary has full knowledge of the generator's behavior and its past random bits.
 
-For ease of presentation, we allow generators to create graphs with self-loops.
-When self-loops are not desired, it is sufficient to add a wrapper function that simply re-invokes \func{Next-Neighbor}$(v)$ or \func{Random-Neighbor}$(v)$ when the generator returns $v$.
 
 
-\paragraph*{Supported Queries in our Model} 
-For undirected graphs, we consider queries of the following forms.
-now we might want to do \func{Next-Neighbor} first for consistency.
-\begin{itemize}
-\item \func{Next-Neighbor}$(v)$: The generator returns the neighbor of $v$ with the lowest ID that has not been returned during the execution of the generator so far. If all neighbors of $u$ have already been returned, the generator returns $n+1$.
-\item \func{Random-Neighbor}$(v)$: The generator returns a neighbor of $v$ uniformly at random (with probability $1/\deg(v)$ each). If $v$ is isolated, $\bot$ is returned.
-\item \func{Vertex-Pair}$(u,v)$: The generator returns either $\ONE$ or $\ZERO$, indicating whether $\{u,v\}\in E$ or not.
-\item \func{All-Neighbors}$(v)$: The generator returns the entire list of out-neighbors of $v$. We may use this query for relatively sparse graphs, specifically in the Small-World model.
-\end{itemize}
-
-\subsection{Random Graph Models}
-\label{sec:graph_model}
-
-\paragraph*{Erd\"{o}s-R\'{e}nyi Model}
-We consider the $G(n, p)$ model: each edge $\{u,v\}$ exists independently with probability $p \in [0, 1]$.
-Note that $p$ is not assumed to be constant, but may be a function of $n$.
-
-\paragraph*{Stochastic Block Model}
-This model is a generalization of the Erd\"{o}s-R\'{e}nyi Model.
-The vertex set $V$ is partitioned into $r$ communities $C_1, \ldots, C_r$.
-The probability that the edge $\{u,v\}$ exists is $p_{i,j}$ when $u\in C_i$ and $v\in C_j$,
-where the probabilities are given as an $r\times r$ symmetric matrix $\matr{P} = [p_{i,j}]_{i,j \in [r]}$.
-We assume that we are given explicitly the distribution $\distr{R}$ over the communities,
-and each vertex is assigned its community according to $\distr{R}$ independently at random.
-\footnote{Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$ are given instead,
-where the assignment of vertices $V$ into these communities is chosen uniformly at random.}
-%The main difficulty here is being able to compute the uniformly sampled assignment of vertices to communities on-the-fly.
-
-\paragraph*{Small-World Model}
-In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$.
-Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,
-and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$.
-Here, $c$ is an indicator of the number of long range directed edges present at each vertex.
-A common choice for $c$ is given by normalizing the distribution so that there is exactly one directed edge emerging from each vertex ($c = \Theta(1/\log n)$).
-We will however support a range of values of $c=\log^{\pm\Theta(1)}n$.
-While not explicitly specified in the original model description of \cite{kleinberg},
-we assume that the probability is rounded down to $1$ if $c/(\func{dist}(u,v))^{2} > 1$.
 
 
+\subsection{Basic Tools for Efficient Sampling}
+\label{sec:basic_tools_for_efficient_sampling}
+\begin{lemma}
+\label{lem:rejection_sampling}
+Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
+\begin{enumerate}
+    \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
+    \item Generating an index $i$ according to $q_i$ is closely implementable.
+    \item There exists a $poly(log n)$-time recognizable set $B$ such that
+    \begin{itemize}
+        \item $1-\sum\limits_{i\in B} p_i$ is negligible
+        \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
+    \end{itemize}
+\end{enumerate}
+Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
+\end{lemma}
+
+\paragraph*{CDF Based Sampling}
+\label{par:cdf_based_sampling}
+
+Consider a probability distribution $\mathsf{X}$ over $O(n)$ consecutive integers,
+whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
+Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is $\frac{1}{\poly(n)}$-close to $\mathsf{X}$ in $L_1$-distance.
+\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\mathbb P[X\leq x] \geq r$.}

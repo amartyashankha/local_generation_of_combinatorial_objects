@@ -34,14 +34,7 @@
 \def\polylog{\mathrm{polylog}\;}
 
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
-\newcommand{\SL}[2]{\sum\limits_{#1}^{#2}}
-\newcommand{\BSL}[2]{\mathlarger{\mathlarger{\sum}\limits_{#1}^{#2}}}
-\newcommand{\PL}[2]{\prod\limits_{#1}^{#2}}
-\newcommand{\BPL}[2]{\mathlarger{\mathlarger{\prod}\limits_{#1}^{#2}}}
 \newcommand{\func}[1]{\texttt{\textsc{#1}}}
-\newcommand{\distr}[1]{\mathsf{#1}}
-\newcommand{\matr}[1]{\mathbf{#1}}
-\newcommand{\data}[1]{\mathbf{#1}}
 \def\poly{\mathrm{poly}}
 
 \renewcommand\algorithmicthen{}
@@ -53,11 +46,11 @@
 \def\ZERO{\mathsf{0}}
 \def\ONE{\mathsf{1}}
 \def\PHI{\phi}
-\def\LAST{\matr{last}}
-\def\BUCKET{\matr{bucket}}
-\def\BEGIN{\matr{begin}}
-\def\END{\matr{end}}
-\def\ADJ{\matr{A}}
+\def\LAST{\mathbf{last}}
+\def\BUCKET{\mathbf{bucket}}
+\def\BEGIN{\mathbf{begin}}
+\def\END{\mathbf{end}}
+\def\ADJ{\mathbf{A}}
 
 \newcommand{\sectioninput}{\input}
 \newcommand{\hagu}{k}
@@ -78,7 +71,7 @@
 
 \bibliographystyle{alpha}
 
-\title{Partial Sampling of Huge Random Objects}
+\title{Local Access to Huge Random Objects through Partial Sampling}
 
 \date{}
 \author{Amartya Shankha Biswas}{CSAIL, MIT}{asbiswas@mit.edu}{https://orcid.org/0000-0002-5068-1524}{funding}
@@ -103,8 +96,9 @@
 \newpage
 
 \input{introduction}
-\input{model}
+\clearpage
 \input{overview/overview}
+\clearpage
 \input{building_blocks}
 \input{undirected_graphs}
 \input{buckets}

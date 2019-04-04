@@ -1,4 +1,4 @@
-\section{Sampling Catalan Objects}%
+\section{Sampling Random Catalan Objects}%
 \label{sec:catalan_objects}
 \todo{Thresholding.}
 \todo{Mention that this is imperfect sampling (close impl.)}
@@ -125,9 +125,9 @@ We will sample the height of the path $B = U+D$ steps into the interval at the m
 This is equivalent to sampling the number of up or down steps that get assigned to the first half of the interval.
 We parameterize the possibilities by $d$ and define $p_d$ to be the probability that exactly $U+d$ up-steps and $D-d$ down steps
 get assigned to the first half, and therefore the second half gets exactly $U-d$ up steps and $D+d$ down steps.
-$$
+\[
 p_d = \frac{S_{left}(d)\cdot S_{right}(d)}{S_{total}(d)}
-$$
+\]
 Here, $S_{left}(d)$ denotes the number of possible paths in the first half (using $U+d$ up steps)
 and $S_{right}(d)$ denotes the number of possible paths in the second half (using $U-d$ up steps).
 Note that all of these paths have to respect the $k$-boundary constraint (cannot dip more than $k-1$ units below the starting height).
@@ -164,9 +164,9 @@ there exists a constant $c$ such that if $k > c \sqrt{B\log n}$, then the distri
 By Lemma~\ref{lem:dyck_path_irrelevant_boundary}, the problem of sampling from $C_k(2U,2D)$
 reduces to sampling from the hypergeometric distribution $C_{\infty}(2U,2D)$ when $k>\mathcal{O}(\sqrt{B\log n})$
 i.e. the probabilities $p_d$ can be approximated by:
-$$
+\[
 q_d = \frac{{{B}\choose{D-d}}\cdot{{B}\choose{D+d}}}{{{2B}\choose{2D}}}
-$$
+\]
 This problem of sampling from the hypergeometric distribution is equivalent to the interval summable functions
 implemented in \cite{huge} (using $\mathcal O(poly(\log n))$ resources).
 
@@ -187,9 +187,9 @@ that approximates $p_d$ up to logarithmic factors over the vast majority of its 
 To invoke the rejection sampling lemma, we present a method to approximate the probabilities $p_d$ in Lemma~\ref{lem:probability_approximation_oracle}.
 The only thing left to do is to find an appropriate $q_d$ that also has an \emph{efficiently computable} $CDF$.
 Surprisingly, as in Section~\ref{sec:the_simple_case}, we will be able to use the hypergeometric distribution for $q_d$,
-$$
+\[
 q_d = \frac{{B\choose D-d}\cdot{B\choose D+d}}{{2B\choose 2D}} = \frac{{B\choose D-d}\cdot{B\choose U-d}}{{2B\choose 2D}}
-$$
+\]
 However, the argument for why this $q_d$ is a good approximation to $p_d$ is far less straightforward.
 
 First, we consider the case where $k\cdot k'\le 2U+1$.

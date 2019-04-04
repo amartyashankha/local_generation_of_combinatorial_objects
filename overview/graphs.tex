@@ -1,139 +1,113 @@
 \subsection{Undirected Graphs}
 \label{sec:undirected_graphs}
-In Section~\ref{sec:undirected}, we implement queries to both the adjacency matrix and adjacency list representation
-for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
-where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
-Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
-We implement \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}
-\footnote{\func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$ each time
-it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).} queries.
-Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
-our implementations support all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
-In particular, our construction yields local-access generators for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
-and the Stochastic Block model with random community assignment.
-As in \cite{reut} (and unlike the generators in \cite{huge_old,huge,sparse}), our techniques allow unlimited queries.
-
-While \func{Vertex-Pair} and \func{Next-Neighbor} queries, as well as \func{All-Neighbors} queries for sparse graphs,
-have been considered in the prior works of \cite{reut, huge_old, huge, sparse}, we provide the first implementation (to the best of our knowledge)
-of \func{Random-Neighbor} queries, which do not follow trivially from the \func{All-Neighbor} queries in \emph{non-sparse graphs}.
-Such queries are useful, for instance, for sub-linear algorithms that employ random walk processes.
-\func{Random-Neighbor} queries present particularly interesting challenges that are outlined below.
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
-We note that the next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
-but for small edge probabilities $p_{uv} = o(1)$ this implementation can be too slow.
-In our algorithms, we achieve speed-up by sampling multiple neighbor values at once for a given vertex $u$; more specifically,
-we sample for the number of ``non-neighbors'' preceding the next neighbor.
-To do this, we assume that we have access to an oracle which can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
+The next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
+but for small edge probabilities $p_{uv} = o(1)$ this implementation can be inefficient.
+As in \cite{reut}, we speed this up by sampling the number of ``non-neighbors'' preceding the next neighbor.
+To do this, we assume that we can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
 where $F(v,a,b)$ is the probability that $v$ has no neighbors in the range $[a,b]$.
 We later show that it is possible to compute this quantity efficiently for the $G(n,p)$ and Stochastic block models.
 
-A main difficulty in our setup, as compared to \cite{reut}, arises from the fact that our graph is undirected, and thus
-we must design a data structure that ``informs'' all (potentially $\Theta(n)$) non-neighbors once we decide on the query vertex's next neighbor.
-%Unlike in the case of directed graphs, each $\func{Next-Neighbor}$ query
-%can affect the probabilities of a large number of other vertices.
+A main difficulty as compared to \cite{reut}, arises from the fact that our graph is undirected,
+and thus we must ``inform'' all (potentially $\Theta(n)$) non-neighbors once we decide on the query vertex's next neighbor.
 More concretely, if $u'$ is sampled as the next neighbor of $v$ after its previous neighbor $u$,
 we must maintain consistency in subsequent steps by ensuring that none of the vertices in the range $(u,u')$ return $v$ as a neighbor.
-This update will become even more complicated as we later handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
+This update will become even more complicated as we handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
 
 In Section~\ref{sec:ER-rand}, we present a very simple randomized generator (Algorithm~\ref{alg:oblivious-coin-toss})
 that supports \func{Next-Neighbor} queries efficiently, albeit the analysis of its performance is rather complicated.
 We remark that this approach may be extended to support \func{Vertex-Pair} queries with superior performance
 (given that we do not to support \func{Random-Neighbor} queries) and to provide deterministic resource usage guarantee
-\todo{What is deterministic here?}
 -- the full analysis can be found in Section~\ref{sec:reroll-cont} and \ref{sec:ER-det}, respectively.
+
 
 \paragraph*{\func{Random-Neighbor} Queries}
 \label{par:random_neighbor_queries}
 
-We provide efficient \func{Random-Neighbor} queries (Section~\ref{sec:buckets}).
+We provide \func{Random-Neighbor} queries (Section~\ref{sec:buckets}) using $\poly(\log n)$ resources.
 The ability to do so is surprising since:
-(1) \func{Random-Neighbor} queries affect the conditional probabilities of the remaining neighbors in a non-trivial manner
+(1) Sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} generators, because this quantity alone
+imposes dependence on the existence of \emph{all} of its potential incident edges and on the rest of the graph \textcolor{Maroon}{(Why?)}.
+Therefore, our generator needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
+without resorting to ``knowing'' its degree.
+(2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries
+affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner.
 \footnote{\label{conditional}Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
 such that vertices will have $\tilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
 After $\tilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
-so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}, and
-(2) our implementation does not resort to explicitly sampling the degree of any vertex $v$
-in order to generate a random neighbor with the correct probability $\frac{1}{d_v}$.
-First, even without committing to the degrees, answers to \func{Random-Neighbor} queries
-affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner \footref{conditional}
--- that is, from the point of view of the \emph{agent} interacting with the generator.
-Second, sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} generators,
-because this quantity alone imposes dependence on the existence of \emph{all} of its potential incident edges.
-Therefore, our generator needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
-without resorting to ``knowing'' its degree.
-The generator, however, must somehow maintain and leverage its additional \emph{internal knowledge}
-of the partially-generated graph, to keep its computation tractable throughout the entire graph generation process.
-This requires a way of implicitly keeping track of all the resulting changes.
+so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}
 
-We formulate a {\em bucketing approach} (Section~\ref{sec:buckets})
-which samples multiple consecutive edges at once, in such a way
-that the conditional probabilities of the unsampled edges
-remain independent and ``well-behaved'' during subsequent queries.
-For each vertex $v$, we divide the vertex set (potential neighbors) or $v$ into consecutive ranges (buckets),
-so that each bucket contains, in expectation, roughly the same number of neighbors
-$\sum^{b}_{u=a} p_{v,u}$ (which we must be able to compute efficiently).
-The subroutine of \func{Next-Neighbor} may be applied to sample the neighbors within a bucket in expected constant time.
-Then, one may obtain a random neighbor of $v$ by picking a random neighbor from a random bucket;
-probabilities of picking any neighbors may be normalized to the uniform distribution via rejection sampling,
-while stilling yielding $\poly(\log n)$ complexities overall.
-This bucketing approach also naturally leads to our data structure that requires
-constant space for each bucket and for each edge, using $\Theta(n+m)$ overall memory requirement.
-The \func{Vertex-Pair} queries are implemented by sampling the relevant bucket.
+We formulate a \emph{bucketing approach} (Section~\ref{sec:buckets}) which samples multiple consecutive edges at once,
+in such a way that the conditional probabilities of the unsampled edges remain independent and ``well-behaved'' during subsequent queries.
+For each vertex $v$, we divide the potential neighbors of $v$ into consecutive ranges $\{B^{(i)}_v\}$ (buckets),
+so that each $B^{(i)}_v$ contains, in expectation, $\Theta(1)$ neighbors (i.e. $\sum_{u\in B_i} p_{vu} = \Theta(1)$).
+The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a bucket in expected $\mathcal{\tilde O}(1)$ time.
+We can now obtain a neighbor of $v$ by picking a random neighbor from a random bucket,
+but this introduces a bias because all buckets may not have the same number of neighbors.
+We remove this bias by rejecting samples from bucket $B^{(i)}_v$ with probability proportional to the number of neighbors in $B^{(i)}_v$.
+\func{Vertex-Pair} queries are implemented by sampling the relevant bucket.
 
+
+
+
+\subsubsection{Applications to Random Graph Models}
+\label{sec:applications_to_random_graph_models}
 We now consider the application of our construction above to actual random graph models,
-where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{v,u})$
-and $\sum^{b}_{u=a} p_{v,u}$ can be computed efficiently.
-This holds trivially for the $G(n,p)$ model via closed-form formulas,
-but requires an additional back-end data structure for the Stochastic Block models.
+where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{v,u})$ and $\sum^{b}_{u=a} p_{v,u}$ can be computed efficiently.
+\textcolor{Maroon}
+{This holds trivially for the $G(n,p)$ model via closed-form formulas, but requires an additional data structure for the Stochastic Block model.}
+
 
 \paragraph*{Erd\"{o}s-R\'{e}nyi}
 \label{par:erdos_renyi}
-In Section~\ref{sec:app_er}, we apply our construction to random $G(n,p)$ graphs for
-arbitrary $p$, and obtain
-$\func{Vertex-Pair}$, $\func{Next-Neighbor}$, and $\func{Random-Neighbor}$ queries,
-using polylogarithmic resources (time, space and random bits) per query.
-We remark that, while $\Omega(n+m) = \Omega(p n^2)$ time and space
-is clearly necessary to generate and represent a full random graph,
-our implementation supports local-access via all three types of queries, 
-and yet can generate a full graph in $\widetilde{O}(n+m)$ time and space (Corollary~\ref{thm:er-optimal}),
-which is tight up to polylogarithmic factors.
+In Section~\ref{sec:app_er}, we apply our construction to random $G(n,p)$ graphs for arbitrary $p$, and obtain $\func{Vertex-Pair}$,
+$\func{Next-Neighbor}$, and $\func{Random-Neighbor}$ queries, using polylogarithmic resources (time, space and random bits) per query.
+We remark that, while $\Omega(n+m) = \Omega(p n^2)$ time and space is clearly necessary to generate and represent a full random graph,
+our implementation supports local-access via all three types of queries, and yet can generate a full graph in $\widetilde{O}(n+m)$ time and space
+(Corollary~\ref{thm:er-optimal}), which is tight up to polylogarithmic factors.
 
-%{\color{red}
+
 \paragraph*{Stochastic Block Model}
 \label{par:stochastic_block_model}
 We generalize our construction to the Stochastic Block Model.
-In this model, the vertex set is partitioned into $r$ \emph{communities}
-$\left\{ C_1, \ldots, C_r \right\}$.
-The probability that an edge exists depends on the communities of its endpoints:
-if $u\in C_i$ and $v \in C_j$, then $\{u,v\}$ exists with probability $p_{i,j}$,
-given in an $r\times r$ matrix $\matr{P}$.
+In this model, the vertex set is partitioned into $r$ \emph{communities} $\left\{ C_1, \ldots, C_r \right\}$.
+The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{i,j}$.
 As communities in the observed data are generally unknown a priori,
-and significant research has been devoted to designing efficient algorithm
-for community detection and recovery,
-these studies generally consider the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms (see e.g., \cite{mossel2015reconstruction}).
-Thus, in this work, we aim to construct generators for this important case, where the community assignment of vertices are independently sampled from some given distribution $\distr{R}$.
-%}
+and significant research has been devoted to designing efficient algorithms for community detection and recovery, these studies generally consider
+the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms (see e.g., \cite{mossel2015reconstruction}).
+Thus, we aim to construct generators where the community assignment of vertices are independently sampled from some given distribution $\mathsf{R}$
+\footnote{Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$
+are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}.
+The difficulty here is to obtain a uniformly sampled assignment of vertices to communities on-the-fly.
 
 Our approach is, as before, to sample for the next neighbor or a random neighbor directly,
 although our result does not simply follow closed-form formulas,
-as the probabilities for the potential edges now depend
-on the communities of endpoints.
+as the probabilities for the potential edges now depend on the communities of endpoints.
 To handle this issue, we observe that it is sufficient to efficiently count
-the number of vertices of each community in any
-range of contiguous vertex indices.
-We then design a data structure extending a construction of \cite{huge},
-which maintain these counts for ranges of vertices,
+the number of vertices of each community in any range of contiguous vertex indices.
+We then design a data structure extending a construction of \cite{huge}, which maintain these counts for ranges of vertices,
 and ``sample'' the partition of their counts only on an as-needed basis.
-This extension results in an efficient technique to sample counts
-from the \emph{multivariate hypergeometric distribution} (Section~\ref{sec:multivariate_hypergeometric_sampling}).
-This sampling procedure may be of independent interest.
-For $r$ communities, this yields an implementation with
-$ \mathcal{O}(r\cdot \poly(\log n))$ overhead in required resources for each operation.
-This upholds all previous polylogarithmic guarantees when $r = \poly(\log n)$.
+This extension results in an efficient technique to sample counts from the \emph{multivariate hypergeometric distribution}
+(Section~\ref{sec:multivariate_hypergeometric_sampling}) which may be of independent interest.
+For $r$ communities, this yields an implementation with $ \mathcal{O}(r\cdot \poly(\log n))$ overhead in required resources for each operation.
 
-\paragraph*{CDF Based Sampling}
-It is worth noting that our techniques for implementing local-access for the ER and SBM graphs
-can easily be extended to other similar models of random graphs.
-The only requirement is that the CDF of the probability sequences can be efficiently computed as in Section~\ref{para:CDF}.
+
+
+
+\subsection{Directed Graphs}
+\label{sec:directed_graphs}
+Lastly, we consider Kleinberg's Small World model (\cite{kleinberg, klein}) in Section~\ref{sec:small_world}.
+While Small-World models are proposed to capture properties of observed data such as small shortest-path 
+distances and large clustering coefficients \cite{watts1998collective}, 
+this important special case of Kleinberg's model, defined on two-dimensional grids, demonstrates underlying geographical structures of networks.
+
+In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$.
+Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,
+and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$.
+A common choice for $c$ is given by normalizing the distribution such that the expected out-degree of each vertex is 1 ($c = \Theta(1/\log n)$).
+We can also support a range of values of $c=\log^{\pm\Theta(1)}n$.
+Since the degree of each vertex in this model is $\Bo(\log n)$ with high probability, we design generators supporting \func{All-Neighbor} queries.
+In contrast to our previous cases, this model imposes an underlying two-dimensional structure of the vertex set,
+which governs the distance function as well as complicates the individual edge probabilities.

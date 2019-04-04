@@ -9,7 +9,7 @@ Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- 
 Next, we focus on the Stochastic Block model with randomly-assigned communities.
 \iffalse
 {\color{red}In this case, a naive solution would be to simply assign communities to contiguous blocks of indices.
-In such a setting, the problem of calculating $\distr{F}(v,a,b)$, simply reduces to the $G(n,p)$ case,
+In such a setting, the problem of calculating $\mathsf{F}(v,a,b)$, simply reduces to the $G(n,p)$ case,
 with some additional case analysis to check when we are at a community boundary.
 However, this setup is unrealistic,
 and not particularly useful in the context of the Stochastic Block model.
@@ -17,7 +17,7 @@ In fact most algorithms operating on these graphs,
 are trying to unveil the underlying community structure.}
 {\color{blue} I'd say these motivations should show up in intro or preliminaries (for the full version)}
 \fi
-Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random, according to some given distribution $\distr{R}$ over the communities. We formulate a method of sampling community assignments locally.
+Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random, according to some given distribution $\mathsf{R}$ over the communities. We formulate a method of sampling community assignments locally.
 This essentially allows us to sample from the \emph{multivariate hypergeometric distribution},
 using $\poly(\log n)$ random bits, which may be of independent interest. We remark that, as our first step, we sample for the number of vertices of each community. That is, our construction can alternatively support the community assignment where the number of vertices of each community is given, under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
 
@@ -28,7 +28,7 @@ As $p_{v,u} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ mod
 The final algorithm in Section~\ref{sec:undirected} locally generates a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
 \end{restatable}
 
-We remark that there exists an alternative approach that picks $F\sim\distr{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
+We remark that there exists an alternative approach that picks $F\sim\mathsf{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
 
 While we are able to generate our random graph on-the-fly supporting all three types of queries, our construction still only requires $\bo(m+n)$ space ($N$-bit words) in total at any state; that is, we keep $\bo(n)$ words for $\LAST$, $\bo(1)$ words per neighbor in $P_v$'s, and one marking bit for each bucket (where there can be up to $m+n$ buckets in total). Hence, our memory usage is nearly optimal for the $G(n,p)$ model:
 
@@ -53,12 +53,12 @@ However, this only requires one $N$-bit random word.
 \subsection{Stochastic Block model}
 \label{sec:app_sbm}
 
-For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$. By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$, as $\prod_{u=a}^b (1-p_{v,u}) = \prod_{j=1}^r (1-p_{i,j})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{v,u}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{i,j}$. Thus, it is sufficient to design a data structure, or a \emph{generator}, that draws a community assignment for the vertex set according to the given distribution $\distr{R}$.
+For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$. By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$, as $\prod_{u=a}^b (1-p_{v,u}) = \prod_{j=1}^r (1-p_{i,j})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{v,u}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{i,j}$. Thus, it is sufficient to design a data structure, or a \emph{generator}, that draws a community assignment for the vertex set according to the given distribution $\mathsf{R}$.
 This data structure should be able to efficiently count the number of occurrences of vertices of each community in any contiguous range, namely the value $|[a,b]\cap C_j|$ for each $j \in [r]$.
 To this end, we use the following lemma, yielding the generator for the Stochastic Block model that uses $O(r\, \poly(\log n))$ resources per query.
 
 \begin{restatable}{theorem}{res:sbm-data}\label{thm:sbm-data}
-There exists a data structure (generator) that samples a community for each vertex independently at random from $\distr{R}$ with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that ask for the number of occurrences of vertices of each community in any contiguous range, using $O(r\,\poly(\log n))$ time, random $N$-bit words and additional space per query. Further, this data structure may be implemented in such a way that requires no overhead for initialization.
+There exists a data structure (generator) that samples a community for each vertex independently at random from $\mathsf{R}$ with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that ask for the number of occurrences of vertices of each community in any contiguous range, using $O(r\,\poly(\log n))$ time, random $N$-bit words and additional space per query. Further, this data structure may be implemented in such a way that requires no overhead for initialization.
 \end{restatable}
 \begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct}
 The final algorithm in Section~\ref{sec:undirected} generates a random graph from the Stochastic Block model with randomly-assigned communities using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per query with high probability.
@@ -76,7 +76,7 @@ holds the number of vertices of each community in its range.
 The tree initially contains only the root,
 with the number of vertices of each community sampled according
 to the multinomial distribution\footnote{See e.g., section 3.4.1 of \cite{knuth}}
-(for $n$ samples (vertices) from the probability distribution $\distr{R}$).
+(for $n$ samples (vertices) from the probability distribution $\mathsf{R}$).
 The children are only generated top-down on an as-needed basis according to the given queries.
 The technical difficulties arise when generating the children,
 where one needs to sample ''half'' of the counts of the parent from the correct marginal distribution.

@@ -28,16 +28,16 @@ As the running time of our generator is proportional to the number of generated 
 then by the bound on the number of neighbors, this assumption does not asymptotically worsen the performance of the generator.
 
 \subsubsection{Phase 1: Sample the distance $D$}
-Let $a = \LAST[v] + 1$, and let $\distr{D}(a)$ to denote the probability distribution of the distance where the next closest neighbor of $v$ is located, or $\bot$ if there is no neighbor at distance at most $2(\sqrt{n}-1)$.
-That is, if $D\sim\distr{D}(a)$ is drawn, then we proceed to Phase 2 to sample all neighbors at distance $D$.
-We repeat the process by sampling the next distance from $\distr{D}(a+D)$ and so on until we obtain $\bot$, at which point we return our answers and terminate.
+Let $a = \LAST[v] + 1$, and let $\mathsf{D}(a)$ to denote the probability distribution of the distance where the next closest neighbor of $v$ is located, or $\bot$ if there is no neighbor at distance at most $2(\sqrt{n}-1)$.
+That is, if $D\sim\mathsf{D}(a)$ is drawn, then we proceed to Phase 2 to sample all neighbors at distance $D$.
+We repeat the process by sampling the next distance from $\mathsf{D}(a+D)$ and so on until we obtain $\bot$, at which point we return our answers and terminate.
 
-To sample the next distance, we perform a binary search: we must evaluate the CDF of $\distr{D}(a)$.
-The CDF is given by $\mathbb P[D\leq d]$ where $D\sim\distr{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
+To sample the next distance, we perform a binary search: we must evaluate the CDF of $\mathsf{D}(a)$.
+The CDF is given by $\mathbb P[D\leq d]$ where $D\sim\mathsf{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
 As usual, we compute the probability of the negation: there is \emph{no} neighbor at distance at most $d$.
 Recall that each distance $i$ has exactly $|\Gamma_i^v| = 4i$ vertices, and the probability of a vertex $u \in \Gamma_i^v$ is not a neighbor is exactly $1-1/i^2$.
 So, the probability that there is no neighbor at distance $i$ is $(1-1/i^2)^{4i}$.
-Thus, for $D\sim\distr{D}(a)$ and $d \leq 2(\sqrt{n}-1)$,
+Thus, for $D\sim\mathsf{D}(a)$ and $d \leq 2(\sqrt{n}-1)$,
 \begin{align*}
 \mathbb P[D\leq d] &= 1-\prod_{i=a}^{d} \left(1-\frac{1}{i^2}\right) = 1-\prod_{i=a}^{d} \left(\frac{(i-1)(i+1)}{i^2}\right)^{4i}
 =1-\left(\frac{(a-1)^{a}}{a^{a-1}}\cdot\frac{(d+1)^{d}}{d^{d+1}}\right)^4
@@ -45,7 +45,7 @@ Thus, for $D\sim\distr{D}(a)$ and $d \leq 2(\sqrt{n}-1)$,
 where the product enjoys telescoping as the denominator $(i^2)^{4i}$ cancels with $(i^2)^{4(i-1)}$ and $(i^2)^{4(i+1)}$ in the numerators of the previous and the next term, respectively.
 \iffalse
 \begin{align}
-F_a(b) = &\BPL{d=a}{b} \left[1-\frac{1}{d^2}\right] = \BPL{d=a}{b} \left[\frac{(d-1)(d+1)}{d^2}\right]^{4d} \\
+F_a(b) = &\mathlarger\prod\limits_{d-a}^{b} \left[1-\frac{1}{d^2}\right] = \mathlarger\prod\limits_{d-a}^{b} \left[\frac{(d-1)(d+1)}{d^2}\right]^{4d} \\
 = & \frac{(a-1)^{a}\cancel{(a+1)^{a}}}{a^{2a}}\cdot\frac{a^{a+1}(a+2)^{a+1}}{\cancel{(a+1)^{2(a+1)}}}
 \cdot\frac{\cancel{(a+1)^{a+2}}(a+3)^{a+2}}{(a+2)^{2(a+2)}}\cdot\frac{(a+2)^{a+3}(a+4)^{a+3}}{(a+3)^{2(a+3)}}\cdot\\
 &\bullet\bullet\bullet
@@ -63,7 +63,7 @@ F_a(b) = &\BPL{d=a}{b} \left[1-\frac{1}{d^2}\right] = \BPL{d=a}{b} \left[\frac{(
 \end{align}
 \fi
 This gives us a closed form for the CDF, which we can compute with $2^{-N}$ additive error in constant time (by our computation model assumption).
-Thus, we may sample for the distance $D\sim\distr{D}(a)$ with $O(\log n)$ time and one random $N$-bit word.
+Thus, we may sample for the distance $D\sim\mathsf{D}(a)$ with $O(\log n)$ time and one random $N$-bit word.
 
 \subsubsection{Phase 2: Sampling neighbors at distance $D$}
 After sampling a distance $D$, we now have to sample all the neighbors at distance $D$.
@@ -77,11 +77,11 @@ For the purpose of making the sampling process more efficient, we view this proc
 We then divide the sequence into contiguous blocks of length $4D$ each.
 Our task is to find the \emph{first} occurrence of success (a neighbor), then report the whole block hosting this variable.
 
-This first occurrence of a successful Bernoulli trial is given by sampling from the geometric distribution, $X\sim\distr{Geo}(1/D^2)$.
+This first occurrence of a successful Bernoulli trial is given by sampling from the geometric distribution, $X\sim\mathsf{Geo}(1/D^2)$.
 Since the vertices in each block are labeled by $1, \ldots, 4D$, then this first occurrence has label $X' = {X\mathrm{\,mod\,}4D}$.
-By sampling $X\sim\distr{Geo}(1/D^2)$, the first $X'$ Bernoulli variables of this block is also implicitly determined. Namely, the vertices of labels $1, \ldots, X'-1$ are non-neighbors, and that of label $X'$ is a neighbor.
+By sampling $X\sim\mathsf{Geo}(1/D^2)$, the first $X'$ Bernoulli variables of this block is also implicitly determined. Namely, the vertices of labels $1, \ldots, X'-1$ are non-neighbors, and that of label $X'$ is a neighbor.
 The sampling for the remaining $4D-X'$ vertices can then be performed in the same fashion we sample for next neighbors in the $G(n,p)$ case: 
-repeatedly find the next neighbor by sampling from $\distr{Geo}(1/D^2)$, until the index of the next neighbor falls beyond this block.
+repeatedly find the next neighbor by sampling from $\mathsf{Geo}(1/D^2)$, until the index of the next neighbor falls beyond this block.
 
 Thus at this point, we have sampled all neighbors in $\Gamma_D^v$. We can then update $\LAST[v] \leftarrow D$ and continue the process of larger distances.
 Sampling each neighbor takes $O(\log n)$ time and one random $N$-bit word; the resources spent sampling the distances is also bounded by that of the neighbors.

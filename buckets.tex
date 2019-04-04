@@ -39,10 +39,10 @@ Fix a bucket $B_v^{(i)}$, and consider the Bernoulli RVs $\left\{ X_{v,u}\right\
 The expected number of neighbors in this bucket is
 $ \textstyle\mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{v,u} \right] < L+1$.
 Via the Chernoff bound,
-$$
+\[
 \mathbb{P} \left[ |\Gamma^{(i)}(v)|> (1+3c\log n)\cdot L \right]
 \le e^{-\frac{3c\log n\cdot L}{3}} = n^{-\Theta(c)}
-$$
+\]
 for any constant $c > 0$.
 \end{proof}
 
@@ -52,12 +52,14 @@ With high probability, for every $v$ such that $|B_v| = \Omega(\log n)$ (i.e., $
 \end{restatable}
 \begin{proof}
 For $i < |B_v|$, since $ \mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{v,u} \right] > L-1$, we bound the probability that $B_v^{(i)}$ is empty:
-$$\mathbb P[B_v^{(i)}\textrm{ is empty}] = \prod_{u\in B_v^{(i)}} (1-p_{v,u}) \leq e^{-\sum_{u\in B_v^{(i)}} p_{v,u}} \leq e^{1-L}=c
-$$
+\[
+\mathbb P[B_v^{(i)}\textrm{ is empty}] = \prod_{u\in B_v^{(i)}} (1-p_{v,u}) \leq e^{-\sum_{u\in B_v^{(i)}} p_{v,u}} \leq e^{1-L}=c
+\]
 for any arbitrary small constant $c$ given sufficienty large constant $L$. Let $T_{i}$ be the indicator for the event that $B_v^{(i)}$ is \emph{not} empty, so $\mathbb E 1-c$. By the Chernoff bound, the probability that less than $|B_v|/3$ buckets are non-empty is 
-$$\textstyle
+\[
+\textstyle
 \mathbb P\left[\sum_{i\in[|B_v|]} T_i<\frac{|B_v|}{3}\right]<\mathbb P\left[\sum_{i\in[|B_v|-1]} T_i<\frac{|B_v-1|}{2}\right]\leq e^{-\Theta(|B_v|-1)} = n^{-\Omega(1)}
-$$ as $|B_v| = \Omega(\log n)$ by assumption.
+\] as $|B_v| = \Omega(\log n)$ by assumption.
 \end{proof}
 
 
@@ -165,7 +167,7 @@ Following the analysis above, the probability that some vertex from $P_v^{(i)}$ 
     %	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
     %    \For{$b$ in $P_v^{(i)}\cup\{\END(v,i)\}$}
             \While{$a \ge b$}
-                \State{\textbf{sample} $u\sim\distr{F}(v,a,b)$}
+                \State{\textbf{sample} $u\sim\mathsf{F}(v,a,b)$}
                 \State{$B_u^{(j)} \gets$ $u$'s bucket containing $v$}
     %            \State{$j\gets \BUCKET(u,v)$}
                 \If{$B_u^{(j)}$ is not \filled}
@@ -200,7 +202,7 @@ Further, observe that the coin-flips are simulated independently of the state of
 
 
 
-By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B_v^{(i)}$, or for the value $u$ from the CDF of $\distr{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
+By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B_v^{(i)}$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
 
 \begin{restatable}{lemma}{fill_time}
 \label{lem:fill_time}
@@ -261,7 +263,7 @@ We will use the skip-sampling procedure outlined in Algorithm~\ref
 {alg:oblivious-coin-toss}, in order to find the remaining entries in $P_v^{(i)}$.
 We do this by dividing up the bucket into intervals
 separated by the existing (indirectly uncovered) values in $P_v^{(i)}$.
-For each of these intervals $[a,b)$, we sample $u\sim\distr{F}(v,a,b)$
+For each of these intervals $[a,b)$, we sample $u\sim\mathsf{F}(v,a,b)$
 repeatedly until $u \ge b$, each time setting $a\leftarrow u$.
 For each sampled $u$, if $A[u][v] = \phi$, we add $u$ to $P_v^{(i)}$.
 We also have to add $v$ to $P_u^{(j)}$ (where $v\in B_u^{(j)}$).

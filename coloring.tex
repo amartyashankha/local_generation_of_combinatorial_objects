@@ -105,7 +105,7 @@ So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
 While the proposals $\vec C^t_v$ are easy to sample, it is much less clear how we can sample the $\bm \chi^t_v$ values.
 Note that we can compute $\vec X^t_v$ quite easily if we know the values $\bm\chi^i_v$ for all $i\le t$.
-So, we focus our attention on the query $\func{Accept}(v,t)$ that returns $\bm\chi^t_v$.
+So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm\chi^t_v$.
 
 
 \subsubsection{Naive Coloring Implementations}%
@@ -119,25 +119,25 @@ Otherwise there is no conflict and we can proceed to the next neighbor.
 THis process however makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
 This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired $t = \Omega(\log n)$.
 
-\begin{wrapfigure}[19]{r}{0.48\textwidth}
+\begin{wrapfigure}[19]{r}{0.50\textwidth}
 \vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Generator}
     \label{alg:coloring}
     \begin{algorithmic}[1]
-        \Procedure{Accept}{$v, t$}
+        \Procedure{Accepted}{$v, t$}
             \State {$c\gets C^t_v$}
             \For{$w \gets \Gamma(v)$}
                 \If {$C_w^t = c$}
                     \State \Return 0
                 \EndIf
                 \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
-                    \If {$\mathcal C^{t'}_w = c$ \textbf{and} \func{Accept}($w, t'$)}
+                    \If {$\mathcal C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
                         \State $flag\gets \ONE$
                         \While{$t' < t-1$}
                             \State $t'\gets t' + 1$
-                            \If {\func{Accept}($w, t'$)}
+                            \If {\func{Accepted}($w, t'$)}
                                 \State $flag\gets \ZERO$
                                 \State \textbf{break}
                             \EndIf
@@ -187,7 +187,7 @@ i.e. $\vec X^{t-1}_w = c$ and this leads to a conflict with $v$'s current propos
 If at any of the iterations, we see that a different proposal was accepted, then $w$ does not cause a conflict and we can move on to the next neighbor.
 If we exhaust all the neighbors and don't find any conflicts then $\bm\chi^t_v = 1$.
 
-Now we analyze the runtime of $\func{Accept}$ by constructing and solving a recurrence relation.
+Now we analyze the runtime of $\func{Accepted}$ by constructing and solving a recurrence relation.
 We will use the following lemma to evaluate the expectation of products of relevant random variables.
 
 \begin{lemma}
@@ -203,7 +203,7 @@ Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/
 \begin{definition}
 \label{def:coloring_probes}
 \todo{What probes?}
-We define $T_t$ to be a random variable indicating the number of recursive calls performed during the execution of $\func{Accept}(v,t)$
+We define $T_t$ to be a random variable indicating the number of recursive calls performed during the execution of $\func{Accepted}(v,t)$
 while sampling a single $\bm \chi_v^t$.
 \end{definition}
 So, the number of probes required to check whether a color $c$ (assigned at epoch $t'$) was overwritten at some epoch before $t$ is:
@@ -217,17 +217,17 @@ So, the number of probes required to check whether a color $c$ (assigned at epoc
 \begin{lemma}
 \label{lem:coloring_recurrence}
 \todo{What probes? Given graph G and q colors ...}
-For $\alpha > 4.5$, the expected number of calls to the procedure $\func{Accept}$ while sampling a single $\bm\chi^t_v$
+For $\alpha > 4.5$, the expected number of calls to the procedure $\func{Accepted}$ while sampling a single $\bm\chi^t_v$
 is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
 We start with the recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$
-(equivalently calls to $\func{Accept}$) used by the algorithm.
+(equivalently calls to $\func{Accepted}$) used by the algorithm.
 We will use $\mathcal B(p)$ to refer to the Bernoulli random variable with bias $p$.
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
 (in reality, only the last occurence matters, but we are looking for an upper bound).
 If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
-Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accept}$ proposal is found.
+Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accepted}$ proposal is found.
 Adding an extra $T_{t'}$ term to Equation~\ref{eq:color_overwrite} and summing up over all neighbors and epochs we get the following:
 \begin{align}
 T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
@@ -285,8 +285,8 @@ This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to
 \begin{proof}
 We compute the mixing time from Theorem~\ref{thm:modified_mixing_time} to obtain $\tau_{mix}(1/n) = 6\ln n$ (this is valid since $q > 9\Delta$).
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
-the number of calls to $\func{Accept}$ is $\mathcal O(n^{6.12/\alpha}\Delta\log n)$  which is sublinear for $\alpha > 6.12$.
-Each call to $\func{Accept}(v,t)$ potentially spends $t\Delta$ time looking for neighbors in each epoch before $t$.
+the number of calls to $\func{Accepted}$ is $\mathcal O(n^{6.12/\alpha}\Delta\log n)$  which is sublinear for $\alpha > 6.12$.
+Each call to $\func{Accepted}(v,t)$ potentially spends $t\Delta$ time looking for neighbors in each epoch before $t$.
 Since $t \le 6\ln n$, the overall runtime becomes $\mathcal O(n^{6.12/\alpha}\Delta\log n)$.
 \end{proof}
 
