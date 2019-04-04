@@ -6,7 +6,7 @@
 The next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
 but for small edge probabilities $p_{uv} = o(1)$ this implementation can be inefficient.
 As in \cite{reut}, we speed this up by sampling the number of ``non-neighbors'' preceding the next neighbor.
-To do this, we assume that we can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{v,u})$,
+To do this, we assume that we can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{vu})$,
 where $F(v,a,b)$ is the probability that $v$ has no neighbors in the range $[a,b]$.
 We later show that it is possible to compute this quantity efficiently for the $G(n,p)$ and Stochastic block models.
 
@@ -55,7 +55,7 @@ We remove this bias by rejecting samples from bucket $B^{(i)}_v$ with probabilit
 \subsubsection{Applications to Random Graph Models}
 \label{sec:applications_to_random_graph_models}
 We now consider the application of our construction above to actual random graph models,
-where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{v,u})$ and $\sum^{b}_{u=a} p_{v,u}$ can be computed efficiently.
+where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{vu})$ and $\sum^{b}_{u=a} p_{vu}$ can be computed efficiently.
 \textcolor{Maroon}
 {This holds trivially for the $G(n,p)$ model via closed-form formulas, but requires an additional data structure for the Stochastic Block model.}
 
@@ -73,7 +73,7 @@ our implementation supports local-access via all three types of queries, and yet
 \label{par:stochastic_block_model}
 We generalize our construction to the Stochastic Block Model.
 In this model, the vertex set is partitioned into $r$ \emph{communities} $\left\{ C_1, \ldots, C_r \right\}$.
-The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{i,j}$.
+The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{ij}$.
 As communities in the observed data are generally unknown a priori,
 and significant research has been devoted to designing efficient algorithms for community detection and recovery, these studies generally consider
 the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms (see e.g., \cite{mossel2015reconstruction}).

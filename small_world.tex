@@ -10,7 +10,7 @@ This returns the entire list of out-neighbors of $v$.
 
 \subsection{Generator for $c=1$}
 
-%Let $X_{u,v}$ denote the Bernoulli indicator variable for the event that that $(u,v)$ exists; all $X_{u,v}$'s are independent, and unlike the undirected case, $X_{u,v}$ and $X_{v,u}$ are different random variables. Moreover, 
+%Let $X_{uv}$ denote the Bernoulli indicator variable for the event that that $(u,v)$ exists; all $X_{uv}$'s are independent, and unlike the undirected case, $X_{uv}$ and $X_{vu}$ are different random variables. Moreover, 
 Observe that since the graphs we consider here are directed, the answers to the $\func{All-Neighbor}$ queries are all independent: each vertex may determine its out-neighbors independently.
 Given a vertex $v$, we consider a partition of all the other vertices of the graph into sets $\{\Gamma^v_1, \Gamma^v_2,\ldots\}$ by distance: $\Gamma^v_k = \{u: \func{dist}(v,u) = k\}$ contains all vertices at a distance $k$ from vertex $v$. Observe that $|\Gamma^v_k|\leq 4k = O(k)$. Then, the expected number of edges from $v$ to vertices in $\Gamma^v_k$ is therefore $|\Gamma^v_k|\cdot 1/k^2 = O(1/k)$.
 Hence, the expected degree of $v$ is at most $\sum_{k=1}^{2(\sqrt{n}-1)}O(1/k) = O(\log n)$.

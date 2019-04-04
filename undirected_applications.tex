@@ -1,8 +1,8 @@
 \section{Applications to Erd\"{o}s-R\'{e}nyi Model and Stochastic Block Model}
 \label{sec:applications}
 In this section we demonstrate the application of our techniques to
-two well known, and widely studied models of randon graphs. That is, as required by Theorem~\ref{thm:grand}, we must provide a method for computing the quantities $\prod_{u=a}^b (1-p_{v,u})$ and $\sum_{u=a}^b p_{v,u}$ of the desired random graph families in logarithmic time, space and random bits.
-Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- $G(n,p)$: in this case, $p_{v,u} = p$ is uniform and our quantities admit closed-form formulas.
+two well known, and widely studied models of randon graphs. That is, as required by Theorem~\ref{thm:grand}, we must provide a method for computing the quantities $\prod_{u=a}^b (1-p_{vu})$ and $\sum_{u=a}^b p_{vu}$ of the desired random graph families in logarithmic time, space and random bits.
+Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- $G(n,p)$: in this case, $p_{vu} = p$ is uniform and our quantities admit closed-form formulas.
 %It is quite simple to calculate the CDF for uniform probabilities.
 %{\color{red} Should we still be explicitly mentioning the CDFs? now that we have two ``assumptions'' (product and sum) maybe we should tone this section as actually computing them (rather than just providing CDFs). also did we actually mention sums?}
 
@@ -23,7 +23,7 @@ using $\poly(\log n)$ random bits, which may be of independent interest. We rema
 
 \subsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
-As $p_{v,u} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{v,u}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{v,u} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
+As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
 \begin{restatable}{corollary}{res:oblivious:corol}
 The final algorithm in Section~\ref{sec:undirected} locally generates a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
 \end{restatable}
@@ -55,7 +55,7 @@ However, this only requires one $N$-bit random word.
 
 For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.
 By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$,
-as $\prod_{u=a}^b (1-p_{v,u}) = \prod_{j=1}^r (1-p_{i,j})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{v,u}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{i,j}$.
+as $\prod_{u=a}^b (1-p_{vu}) = \prod_{j=1}^r (1-p_{ij})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{vu}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{ij}$.
 Thus, it is sufficient to design a data structure, or a \emph{generator},
 that draws a community assignment for the vertex set according to the given distribution $\mathsf{R}$.
 This data structure should be able to efficiently count the number of occurrences of vertices of each community in any contiguous range,
