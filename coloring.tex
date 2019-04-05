@@ -7,7 +7,7 @@ Moreover, in this setting, multiple independent instances of $\func{Color}$ usin
 should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
 We consider graphs with max degree $\Delta$ and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.
 
-Using the technique of path-coupling, Vigoda \cite{glauber_survey} showed that for $q > 2\Delta$,
+Using the technique of path-coupling, \cite{glauber_survey} showed that for $q > 2\Delta$,
 one can sample an uniformly random coloring by using a simple Markov chain.
 The Markov chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
 Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
@@ -23,7 +23,7 @@ i.e. the distribution of resulting colors is close to the uniform distribution i
 \label{sec:modified_glauber_dynamics}
 
 Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
-The modified Markov chain procceds in epochs.
+The modified Markov chain proceeds in epochs.
 We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch $\mathcal E_k$:
 \begin{itemize}
@@ -37,11 +37,7 @@ In the $k^{th}$ epoch $\mathcal E_k$:
 %\end{itemize}
 
 This procedure is a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
-The goal in \cite{mohsen} is to find a simultaneous update rule that causes few conflicts among neighbors (and converges to the correct distribution).
-Notice that we \emph{can} have adjacent nodes update in the same epoch.
-However for the sake of succinctness we use their update rule and avoid a tedious path coupling argument.
-
-We can directly use the path coupling argument from \cite{mohsen} which be briefly describe below.
+We can directly use their path coupling argument, which we briefly describe below.
 Given two colorings $\vec X$ and $\vec Y$, we define $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$.
 We define the coupling $(\vec X,\vec Y)\rightarrow(\vec X',\vec Y')$ where $\vec X$ and $\vec Y$
 differ only at a single vertex $v$ such that $\vec X_v = c_X$ and $\vec Y_v = c_Y$.

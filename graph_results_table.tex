@@ -7,15 +7,16 @@
     $G(n,p)$ with $p=\log^{\mathcal O(1)} n/n$ & \cite{sparse}      & \cite{sparse}        & \cite{sparse}          & \cite{sparse}        \\[5pt] \cline{1-5}
     $G(n,p)$ for arbitrary $p$                 & This paper         & This paper           & This paper             & \UBD                 \\[5pt] \cline{1-5}
     Stochastic Block Model                     & This paper         & This paper           & This paper             & \UBD                 \\[5pt] \cline{1-5}
-    BA Preferential Attachment                 & \cite{reut}        & \cite{reut}          & $\textsf{??}$          & \UBD                 \\[5pt] \cline{1-5}
+    BA Preferential Attachment                 & \cite{reut}        & \cite{reut}          & \BD                    & \UBD                 \\[5pt] \cline{1-5}
     Small world model                          & This paper         & This paper           & This paper             & This paper           \\[5pt] \cline{1-5}
     Random ordered rooted trees                & This paper         & This paper           & This paper             & This paper           \\[5pt] \cline{1-5}
     \end{tabular}
     \vspace{0.7em}
-    \caption{\textbf{A summary of our results for random graphs:}
-        A \BD\ indicates that the particular query follows as a trivial consequence of \func{All-Neighbors}, because the graph has bounded degree.
+    \caption{\textbf{(Local access implementations for random graphs):}
+        All the implementations in this table use polylogarithimc time, additional space and random bits per query.
         A \UBD\ in the \func{All-Neighbors} column indicates that the graphs in this model may have un-bounded degree,
-        and it is therefore impossible to sample \func{All-Neighbors} efficiently.}
+        and it is therefore impossible to sample \func{All-Neighbors} efficiently.
+        A \BD\ entry indicates a sampling problem with no known efficient solution.}
     \label{table:graph_results}
 \end{table}
 
