@@ -43,8 +43,8 @@ we provide the first implementations of non-sparse random graph models.
 Prior results for implementing queries to $G(n,p)$ focused on the sparse case where $p = \log^{\mathcal O(1)} n/n$ \cite{sparse}.
 The dense case where $p = \Theta(1)$ is also relatively simple because most of the adjacency matrix is filled,
 and neighbor queries can be answered by performing $\Theta(1)$ \func{Vertex-Pair} queries until an edge is found.
-The interesting case is when $p$ takes on some intermediate value; say $p = 1/\sqrt{n}$.
-In this regime, each vertex has high degree $\mathcal O(\sqrt{n})$ but most of the adjacency matrix is empty,
+The case of general $p$ was not considered previously.
+For example, when $p = 1/\sqrt{n}$, each vertex has high degree $\mathcal O(\sqrt{n})$ but most of the adjacency matrix is empty,
 thus making it difficult to sample a neighbor efficiently.
 We also provide the first implementation (to the best of our knowledge) of \func{Random-Neighbor} queries in \emph{non-sparse graphs}.
 Such queries are useful, for instance, in sub-linear algorithms that employ random walk processes.

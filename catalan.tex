@@ -96,11 +96,11 @@ where $k - 1 = y_i$, $U + D = x_{i+1} - x_i$, and $U-D = y_{i+1} - y_i$, and thi
 Next, we will show how one can sample heights within such an interval,
 and in Section~\ref{sec:supporting_first_return_queries} we will move on to the more complicated $\func{First-Return}$ queries.
 
-We also maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
-If a query lands in an interval that has length less than $\mathcal T$, then we brute force sample the entire interval one step at a time.
-Assuming that the probabilities of these events can be approximated efficiently (Lemma~\ref{lem:probability_approximation_oracle},
-this take $\poly(\log n)$ time.
-\todo{Is this necessary?}
+%We also maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
+%If a query lands in an interval that has length less than $\mathcal T$, then we brute force sample the entire interval one step at a time.
+%Assuming that the probabilities of these events can be approximated efficiently (Lemma~\ref{lem:probability_approximation_oracle},
+%this take $\poly(\log n)$ time.
+%\todo{Is this necessary?}
 
 
 
@@ -143,7 +143,7 @@ This results in a different starting point, and the boundary constraint will als
 Hence, we define $k' = k + 2U - 2D$  to represent the new boundary constraint (since the final height of the $2B$-interval is $k'-1$).
 Finally, $S_{total}$ is the total number of possible paths in the interval (of length $2B$).
 
-We will use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling} from \cite{huge}.
+We will use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}, restated from \cite{huge}).
 An important point to note is that in order to apply this lemma, we must be able to compute the $p_d$ values at least approximately.
 For now, we will assume that we have access to an oracle that will compute the value for us.
 Lemma~\ref{lem:probability_approximation_oracle} shows how to construct such an oracle.
@@ -257,8 +257,8 @@ using only $\mathcal O(poly(\log n))$ resources per query.
 \begin{proof}
 The algorithm maintains a successor-predecessor data structure (e.g. Van Emde Boas tree) to store all positions $x$ that have already been sampled.
 Each newly sampled position is added to this structure.
-Given a query \func{Height}$(x)$, the algorithm first finds the successor and predecessor (say $a$ and $b$) of $x$ among the alredy queried positions.
-This provides us the quarantee required to apply Theorem~\ref{thm:dyck_midpoint_sampling},
+Given a query \func{Height}$(x)$, the algorithm first finds the successor and predecessor (say $a$ and $b$) of $x$ among the already queried positions.
+This provides us the guarantee required to apply Theorem~\ref{thm:dyck_midpoint_sampling},
 which allows us to query the height at the midpoint of $a$ and $b$.
 We then binary search by updating either the successor or predecessor of $x$ and repeat until we sample the height of position $x$.
 %Once the interval length becomes less than $\Theta(\log^2 n)$,
@@ -333,16 +333,17 @@ We re-establish the invariant by sampling an additional point on either side.
 This proceeds as follows for the interval between $x_i$ and $x_{i+1}$
 (see error in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
-    \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$.
-    \item Sample a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$.
+    \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ (see Section~\ref{sec:sampling_the_lowest_achievable_height}).
+    \item Sample a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
+    (see Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
 \end{enumerate}
-Since $h$ is the minimum height along this interval, sampling the point $x$ suffices to preserve the invariant.
-Lemma~\ref{lem:first_return_interval} shows/how this invariant can be used to efficiently find the interval containing the first return.
+Since $h$ is the minimum height in this interval, sampling $\func{Height}(x)$ suffices to preserve the invariant.
+Lemma~\ref{lem:first_return_interval} shows how this invariant can help us efficiently search for the interval containing the first return.
 
 
 \subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}
 \label{sec:sampling_the_lowest_achievable_height}
-First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$.
+First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$).
 We will also refer to $h$ as the \emph{``mandatory boundary''} in this interval;
 i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
@@ -469,7 +470,7 @@ where $r(d)=\mathcal O(\log^2 n)$.
 
 \subsubsection{Estimating the CDF}
 \label{sec:estimating_the_cdf}
-We use these observations to construct a suitable $\{ q_d\}$ that can be used to invoke the rejection sampling lemma.
+We use these observations to construct a suitable $\{q_d\}$ that can be used to invoke the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}).
 This is achieved by constructing a piecewise continuous function $\hat q$, such that $\hat q(\delta)$ approximates $p_{\floor\delta}$,
 and then using the integral of $\hat q$ to define $q_d$.
 %In addition to being a good approximation to $\{ p_d\}$, $\{ q_d\}$ must be of a form that allows us to compute its CDF efficiently.
