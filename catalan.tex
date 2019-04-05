@@ -39,7 +39,6 @@ Specifically, we will want to answer the following queries:
 
 
 \subsection{Bijections to other Catalan objects}%
-\label{sec:bijections_to_other_catalan_objects}
 The $\func{Height}$ query is natural for Dyck paths, but the $\func{First-Return}$ query is important in exploring other Catalan objects.
 For instance, consider a random well bracketed expression; equivalently an uniform distribution over the Dyck language.
 One can construct a trivial bijection between Dyck paths and words in this language
@@ -47,11 +46,19 @@ by replacing up and down steps with opening and closing brackets respectively.
 The $\func{Height}$ query corresponds to asking for the nesting depth at a certain position in the word,
 and $\func{First-Return}(i)$ returns the position of the matching bracket for position $i$.
 
-\todo{figure}
+\label{sec:bijections_to_other_catalan_objects}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/dyck_tree_bijection.pdf}
+    \caption{Bijection between Dyck paths and ordered rooted trees.
+    For example, successive $\func{First-Return}$ queries on the yellow node would reveal its three children in order from left to right.}
+    \label{fig:dyck_tree_bijection}
+\end{figure}
+There is also a natural bijection between Dyck paths and ordered rooted trees (Figure~\ref{fig:dyck_tree_bijection}),
+by considering the Dyck path to be a transcript of a DFS traversal on the tree.
 Starting with the root, for each ``up-step'' we move to a new child of the current node, and for each ``down-step'', we backtrack towards the root.
 Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
-\todo{Figure? Degree queries by repeated application.}
-
+A similar argument shows a bijection to the set of all ordered binary trees.
 Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 
 
@@ -65,14 +72,14 @@ This means that we start our Dyck path at a height of $k-1$, and we are never al
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/complex_dyck_path.pdf}
-    \caption{Complex Dyck path with $U = 25$, $D = 22$ and $k = 3$.
+    \caption{Generalized Dyck path with $U = 25$, $D = 22$ and $k = 3$.
              Notice that the boundary is shifted.} \label{fig:complex_dyck}
 \end{figure}
 
 We will denote the set of such \emph{generalized Dyck paths} as $\mathbb C_k(U,D)$ and the number of paths as $C_k(U,D) = |\mathbb C_k(U,D)|$,
-which is an entry in the \textit{Catalan Trapezoid} of order $k$ (presented in \cite{trap}).
+which is an entry in the \textit{Catalan Trapezoid} of order $k$ \cite{trap}.
 We also use $\mathsf C_k(U,D)$ to denote the uniform distribution over $\mathbb C_k(n,m)$.
-Now, we state a result from \cite{trap} without proof
+Now, we state a result from \cite{trap} without proof:
 \begin{align}
     \label{eq:catalan_trapezoid}
     C_k(U,D)=
@@ -523,11 +530,17 @@ it is possible to compute the integral $\int_{d_1}^{d_2+1} \hat q(\delta)$ in $\
 (the bounds must be such that $d_i \ge 0$ and $U+D-2d_i-k+1 \ge 0$).
 \end{lemma}
 
+Now, we are finally ready to use Lemma~\ref{lem:rejection_sampling} to sample $d$ from the distribution $\{p_d\}$,
+using the efficient sampling procedure for $\{q_d\}$.
+The only other requirement is the ability to approximate the $p_d$ values, which follows from Lemma~\ref{lem:probability_approximation_oracle}.
 \begin{theorem}
 \label{thm:first_return_in_interval}
-Kinesthetics
+Given a sub-interval $[x_{i},x_{i+1}]$ of a random Dyck path of length $2n$,
+such that the only sampled heights in the interval are $y_i=\func{Height}(x_i)$ and $y_{i+1}=\func{Height}(x_{i+1})$,
+and a mandatory boundary constraint at $k$,
+there exists an algorithm that samples a point $x$ within the interval such that $\func{Height}(x) = y_i-k+1$,
+using $\poly(\log n)$ time, random bits, and additional space.
 \end{theorem}
-\todo{Needs a theorem}
 
 
 
