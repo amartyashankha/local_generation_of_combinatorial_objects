@@ -1,10 +1,9 @@
 \subsection{Random Catalan Objects}
 \label{sec:overview_catalan_objects}
-We consider a one dimensional random walk on the line with $n$ up and $n$ down steps, starting from the origin,
-with a boundary constraint that the height is always non-negative.
-Alternately, we can view this as a random sequence (permutation) of $n$ black (corresponding to $+1$) and $n$ white balls (corresponding to $-1$),
-with the restriction that the number of black balls is always at least the number of white balls in any prefix of the sequence.
-\todo[inline,color=Red!20]{What queries do we support?}
+Consider a one dimensional random walk on the line with $n$ up and $n$ down steps, starting from the origin,
+with a constraint that the height is always non-negative.
+We implement two queries, $\func{Height}$ and \func{First-Return}, where $\func{Height}(t)$ which returns the position of the walk at time $t$,
+and \func{First-Return}$(t)$ returns the first time when the random walk returns to the same position as it was at time $t$.
 
 Over the course of the execution, our algorithm will sample the height of the walk at many different positions $\{ x_1, x_2,\cdots, x_m\}$
 (with $x_i<x_{i+1}$), both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.

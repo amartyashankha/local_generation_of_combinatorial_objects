@@ -74,16 +74,14 @@ The added constraint introduces intricate non-local dependencies on the distribu
 However, we are able to support both queries using $\mathcal O(\poly(\log n))$ resources.
 
 Dyck paths are one type of Catalan object, and they have natural bijections to other Catalan objects
-such as bracketed expressions, random rooted trees and binary trees
+such as bracketed expressions, random rooted trees and binary trees.
 Thus, we can use our Dyck Path implementation to obtain useful implementations of other random Catalan objects.
 For instance, $\func{Height}$ queries correspond to $\func{Depth}$ queries on rooted trees and bracketed expressions
 (Section~\ref{sec:bijections_to_other_catalan_objects}).
-We also support more interesting queries; for example, finding the children of a node in a random tree
+We also support more involved queries that are widely used; for example, finding the children of a node in a random tree
 or finding the matching bracket in a random bracketed expression.
-To achieve this, we note that \func{First-Return} queries Section~\ref{sec:bijections_to_other_catalan_objects} queries correspond to
-$\func{Next-Neighbor}$ queries on trees and $\func{Matching-Bracket}$ queries on bracketed expressions
-(Section~\ref{sec:bijections_to_other_catalan_objects}).
-
+To achieve this, we note that \func{First-Return} queries queries correspond to $\func{Next-Neighbor}$ queries on trees,
+and $\func{Matching-Bracket}$ queries on bracketed expressions (Section~\ref{sec:bijections_to_other_catalan_objects}).
 
 
 
