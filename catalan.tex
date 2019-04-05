@@ -466,11 +466,11 @@ and then using the integral of $\hat q$ to define $q_d$.
 %In addition to being a good approximation to $\{ p_d\}$, $\{ q_d\}$ must be of a form that allows us to compute its CDF efficiently.
 First, we rewrite $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)$ where:
 {\small
-\begin{align}
-\label{eq:dyck_integrable_function}
-    \mathcal K = \frac{2^{U+D}}{S_{total}} = \frac{2^{U+D}}{C_k(U,D)-C_{k-1}(U,D)}\ \ \ \
-    &&f(d) = \frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}
-\end{align}}
+    \begin{align}
+    \label{eq:dyck_integrable_function}
+        \mathcal K = \frac{2^{U+D}}{S_{total}} = \frac{2^{U+D}}{C_k(U,D)-C_{k-1}(U,D)}\ \ \ \
+        &&f(d) = \frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}
+    \end{align}}
 Notice that $\mathcal K$ is a constant and $f(d)$ is a function whose integral has a closed form.
 Using the fact that $r(d) = \mathcal O(\log^2 n)$ (from Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized}), we obtain the following lemma:
 
@@ -505,17 +505,17 @@ so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log n)$ 
 \end{proof}
 
 Now, we have everything in place to define the distribution $\{ q_d\}$ that we will be sampling from.
-Specifically, we will define $q_d$ and it's CDF $Q_d$ as follows:
-\begin{align}
-    q_d = \frac{\int\limits_d^{d+1} \hat q(\delta)}{\mathcal N}
-    && Q_d = \frac{\int\limits_0^{d+1} \hat q(\delta)}{\mathcal N}
-\end{align}
-Here the normalizing factor $\mathcal N$ is $\int_0^{d_{max}+1} \hat q(\delta)$.
+Specifically, we will define $q_d$ and it's CDF $Q_d$ as follows ($\mathcal N$ is the normalizing factor):
+{\small
+    \begin{align}
+        q_d = \left(\int\limits_d^{d+1} \hat q(\delta)\right)\cdot \frac{1}{\mathcal N}
+        && Q_d = \left(\int\limits_0^{d+1} \hat q(\delta)\right)\cdot \frac{1}{\mathcal N}
+        && \textrm{where }\ \mathcal N = \int\limits_0^{d_{max}+1} \hat q(\delta)
+    \end{align}}
+%Here the normalizing factor $\mathcal N$ is $\int_0^{d_{max}+1} \hat q(\delta)$.
 To show that these can be computed efficiently, it suffices to show that any integral of $\hat q(\delta)$ can be efficiently evaluated.
 This follows from the fact that $\hat q$ is piecewise continuous with $\mathcal O(\log^4)$ pieces (Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous}),
-each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{eq:dyck_integrable_function} has an integral),
-thus yielding the following lemma.
-
+each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{eq:dyck_integrable_function} has an integral), thus yielding:
 \begin{lemma}
 \label{lem:ReturnProbabilityPiecewiseContinuousIntegral}
 Given the function $\hat q_d$ defined in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous},

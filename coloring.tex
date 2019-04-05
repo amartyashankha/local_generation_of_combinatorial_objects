@@ -95,12 +95,13 @@ Given query access to the adjacency matrix of a graph $G$ with maximum degree $\
 the algorithm has to output the color of $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
-The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$.
+The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
+where $\vec C^t_v$ is the color proposed by $v$ in the $t^{th}$ epoch.
 Note that these values are fully independent and as such any $\vec C^t_v$ can be sampled trivially.
 We also use $\vec X^t$ to denote the final vector of vertex colors at the end of the $t^{th}$ epoch.
-Finally, we define indicator variables $\bm \chi^t_v$ to denote if the color for vertex $v$ was accepted at the $t^{th}$ epoch;
+Finally, we define indicator variables $\bm \chi^t_v$ to denote if the color $\vec C^t_v$ proposed by vertex $v$ was accepted at the $t^{th}$ epoch;
 $\bm \chi^t_v = 1$ if and only if for all neighbors $w\in \Gamma(v)$,
-we satisfy the condition $\vec  C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$.
+we satisfy the condition $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$.
 So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
 While the proposals $\vec C^t_v$ are easy to sample, it is much less clear how we can sample the $\bm \chi^t_v$ values.
@@ -110,16 +111,16 @@ So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm
 
 \subsubsection{Naive Coloring Implementations}%
 \label{sec:naive_coloring_implementations}
-The general strategy to implement this is to iterate over all neighbors $w$ of $v$,
-and for each of them check if they conflict with $v$'s proposed color.
+The general strategy to sample $\bm\chi^t_v$ is to iterate over all neighbors $w$ of $v$,
+and for each of them check if they conflict with $v$'s proposed color in the $t^{th}$ epoch.
 Given a neighbor $w$, one naive way to do this is to iterate backwards from epoch $t$ querying to find if $w$'s proposal was accepted
 until the first accepted proposal (from the latest epoch $t' < t$) is found.
-At this point, if $\mathcal C^{t'}_w = C^t_v$, then the current color of $w$ conflicts with $v$'s proposal.
+At this point, if $\vec C^{t'}_w =\vec C^t_v$, then the current color of $w$ conflicts with $v$'s proposal.
 Otherwise there is no conflict and we can proceed to the next neighbor.
-This process however makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
-This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired $t = \Omega(\log n)$.
+However, this process potentially makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
+This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired mixing time $t = \Omega(\log n)$.
 
-We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $C^t_v$ during \emph{some} epoch.
+We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $\vec C^t_v$ during \emph{some} epoch.
 In this case, the expected number of neighbors that have to be probed recursively is $\le t\Delta/q$
 (since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$).
 So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
@@ -129,7 +130,7 @@ This lower bound on $q$ is however asymptotically worse that the sequential requ
 
 \subsubsection{Jumping Back to Past Epochs}
 \label{sec:jumping_back_to_past_epochs}
-\begin{wrapfigure}[19]{r}{0.50\textwidth}
+\begin{wrapfigure}[19]{r}{0.48\textwidth}
 \vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -137,13 +138,13 @@ This lower bound on $q$ is however asymptotically worse that the sequential requ
     \label{alg:coloring}
     \begin{algorithmic}[1]
         \Procedure{Accepted}{$v, t$}
-            \State {$c\gets C^t_v$}
+            \State {$c\gets\vec C^t_v$}
             \For{$w \gets \Gamma(v)$}
-                \If {$C_w^t = c$}
+                \If {$\vec C_w^t = c$}
                     \State \Return 0
                 \EndIf
                 \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
-                    \If {$\mathcal C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
+                    \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
                         \State $flag\gets \ONE$
                         \While{$t' < t-1$}
                             \State $t'\gets t' + 1$
@@ -169,20 +170,22 @@ The crucial observation is that even though these recursive calls seem unavoidab
 we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
 Because of the more complex structure of this epoch jumping process, the main challenge is to analyze the runtime.
 
-Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c = C^t_v$ is the color proposed by $v$ in epoch $t$.
+Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
 As before, we iterate through all neighbors $w$ of $v$.
-The condition $c\not= \vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$ in the current epoch.
+The condition $c\not=\vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$ in the current epoch.
 If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
 To achieve this, we iterate through all the epochs in reverse order (without making recursive calls)
 to check whether the color $c$ was ever proposed for vertex $w$.
 If not, we can ignore $w$, and otherwise let's say that the last proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
 Now, we directly ``jump'' to the $t'^{th}$ epoch and recursively check if this proposal was accepted.
-If the proposal $C^{t'}_w$ was not accepted, we keep iterating back until we find another candidate proposal for color $c$ or we run out of epochs.
-Otherwise if $\bm\chi^{t'}_w = 1$ (proposal accepted), we move to epoch $t'+1$ to see if $w$'s color was replaced.
-If not, we check epoch $t'+2$, $t'+3$, and so on until we reach epoch $t-1$.
-At this point we have seen that $\bm\chi^{t'}_w = 1$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected
-i.e. $\vec X^{t-1}_w = c$ and this leads to a conflict with $v$'s current proposal for color $c$ and hence $\bm\chi^t_v = 0$.
+If the proposal $\vec C^{t'}_w$ was not accepted, we keep iterating back until we find another epoch when $c$ was proposed $w$, or we run out of epochs.
+Otherwise if $c$ was accepted i.e. $\bm\chi^{t'}_w = 1$,
+we successively consider epochs $t'+1, t'+2, t'+3, \cdots, t-1$ to see whether the color $c$ was replaced by an accepted proposal in a future epoch,
+by recursively invoking $\func{Accepted}(w,t'+i)$ in order to sample $\bm\chi^{t'+i}_w$.
+At this point we have seen that $\bm\chi^{t'}_w = 1$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected,
+implying that color $c$ \emph{survived}, i.e. $\vec X^{t-1}_w = c$.
+This leads to a conflict with $v$'s current proposal for color $c$ and hence $\bm\chi^t_v = 0$.
 If at any of the iterations, we see that a different proposal was accepted, then $w$ does not cause a conflict and we can move on to the next neighbor.
 If we exhaust all the neighbors and don't find any conflicts then $\bm\chi^t_v = 1$.
 
@@ -195,13 +198,12 @@ The probability that any given proposal is rejected $\mathbb P[\bm\chi^t_v=0]$ i
 Moreover, this upper bound holds even if we condition on all the values in $\vec C$ except $\vec C^t_v$.
 \end{lemma}
 \begin{proof}
-A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{ C^t_w, X^{t-1}_w | w\in\Gamma(v)\}$.
+A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{\vec C^t_w, X^{t-1}_w | w\in\Gamma(v)\}$.
 Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/\alpha$.
 \end{proof}
 
 \begin{definition}
-\label{def:coloring_probes}
-\todo{What probes?}
+\label{def:coloring_recursions}
 We define $T_t$ to be a random variable indicating the number of recursive calls performed during the execution of $\func{Accepted}(v,t)$
 while sampling a single $\bm \chi_v^t$.
 \end{definition}
@@ -215,8 +217,8 @@ So, the number of probes required to check whether a color $c$ (assigned at epoc
 
 \begin{lemma}
 \label{lem:coloring_recurrence}
-\todo{What probes? Given graph G and q colors ...}
-For $\alpha > 4.5$, the expected number of calls to the procedure $\func{Accepted}$ while sampling a single $\bm\chi^t_v$
+\todo{Given graph G and q colors ...}
+For $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$ while sampling a single $\bm\chi^t_v$
 is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
@@ -276,6 +278,7 @@ resulting in a total runtime of $\mathcal O(t\Delta e^{\hagu t/\alpha})$.
 
 \begin{theorem}
 \label{thm:coloring_generator_main}
+\todo{probes?}
 Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
 we can sample the color of any given node in an ($1/n$-approximate) uniformly random coloring of the graph in a consistent manner
 using only $\mathcal O(n^{6.12/\alpha}\Delta\log n)$ time space and random bits.
