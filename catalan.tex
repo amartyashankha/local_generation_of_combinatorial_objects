@@ -105,6 +105,7 @@ this take $\poly(\log n)$ time.
 
 
 \subsection{Sampling the Height}
+\label{sec:sampling_the_height}
 We will implement $\func{Height}(t)$ by showing how to (efficiently) sample the position of the path in the midpoint of an existing interval.
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
 If the interval in question has odd length, we sample one step on the boundary and proceed with a shortened interval.

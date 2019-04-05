@@ -1,13 +1,16 @@
-\section{Alternative Generator with Deterministic Performance Guarantee}\label{sec:ER-det}
-
+\section{\func{Next-Neighbor} Implementation with Deterministic Performance Guarantee}
+\label{sec:ER-det}
 In this section, we construct data structures that allow us to sample for the next neighbor directly by considering only the cells $\ADJ[v][u]=\PHI$ in the Erd\"{o}s-R\'{e}nyi model and the Stochastic Block model. This provides $\poly(\log n)$ \emph{worst-case} performance guarantee for generators supporting only the \func{Next-Neighbor} queries. We may again extend this data structure to support \func{Vertex-Pair} queries, however, at the cost of providing $\poly(\log n)$ \emph{amortized} performance guarantee instead.
 
 In what follows, we first focus on the $G(n,p)$ model, starting with \func{Next-Neighbor} queries (Section~\ref{sec:det-er}) then extend to \func{Vertex-Pair} queries (Section~\ref{sec:det-er-pair}. We then explain how this result may be generalized to support the Stochastic Block model with random community assignment in Section~\ref{sec:det-sbm}.
 
 \subsection{Data structure for next-neighbor queries in the Erd\"{o}s-R\'{e}nyi model}\label{sec:det-er}
 
-\begin{wrapfigure}[17]{L}{0.5\textwidth}
-    \caption{Alternative Generator}
+\begin{wrapfigure}[14]{r}{0.42\textwidth}
+\vspace{-1.5em}
+\begin{framed}
+    \renewcommand\figurename{Algorithm}
+    \caption{Alternate implementation}
     \label{alg:exact-coin-toss}
     \begin{algorithmic}
         \Procedure{Next-Neighbor}{$v$}
@@ -28,6 +31,7 @@ In what follows, we first focus on the $G(n,p)$ model, starting with \func{Next-
             \State \Return $u$
         \EndProcedure
     \end{algorithmic}
+\end{framed}
 \end{wrapfigure}
 
 Recall that \func{Next-Neighbor}$(v)$ is given by $\min\{u > \LAST[v]: X_{vu} = 1\}$ (or $n+1$ if no satisfying $u$ exists). To aid in computing this quantity, we define:
@@ -36,7 +40,7 @@ K_v &= \{u \in (\LAST[v], n]: \ADJ[v][u]=1\},\\
 w_v &= \min K_v \textrm{, or $n+1$ if $K_v = \emptyset$,} \\
 T_v &= \{u \in (\LAST[v], w_v): \ADJ[v][u] = \PHI\}.
 \end{align*}
-The ordered set $K_v$ is only defined for ease of presentation within this section: it is equivalent to $(\LAST[v],n] \cap P_v$, recording the known neighbors of $v$ after $\LAST[v]$ (i.e., those that have not been returned as an answer by any \func{Next-Neighbor}$(v)$ query yet). The quantity $w_v$ remains unchanged but is simply restated in terms of $K_v$. $T_v$ specifies the list of candidates $u$ for \func{Next-Neighbor}$(v)$ with $\ADJ[v][u] = \PHI$; in particular, all candidates $u$'s, such that the corresponding RVs $X_{vu} = \ZERO$ are decided, are explicitly excluded from $T_v$.
+The ordered set $K_v$ is only defined for ease of presentation: it is equivalent to $(\LAST[v],n] \cap P_v$, recording the known neighbors of $v$ after $\LAST[v]$ (i.e., those that have not been returned as an answer by any \func{Next-Neighbor}$(v)$ query yet). The quantity $w_v$ remains unchanged but is simply restated in terms of $K_v$. $T_v$ specifies the list of candidates $u$ for \func{Next-Neighbor}$(v)$ with $\ADJ[v][u] = \PHI$; in particular, all candidates $u$'s, such that the corresponding RVs $X_{vu} = \ZERO$ are decided, are explicitly excluded from $T_v$.
 
 Unlike the approach of Algorithm~\ref{alg:oblivious-coin-toss} that simulates coin-flips even for decided $X_{vu}$'s, here we only flip undecided coins for the indices in $T_v$: we have $|T_v|$ Bernoulli trials to simulate. Let $F$ be the random variable denoting the first index of a successful trial out of $|T_v|$ coin-flips, or $|T_v|+1$ if all fail; denote the distribution of $F$ by $\mathsf{ExactF}(p,|T|)$. The CDF of $F$ is given by $\mathbb P[F = f] = 1-(1-p)^f$ for $f \leq |T_v|$ (i.e., there is some success trial in the first $f$ trials), and $\mathbb P[F = |T_v|+1] = 1$. Thus, we must design a data structure that can compute $w_v$, compute $|T_v|$, find the $F^\textrm{th}$ minimum value in $T_v$, and update $\ADJ[v][u]$ for the $F$ lowest values $u \in T_v$ accordingly.
 

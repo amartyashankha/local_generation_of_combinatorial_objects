@@ -115,9 +115,9 @@ $\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
 
 
 
-\subsection{Estimating Probabilities}%
+\subsection{Estimating the Sampling Probabilities}%
 \label{sec:computing_probabilities}
-Oracle for estimating probabilities:
+\todo{Link back to section}
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
 Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
@@ -152,8 +152,8 @@ Otherwise, we can exponentiate the approximation to obtain $p_d\cdot e^{-\mathca
 
 
 
-\subsection{Sampling the Height}%
-\label{sec:sampling_the_height}
+\subsection{Omitted Proofs from Section~\ref{sec:sampling_the_height}: Sampling the Height}%
+\label{sec:appendix_sampling_the_height}
 \begin{lemma}
 \label{lem:taylor_bound}
 For $x < 1$ and $k\ge 1$, we claim that $1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2$
@@ -188,7 +188,6 @@ S_{right} &= {{B}\choose{U-d}}-{{B}\choose{U-d-k'}}\\
 
 \begin{restatable}{lemma}{DTotalBasicBound}
 \label{lem:DTotalBasicBound}
-\todo{change statement}
 $S_{tot} \ge {{2B}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]$.
 \end{restatable}
 \begin{proof}
@@ -201,8 +200,6 @@ S_{tot} &= {{2B}\choose{2D}}-{{2B}\choose{2D-k}}\\
 &\ge {{2B}\choose{2D}}\cdot \left[1-\left(1 - \frac{k'}{2U+1}\right)^k\right]\\
 \end{align}
 \end{proof}
-
-\todo{Reference previous lemma}
 
 \DTotalFarBoundary*
 \begin{proof}
@@ -231,7 +228,7 @@ Using Taylor expansion, we see that
 
 
 
-\subsection{Omitted Proofs from Section~\ref{sec:supporting_first_return_queries}}
+\subsection{Omitted Proofs from Section~\ref{sec:supporting_first_return_queries}: Supporting \func{First-Return} Queries}
 \label{sec:omitted_supporting_first_return_queries}
 \ReturnProbabilityBoundNotNormalized*
 \begin{proof}

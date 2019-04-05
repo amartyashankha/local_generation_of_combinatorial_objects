@@ -30,17 +30,18 @@ The adversary has full knowledge of the algorithm's behavior and its past random
 
 \subsection{Basic Tools for Efficient Sampling}
 \label{sec:basic_tools_for_efficient_sampling}
-Consider a probability distribution $\mathsf{X}$ over $O(n)$ consecutive integers,
-whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
-Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is $\frac{1}{\poly(n)}$-close to $\mathsf{X}$ in $L_1$-distance.
-\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\mathbb P[X\leq x] \geq r$.}
+In this section, we describe the main techniques used to sample from a distribution $\{ p_d\}$,
+which differ based on what type of access to $\{p_d\}$ is provided to the algorithm.
+If the algorithm is provided cumulative distribution function (CDF) queries to $\{p_d\}$,
+then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
+to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance (for constant $c$).
 
-
-We use the following rejection sampling lemma from \cite{huge} as an essential tool for sampling from complicated distributions $\{p_d\}$,
-when the CDF of $p_d$ is difficult to estimate directly.
-In this setting, we construct an auxilliary distribution $\{q_d\}$, which approximates $\{p_d\}$ pointwise, up to polylogarithmic factors,
-and has an efficiently computable CDF.
-We can then sample according to $\{q_d\}$, and reject with the appropriate probabilities in order to obtain a sample from $\{p_d\}$.
+When only given access to queries to the probability dsitribution function (PDF) of $\{p_d\}$, sampling can be more challenging.
+The approach that we use in this work is to construct an auxiliary distribution $\{q_d\}$ with the following two properties:
+First, $\{ q_d\}$ has an efficiently computable CDF.
+Second, $q_d$ approximates $p_d$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_d\}$.
+the following Lemma from \cite{huge} formalizes this concept, and shows that if we can provide such a $\{ q_d\}$,
+we can quickly sample according to a distribution that is close to $\{ p_d\}$.
 \begin{lemma}
 \label{lem:rejection_sampling} (From \cite{huge})
 Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions:
