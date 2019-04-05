@@ -88,7 +88,11 @@ Otherwise, observe that $\ADJ[v][u]$ becomes \emph{decided} (i.e. its value is c
 during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$ thereby setting $\LAST[v] = u' \implies u<\LAST[v]$, or vice versa.
 \end{proof}
 
-\begin{wrapfigure}[15]{R}{0.5\textwidth}
+
+
+\subsubsection{Queries and Updates}
+\label{sec:nn-correctness}
+\begin{wrapfigure}[15]{R}{0.42\textwidth}
 \vspace{-2em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -112,11 +116,6 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
-
-
-
-\subsubsection{Queries and Updates}
-\label{sec:nn-correctness}
 We now present Algorithm~\ref{alg:oblivious-coin-toss}, and discuss the correctness of its sampling process.
 The argument here is rather subtle and relies on viewing the random process as an ``uncovering'' process on the table of RVs $X_{uv}$
 (introduced in Section~\ref{sec:undirected}).

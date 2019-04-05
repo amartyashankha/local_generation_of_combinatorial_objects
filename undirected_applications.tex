@@ -52,15 +52,14 @@ However, this only requires one $N$-bit random word.
 
 \subsubsection{Stochastic Block model}
 \label{sec:app_sbm}
-
-For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.
+In the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.
 By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$,
 as $\prod_{u=a}^b (1-p_{vu}) = \prod_{j=1}^r (1-p_{ij})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{vu}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{ij}$.
 Thus, it is sufficient to design a data structure,
 that draws a community assignment for the vertex set according to the given distribution $\mathsf{R}$.
 This data structure should be able to efficiently count the number of occurrences of vertices of each community in any contiguous range,
 namely the value $|[a,b]\cap C_j|$ for each $j \in [r]$.
-To this end, we use the following lemma (proven in Section~\ref{sec:multivariate_hypergeometric_sampling}),
+To this end, we use the following lemma,
 yielding an implementation for the Stochastic Block model using $O(r\, \poly(\log n))$ resources per query.
 
 \begin{restatable}{theorem}{res:sbm-data}\label{thm:sbm-data}
@@ -75,20 +74,19 @@ using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per
 \end{restatable}
 
 We provide the full details of the construction in Section~\ref{sec:multivariate_hypergeometric_sampling}.
-Our construction extends upon a similar implementation in the work of \cite{huge} which only supports $r = 2$.
-Our overall data structure is a balanced binary tree, where the root corresponds to the entire range of indices $\{1, \ldots, n\}$,
-and the children of each vertex corresponds to each half of the parent's range.
+Our construction extends a similar implementation in the work of \cite{huge} which only supports $r = 2$.
+The overall data structure is a balanced binary tree, where the root corresponds to the entire range of indices $[n]$,
+and the children of each vertex correspond to the first and second half of the parent's range.
 Each node\footnote{For clarity, ``vertex'' is only used in the sampled graph,
 and ``node'' is only used in the internal data structures of the algorithm.}
 holds the number of vertices of each community in its range.
 The tree initially contains only the root, with the number of vertices of each community sampled according to the multinomial distribution
 \footnote{See e.g., section 3.4.1 of \cite{knuth}} (for $n$ samples (vertices) from the probability distribution $\mathsf{R}$).
-The children are only generated top-down on an as-needed basis according to the given queries.
+The children are generated top-down on an as-needed basis according to the given queries.
 The technical difficulties arise when generating the children,
-where one needs to sample ''half'' of the counts of the parent from the correct marginal distribution.
-To this end, we show how to sample such a count as described in the statement below.
-Namely, we provide an algorithm for sampling from the \emph{multivariate hypergeometric distribution}.
-\todo{Move this to appendix?}
+where one needs to sample the counts assigned to either child from the correct marginal distribution.
+We show how to sample such a count from the \emph{multivariate hypergeometric distribution},
+below in Theorem~\ref{thm:SamplingManyColors} (proven in Section~\ref{sec:multivariate_hypergeometric_sampling}).
 
 \begin{restatable}{theorem}{SamplingManyColors}
 \label{thm:SamplingManyColors}
@@ -97,22 +95,20 @@ there exists an algorithm that samples $\langle s_1, s_2,\cdots, s_r \rangle$,
 the number of marbles of each color appearing when drawing $l$ marbles from the urn without replacement,
 in $O(r\cdot\poly(\log B))$ time and random words.
 \end{restatable}
-
 \begin{proof}[Proof of Theorem~\ref{thm:sbm-data}]
-We now show that Theorem~\ref{thm:SamplingManyColors} may be used in order to create the following data structure.
-Recall that $\mathsf{R}$ denote the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex).
-Our data structure generates and maintains random variables $X_1, \ldots, X_n$,
-each of which is drawn independently at random from $\mathsf{R}$: $X_i$ denotes the community of vertex $i$.
-Then given a pair $(i, j)$, it returns the vector $\vec{C}(i, j) = \langle c_1, \ldots, c_r \rangle$
-where $c_k$ counts the number of variables $X_i, \ldots, X_j$ that takes on the value $k$.
-Note that we may also find out $X_i$ by querying for $(i, i)$ and take the corresponding index.
+%We now show that Theorem~\ref{thm:SamplingManyColors} may be used in order to create the following data structure.
+Recall that $\mathsf{R}$ denotes the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex).
+Our algorithm generates and maintains random variables $X_1, \ldots, X_n$ (denoting the community assignment),
+each of which is drawn independently from $\mathsf{R}$.
+Given a pair $(i, j)$, it uses Theorem~\ref{thm:sbm-data} to sample the vector $\vec{C}(i, j) = \langle c_1, \ldots, c_r \rangle$,
+where $c_k$ counts the number of variables in $\{X_i, \ldots, X_j\}$ that take on the value $k$.
 
 We maintain a complete binary tree whose leaves corresponds to indices from $[n]$.
 Each node represents a range and stores the vector $\vec{C}$ for the corresponding range.
 The root represents the entire range $[n]$, which is then halved in each level.
 Initially the root samples $\vec{C}(1, n)$ from the multinomial distribution according to $\mathsf{R}$
 (see e.g., Section 3.4.1 of \cite{knuth}).
-Then, the children are generated on-the-fly using the lemma above.
+Then, the children are generated on-the-fly as described above.
 Thus, each query can be processed within $O(r\,\poly(\log n))$ time, yielding Theorem~\ref{thm:sbm-data}.
 \end{proof}
 

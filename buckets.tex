@@ -59,11 +59,11 @@ We postpone the description of our implementation of $\func{Fill}$ to Section~\r
 
 \subsubsection{Putting it all together: \func{Random-Neighbor} queries}
 \label{sec:random_neighbor}
-\begin{wrapfigure}[11]{R}{0.42\textwidth}
+\begin{wrapfigure}[11]{R}{0.41\textwidth}
 \vspace{-1.2em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
-    \caption{Bucketing Implementation}
+    \caption{Bucket sampling.}
     \label{alg:random}
     \begin{algorithmic}
         \Procedure{Random-Neighbor}{$v$}
@@ -127,11 +127,11 @@ Thus, the number of iterations required is $O(\log^2 n)$ with high probability.
 \subsection{Implementation of \func{Fill}}
 \label{sec:fill_implement}
 
-\begin{wrapfigure}[13]{R}{0.42\textwidth}
+\begin{wrapfigure}[13]{R}{0.39\textwidth}
 \vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
-    \caption{Sampling in a Bucket}
+    \caption{Filling a bucket}
     \label{alg:fill}
     \begin{algorithmic}
     \Procedure{Fill}{$v,i$}

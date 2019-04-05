@@ -1,24 +1,15 @@
 \section{Sampling Random Catalan Objects}%
 \label{sec:catalan_objects}
-\todo{Thresholding.}
-\todo{Mention that this is imperfect sampling (close impl.)}
-
-Earlier, we were interested in querying the following random object.
-In a random permutation of $n$ white marbles and $n$ black marbles, how many white marbles are present in the first $k$ positions.
-As we have seen before, \todo{we have?} \cite{huge} gives us a method of sampling from this (hypergeometric) distribution.
-In constructing a generator for the Stochastic Block model, we generalized this by adding more colors (multivariate hypergeometric distribution).
-We also took this to the extreme where all marbles are distinguishable (i.e. a random permutation),
-and saw that this could also be implemented efficiently.
-Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
-\todo{Connect with previous part on SBM}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{images/basic_dyck_path.pdf}
-    \caption{Simple Dyck path with $n = 35$.}
-    \label{fig:basic_dyck}
-\end{figure}
-Important extension of interval summable queries.
+%\todo{Thresholding.}
+%\todo{Mention that this is imperfect sampling (close impl.)}
+%Earlier, we were interested in querying the following random object.
+%In a random permutation of $n$ white marbles and $n$ black marbles, how many white marbles are present in the first $k$ positions.
+%As we have seen before, \todo{we have?} \cite{huge} gives us a method of sampling from this (hypergeometric) distribution.
+%In constructing a generator for the Stochastic Block model, we generalized this by adding more colors (multivariate hypergeometric distribution).
+%We also took this to the extreme where all marbles are distinguishable (i.e. a random permutation),
+%and saw that this could also be implemented efficiently.
+%Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
+%\todo{Connect with previous part on SBM}
 
 We consider a sequence of $n$ white and $n$ black marbles such that every prefix of the sequence has at least as many white marbles as black ones.
 This can be interpreted as a Dyck path; a $2n$ step \emph{balanced} one-dimensional walk with exactly $n$ up and down steps.
@@ -26,6 +17,12 @@ In Figure~\ref{fig:basic_dyck}, each step moves one unit along the positive $x$-
 The prefix constraint implies that the $y$-coordinate of any point on the walk is $\ge 0$ i.e. the walk never crosses the $x$-axis.
 The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) is the $n^{th}$ Catalan number $C_n=\frac{1}{n+1}\cdot{2n\choose n}$.
 Many important combinatorial objects occur in Catalan families of which these are an example.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/basic_dyck_path.pdf}
+    \caption{Simple Dyck path with $n = 35$ up and down steps.}
+    \label{fig:basic_dyck}
+\end{figure}
 
 Our goal will be to support queries to a uniformly random instance of a Dyck path,
 which will in turn allow us to sample other random Catalan objects such as rooted trees, and bracketed expressions.
@@ -68,12 +65,11 @@ In order to sample Dyck paths locally, we will need to analyze more general Cata
 Specifically, we consider a sequence of $U$ up-steps and $D$ down-steps,
 such that any prefix of the sequence with $U'$ up and $D'$ down steps satisfies $U'-D' \ge 1-k$.
 This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/complex_dyck_path.pdf}
     \caption{Generalized Dyck path with $U = 25$, $D = 22$ and $k = 3$.
-             Notice that the boundary is shifted.} \label{fig:complex_dyck}
+             Note that the boundary is $k-1 = 2$ units below the starting height.} \label{fig:complex_dyck}
 \end{figure}
 
 We will denote the set of such \emph{generalized Dyck paths} as $\mathbb C_k(U,D)$ and the number of paths as $C_k(U,D) = |\mathbb C_k(U,D)|$,
@@ -275,13 +271,13 @@ We then binary search by updating either the successor or predecessor of $x$ and
 \label{sec:supporting_first_return_queries}
 
 In this section, we show how to implement more complex queries to a Dyck path.
-Specifically, we introduce a $\func{First-Return}$ query that allows the user to query the next time the path returns to that height
-(if at all i.e. only if the step from $x$ to $x+1$ is an up-step).
-The utility of this kind of query can be seen in other interpretations of Catalan objects.
-For instance, if we interpret it as a well bracketed expression,
-$\func{First-Return}(x)$ returns the position of the bracket matching the one started at $x$.
-If we consider a uniformly random rooted tree,
-the function effectively returns the next child of a vertex (see Section~\ref{sec:bijections_to_other_catalan_objects}).
+Specifically, we introduce $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$.
+Without loss of generality, we impose a restriction that the step from $x$ to $x+1$ is an up-step.
+The utility of this kind of query can be seen through other random Catalan objects.
+For instance, if we consider a random well bracketed expression, $\func{First-Return}(x)$ is the position of the bracket matching the $x^{th}$ one.
+If we consider a random rooted tree,
+$\func{First-Return}$ corresponds to the next child of a vertex (see Section~\ref{sec:bijections_to_other_catalan_objects}).
+\todo{What if no first return?}
 
 %We will use the following asymptotic formula for \emph{close-to-central} binomial coefficients
 %which will allow us the approximate the probabilities in Section~\ref{sec:estimating_the_cdf}.
@@ -322,7 +318,10 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_boundary_invariant.pdf}
-    \caption{Error in third segment.}
+    \caption{The set of intervals formed by a set of height samples.
+        Each interval also has its own boundary constraint (red).
+        Invariant~\ref{inv:boundary_invariant} implies that each boundary must coincide with one of the interval endpoints.
+        Note that the only interval which does not satisfy this is the third last one (shown in yellow box).}
     \label{fig:dyck_boundary_invariant}
 \end{figure}
 
@@ -398,7 +397,9 @@ As before, we assume that this interval contains $U$ up steps and $D$ down steps
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_first_approach_sampling.pdf}
-    \caption{Zooming into the error in Figure~\ref{fig:dyck_boundary_invariant}}
+    \caption{Zooming into the error in Figure~\ref{fig:dyck_boundary_invariant}.
+        We sample a position $x$ (yellow) on the boundary (red),
+        such that the section of the path to the left of $x$ never approaches the red boundary (it respects the orange boundary).}
     \label{fig:dyck_mandatory_boundary_sampling}
 \end{figure}
 
@@ -567,7 +568,7 @@ Now, the challenge is to find the smallest index $f>i$ such that $y_f\le y_i$.
 To this end, we define $M_{[a,b]}$ as the minimum sampled height in the range of positions $[a,b]$.
 %(lowest $y$-value) of any sampled boundary in the range of positions $[a,b]$ along the Dyck path.
 
-One solution is to maintain a range tree $\mathbf R$ \todo{cite} over the range $[2n]$, storing the $y$-value of the boundary at each point.
+One solution is to maintain a range tree $\mathbf R$ \cite{comp_geo} over the range $[2n]$.
 Assuming that $2n = 2^l$, we can view $\mathbf R$ as a complete binary tree with depth $r$.
 Every non-leaf node is denoted by $\mathbf R_{[a,b]}$, and corresponds to a range $[a,b]\subseteq[2n]$ that is the union of the ranges of its children.
 Each $\mathbf R_{[a,b]}$ stores the value $M_{[a,b]}$ which is is the minimum sampled height
