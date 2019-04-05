@@ -272,13 +272,15 @@ We then binary search by updating either the successor or predecessor of $x$ and
 \label{sec:supporting_first_return_queries}
 
 In this section, we show how to implement more complex queries to a Dyck path.
-Specifically, we introduce $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$.
-Without loss of generality, we impose a restriction that the step from $x$ to $x+1$ is an up-step.
+Specifically, we introduce $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$ (if at all).
 The utility of this kind of query can be seen through other random Catalan objects.
 For instance, if we consider a random well bracketed expression, $\func{First-Return}(x)$ is the position of the bracket matching the $x^{th}$ one.
 If we consider a random rooted tree,
 $\func{First-Return}$ corresponds to the next child of a vertex (see Section~\ref{sec:bijections_to_other_catalan_objects}).
-\todo{What if no first return?}
+An important caveat here is that we do not consider first returns in the case that the step from $x$ to $x+1$ is an down-step.
+Of course, we could solve the same problem by flipping it upside down,
+but the aforementioned correspondence to other Catalan objects only requires the ability to sample first returns from ``above''
+(see Figure~\ref{fig:dyck_tree_bijection}).
 
 %We will use the following asymptotic formula for \emph{close-to-central} binomial coefficients
 %which will allow us the approximate the probabilities in Section~\ref{sec:estimating_the_cdf}.

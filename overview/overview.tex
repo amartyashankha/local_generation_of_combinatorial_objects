@@ -31,8 +31,8 @@ The adversary has full knowledge of the algorithm's behavior and its past random
 \subsection{Basic Tools for Efficient Sampling}
 \label{sec:basic_tools_for_efficient_sampling}
 In this section, we describe the main techniques used to sample from a distribution $\{ p_d\}$,
-which differ based on what type of access to $\{p_d\}$ is provided to the algorithm.
-If the algorithm is provided cumulative distribution function (CDF) queries to $\{p_d\}$,
+which differ based on the type of access to $\{p_d\}$ provided to the algorithm.
+If the algorithm is given cumulative distribution function (CDF) queries to $\{p_d\}$,
 then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
 to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance (for constant $c$).
 

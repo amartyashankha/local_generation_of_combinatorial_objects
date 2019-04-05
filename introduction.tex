@@ -9,10 +9,10 @@ For example, the greedy routing algorithm on Kleinberg's small world networks \c
 Using our implementation, one can execute this algorithm on a random small world instance
 in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
 
-The problem of sampling partial information about huge random objects was pioneered in \cite{huge_old,huge}.
+The problem of sampling partial information about huge random objects was pioneered in \cite{huge,huge_old,huge_journal}.
 Further work in \cite{sparse,reut} considers the generation of different random graph models.
-\todo[inline,color=Red!20]{Add more citations}
-\todo[inline,color=Red!20]{In this paper, we . . . Finish}
+In this work, we focus on generating huge random objects in a number of new settings,
+including basic random graph models that were not previously considered, Catalan objects, and random colorings.
 One emerging theme that we develop further in this work is to provide common data-structure query access to huge random objects.
 For example, for random graph implementations, in addition to supporting adjacency matrix queries about the existence of edge $(u,v)$,
 \cite{reut} introduced the study of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
@@ -75,8 +75,7 @@ However, we are able to support both queries using $\mathcal O(\poly(\log n))$ r
 
 Dyck paths are one type of Catalan object, and they have natural bijections to other Catalan objects
 such as bracketed expressions, random rooted trees and binary trees.
-Thus, we can use our Dyck Path implementation to obtain useful implementations of other random Catalan objects.
-For instance, $\func{Height}$ queries correspond to $\func{Depth}$ queries on rooted trees and bracketed expressions
+Thus, we can use our Dyck Path implementation to obtain useful implementations of other random Catalan objects.  For instance, $\func{Height}$ queries correspond to $\func{Depth}$ queries on rooted trees and bracketed expressions
 (Section~\ref{sec:bijections_to_other_catalan_objects}).
 We also support more involved queries that are widely used; for example, finding the children of a node in a random tree
 or finding the matching bracket in a random bracketed expression.
@@ -98,6 +97,11 @@ by probing the graph (in the manner of \emph{local computation algorithms} \cite
 Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
 We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 7\Delta$.
 
+Unlike all prior results in the area, this implementation has an additional feature that it is memoryless,
+and the sampled color values only depend on the input random bits.
+Consequently, multiple independent instances of the algorithm having access to the same random bits,
+will respond to queries in a manner consistent with each other; they will sample exactly the same coloring, regardless of the queries asked.
+
 
 
 
@@ -116,4 +120,4 @@ the oracle is able to locally generate arbitrary portions of it and answer queri
 Though preferential attachment graphs are sparse, they contain vertices of high degree,
 thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
 
-For additional related work, see Section~\ref{sec:related_work}.
+For additional related work, see Section~\ref{sec:additional_related_work}.

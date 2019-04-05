@@ -92,8 +92,8 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
 
 \subsubsection{Queries and Updates}
 \label{sec:nn-correctness}
-\begin{wrapfigure}[15]{R}{0.42\textwidth}
-\vspace{-2em}
+\begin{wrapfigure}[14]{R}{0.42\textwidth}
+\vspace{-1em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Sampling \func{Next-Neighbor}}
@@ -125,7 +125,7 @@ where the $i^{th}$ coin $C_{vu}$ corresponding to $u = \LAST[v]+i$ has bias $p_{
 Then, we use the sequence $\langle C_{vu} \rangle$ to assign values to \emph{undecided} random variable $X_{vu}$.
 The main observation here is that, the \emph{decided} random variables $X_{vu} = \ZERO$ do not need coin-flips,
 and the corresponding coin result $C_{vu}$ can simply be discarded.
-Thus, we generate coin-flips up until we encounter some $u$ satisfying both $C_{vu} = \ONE$, and $\ADJ[v][u] = \PHI$.
+Thus, we generate coin-flips until we encounter some $u$ satisfying both $C_{vu} = \ONE$ and $\ADJ[v][u] = \PHI$.
 
 Let $\mathsf{F}(v,a,b)$ denote the probability distribution of the occurrence $u$ of the first coin-flip $C_{vu} = \ONE$ among the neighbors in $(a, b)$.
 More specifically, $F\sim\mathsf{F}(v,a,b)$ represents the event that $C_{v,a+1}=\cdots=C_{v,F-1}=\ZERO$ and $C_{v,F}=\ONE$,

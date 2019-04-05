@@ -393,13 +393,13 @@
   \fontsize{9}{12}\selectfont
   \noindent\ignorespaces}
   {\vskip0.7\baselineskip\noindent
-   \subjclassHeading
-   \ifx\@ccsdescString\@empty
-     \textcolor{red}{Author: Please fill in 1 or more \string\ccsdesc\space macro}%
-   \else
-     \@ccsdescString
-   \fi
-   \vskip0.7\baselineskip
+   %\subjclassHeading
+   %\ifx\@ccsdescString\@empty
+     %\textcolor{red}{Author: Please fill in 1 or more \string\ccsdesc\space macro}%
+   %\else
+     %\@ccsdescString
+   %\fi
+   %\vskip0.7\baselineskip
    \noindent\keywordsHeading
    \ifx\@keywords\@empty
      \textcolor{red}{Author: Please fill in \string\keywords\space macro}%
@@ -680,7 +680,7 @@
 \let\@keywords\@empty
 \def\keywordsHeading{%
   \textcolor{darkgray}{\fontsize{9}{12}\sffamily\bfseries
-                       Keywords and phrases\enskip}}
+                       Keywords\enskip}}
 \RequirePackage{comment}
 \excludecomment{CCSXML}
 % inspired by https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string

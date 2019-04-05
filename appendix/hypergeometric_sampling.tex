@@ -65,7 +65,6 @@ there exists an algorithm that samples $s_1 + s_2 +\cdots + s_k$,
 the number of marbles among the first $k$ colors appearing when drawing $\ell$ marbles from the urn without replacement,
 in $O(\poly(\log B))$ time and random words.
 \end{theorem}
-\todo{Remove this?}
 \begin{proof}
 Since we don't have to find the individual counts, we can be more efficient by grouping half the colors together at each step.
 Formally, we define a pair $\vec  D= \langle D_1,D_2 \rangle$ where $D_1=C_1 + C_2 +\cdots + C_{r/2}$ and $D_2=C_{r/2+1}+\cdots+C_{r-1}+C_r$.

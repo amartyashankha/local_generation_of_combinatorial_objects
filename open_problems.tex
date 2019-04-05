@@ -1,9 +1,14 @@
 \section{Open Problems}%
 \label{sec:open_problems}
-\todo{Move elsewhere?}
+There are many interesting directions to pursue in this area. We give a few examples.
 \begin{itemize}
-    \item Degree queries for undirected random graphs?
-    \item Faster implementation of coloring $\mathcal O(\poly(\log n))$?
-    \item Reduce the required value of $\alpha$?
-    \item Random walks on other networks? Ideally, any network.
+    \item Provide a local access implementation of degree queries for undirected random graphs, even for $G(n,p)$.
+    \item Provide a faster local access implementation for sampling the color of a specified vertex
+          in a random $q$-coloring of a bounded degree graph $G$.
+    \item Given a graph with maximum degree $\Delta$ and $q < 9\Delta$,
+          provide a sublinear time local access implementation for sampling the color of a specified vertex in a random $q$-coloring of $G$.
+          We remark that this problem in particular should be feasible, by simulating a faster mixing Markov chain.
+          The important question is whether you can you get down to $q = 2\Delta$?
+    \item Given a graph $G$ and starting vertex $v$,
+          provide a local access implementation for sampling the location of a random walk starting at $v$ after $t$ steps.
 \end{itemize}
