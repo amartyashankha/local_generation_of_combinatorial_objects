@@ -5,18 +5,18 @@ or is it possible to provide query access to the object and sample it incrementa
 Such an \emph{implementation} would emulate the random object by answering appropriate queries in a consistent manner.
 Specifically, all responses to queries must be consistent with an instance of the random object sampled from the true distribution (or close to it).
 This paradigm is useful when the algorithm is sub-linear and thus, sampling the entire object up front would ruin its efficiency.
+For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
+Using our implementation, one can execute this algorithm on a random small world instance
+in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
+
 The problem of sampling partial information about huge random objects was pioneered in \cite{huge_old,huge}.
 Further work in \cite{sparse,reut} considers the generation of different random graph models.
 \todo[inline,color=Red!20]{Add more citations}
-
 \todo[inline,color=Red!20]{In this paper, we . . . Finish}
 One emerging theme that we develop further in this work is to provide common data-structure query access to huge random objects.
 For example, for random graph implementations, in addition to supporting adjacency matrix queries about the existence of edge $(u,v)$,
 \cite{reut} introduced the study of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
 
-For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
-Using our implementation, one can execute this algorithm on a random small world instance
-in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
 
 
 
