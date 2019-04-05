@@ -1,10 +1,10 @@
 \begin{table}[htpb]
 \centering
-%\renewcommand{\arraystretch}{1.1}
+\renewcommand{\arraystretch}{1.2}
 \begin{tabular}{| >{\centering\arraybackslash}m{70pt} || >{\centering\arraybackslash}m{50pt} || >{\centering\arraybackslash}m{50pt} | >{\centering\arraybackslash}m{60pt} | >{\centering\arraybackslash}m{70pt} | >{\centering\arraybackslash}m{60pt} |}
     \hline
     \textbf{Model}           & \textbf{Reference}   & \func{Vertex-Pair} & \func{Next-Neighbor} & \func{Random-Neighbor} & \func{All-Neighbors} \\      \hline \hline
-    $G(n,p)$ with $p=\mathcal O(\ln n/n)$ & \cite{sparse}        & \OPL               & \OPL                 & \OPL                   & \OPL                 \\[5pt] \cline{1-6}
+    $G(n,p)$ with $p=\ln^{\mathcal O(1)} n/n$ & \cite{sparse}        & \OPL               & \OPL                 & \OPL                   & \OPL                 \\[5pt] \cline{1-6}
     $G(n,p)$ for arbitrary $p$            & This paper           & \OPL               & \OPL                 & \OPL                   & \UBD                 \\[5pt] \cline{1-6}
     Stochastic Block Model                & This paper           & \OPL              & \ROPL                & \ROPL                  & \UBD                 \\[5pt] \cline{1-6}
     BA Preferential Attachment            & \cite{reut}          & \OPL               & \OPL                 & --                     & \UBD                 \\[5pt] \cline{1-6}

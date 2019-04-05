@@ -10,7 +10,8 @@ This paradigm is useful when the algorithm is sub-linear and thus, sampling the 
 Our first set of results focus on undirected graphs with independent edge probabilities,
 i.e. each edge is chosen as an independent Bernoulli random variable.
 We provide a general implementation for this model under certain assumptions.
-Then, we use this to obtain the first efficient local implementations for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, and the Stochastic Block model.
+Then, we use this to obtain the first efficient local implementations for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model for \emph{all} values of $p$,
+and the Stochastic Block model.
 As in previous local-access implementations for random graphs, we support \func{Vertex-Pair} and \func{Next-Neighbor} queries.
 In addition, we introduce a new \func{Random-Neighbor} query.
 Next, we give the first local-access implementation for \func{All-Neighbors} queries in the (sparse and directed) Kleinberg's Small-World model.

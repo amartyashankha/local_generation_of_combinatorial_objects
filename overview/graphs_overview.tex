@@ -4,8 +4,9 @@ In Section~\ref{sec:undirected}, we implement queries to both the adjacency matr
 for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
 where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
 Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
-In this model, \func{Vertex-Pair} queries can be implemented trivially,
-since the existence of any edge $(u,v)$ is an independent Bernoulli random variable.
+In this model, \func{Vertex-Pair} queries by themselves can be implemented trivially,
+since the existence of any edge $(u,v)$ is an independent Bernoulli random variable,
+but it becomes harder to maintain consistency when implementing them in conjunction with the other queries.
 Inspired by \cite{reut}, we provide an implementation of $\func{next-neighbor}$ queries,
 which return the neighbors of any given vertex one by one in lexicographic order.
 Finally, we introduce a new query: \func{Random-Neighbor} that returns a uniformly random neighbor of any given vertex.
@@ -114,3 +115,11 @@ We can also support a range of values of $c=\log^{\pm\Theta(1)}n$.
 Since the degree of each vertex in this model is $\Bo(\log n)$ with high probability, we design implementations supporting \func{All-Neighbor} queries.
 In contrast to our previous cases, this model imposes an underlying two-dimensional structure of the vertex set,
 which governs the distance function as well as complicates the individual edge probabilities.
+
+We design generators for the aforementioned case of the Small-World model, supporting each \func{all-neighbors} query,
+listing all neighbors from closest to furthest away from the queried vertex, using $\poly(\log n)$ resources per query.
+Providing local access for directed graphs is simpler because the out-neighbors of vertices may be chosen independently at each vertex.
+So, the main challenge is to sample for the next (closest) neighbor, when the probabilities are a function of the Manhattan distance on the lattice.
+Rather than sampling for a neighbor directly, we sample the next smallest distance with a neighbor,
+employing the rejection sampling technique that allows efficient sampling through an approximate distribution that have closed-form description,
+then as a second step, sample for all neighbors for each chosen distance.

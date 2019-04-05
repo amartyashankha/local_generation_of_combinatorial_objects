@@ -57,6 +57,20 @@
 \newcommand{\BD}{$\widetilde{\mathcal O}(1)$}
 \newcommand{\ROPL}{$r\cdot \log^{\mathcal O(1)} n$}
 \newcommand{\OPL}{$\log^{\mathcal O(1)} n$}
+\newcommand{\RPL}[1]{
+    \ifnum1=#1\relax
+        $r\cdot \log n$
+    \else
+        $r\cdot \log^{#1} n$
+    \fi
+}
+\newcommand{\PL}[1]{
+    \ifnum1=#1\relax
+        $\log n$
+    \else
+        $\log^{#1} n$
+    \fi
+}
 \newcommand{\UBD}{$\times$}
 \newcommand{\hagu}{k}
 \newcommand{\thicksquare}{\tikz[baseline]\draw[very thick](0,0)rectangle(0.2,0.2);}
