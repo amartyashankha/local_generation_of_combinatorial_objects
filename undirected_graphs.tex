@@ -20,18 +20,20 @@ The deterministic guarantee comes at the cost of more complicated data-structure
 
 First, consider the adjacency matrix $\ADJ$ of $G$ where each entry $\ADJ[u][v]$ can exist in three possible states:
 $\ADJ[u][v] = \ONE$ or $\ZERO$ if the algorithm has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$ respectively,
-and $\ADJ[u][v] = \PHI$ if the marginal probability of $\mathbb P[(u,v)\in E]$ conditioned on all prior samples is $p_{uv}$.
+and $\ADJ[u][v] = \PHI$ if whether ${u,v}\in E$ or not will be determined by future random choices
+(in fact, the marginal probability of $\mathbb P[(u,v)\in E]$ conditioned on all prior samples is still $p_{uv}$).
 Our implementation also maintains the vector $\LAST$ (used in the same sense as \cite{reut}),
 where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
 All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
 
 We use the Bernoulli random variable $X_{uv} \sim \mathsf{Bern}(p_{uv})$ when sampling the value of $\ADJ[u][v]=\phi$.
-For the sake of analysis, we will frequently consider the \emph{entire} table of RVs $X_{uv}$ being sampled \emph{up-front} (i.e., flip all coins),
-and the algorithm simply ``uncovers'' these variables instead of making coin-flips.
+For the sake of analysis, we will frequently view our random process as if the \emph{entire} table of random variables $X_{uv}$ has been sampled
+\emph{up-front} (i.e. all coins have already been flipped), and the algorithm simply ``uncovers'' these variables instead of making coin-flips.
 Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{uv}$ once the graph generation is complete.
 
 \paragraph*{Obstacles for maintaining $\ADJ$ explicitly}
-First, consider a naive implemention that fills out the cells of $\ADJ$ one-by-one as required by each query.
+First, consider a naive implemention that fills out the cells of $\ADJ$ one-by-one as required by each query;
+equivalently, we perform $\func{Vertex-Pair}$ queries on successive vertices until a neighbor is found.
 There are two problems with this approach.
 Firstly, the algorithm only finds a neighbor, for a \func{Random-Neighbor} or \func{Next-Neighbor} query, with probability $p_{uv}$,
 which requires too many iterations: for $G(n,p)$ this requires $1/p$ iterations, which is already infeasible for $p = o(1/\poly(\log n))$.

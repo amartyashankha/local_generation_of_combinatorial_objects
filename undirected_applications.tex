@@ -1,4 +1,4 @@
-\section{Applications to Erd\"{o}s-R\'{e}nyi Model and Stochastic Block Model}
+\subsection{Applications to Erd\"{o}s-R\'{e}nyi Model and Stochastic Block Model}
 \label{sec:applications}
 In this section we demonstrate the application of our techniques to
 two well known, and widely studied models of randon graphs. That is, as required by Theorem~\ref{thm:grand}, we must provide a method for computing the quantities $\prod_{u=a}^b (1-p_{vu})$ and $\sum_{u=a}^b p_{vu}$ of the desired random graph families in logarithmic time, space and random bits.
@@ -21,7 +21,7 @@ Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ 
 This essentially allows us to sample from the \emph{multivariate hypergeometric distribution},
 using $\poly(\log n)$ random bits, which may be of independent interest. We remark that, as our first step, we sample for the number of vertices of each community. That is, our construction can alternatively support the community assignment where the number of vertices of each community is given, under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
 
-\subsection{Erd\"{o}s-R\'{e}nyi Model}
+\subsubsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
 As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
 \begin{restatable}{corollary}{res:oblivious:corol}
@@ -50,7 +50,7 @@ However, this only requires one $N$-bit random word.
 
 
 
-\subsection{Stochastic Block model}
+\subsubsection{Stochastic Block model}
 \label{sec:app_sbm}
 
 For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.

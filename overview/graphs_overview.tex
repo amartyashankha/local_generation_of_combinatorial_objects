@@ -15,7 +15,7 @@ $\func{Random-Neighbor}$ queries present particularly interesting challenges tha
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
 The next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
-but for small edge probabilities $p_{uv} = o(1)$ this implementation can be inefficient.
+but for small edge probabilities $p_{uv} = o(1)$ this implementation is inefficient, and uses $\Omega (1/p)$ time.
 As in \cite{reut}, we speed this up by sampling the number of ``non-neighbors'' preceding the next neighbor.
 To do this, we assume that we can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{vu})$,
 where $F(v,a,b)$ is the probability that $v$ has no neighbors in the range $[a,b]$.
