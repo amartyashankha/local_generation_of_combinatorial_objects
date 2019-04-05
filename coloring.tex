@@ -1,36 +1,28 @@
 \section{Random Coloring of a Graph}%
 \label{sec:random_coloring_of_a_graph}
+A $q$-coloring of a graph $G=(V, E)$ is a function $\vec X : V\rightarrow [q]$, such that for all $(u,v)\in E$, $\vec X_u \not= \vec X_v$.
+We will locally sample an uniformly random $q$-coloring of a graph, by implementing an oracle $\func{Color}(v)$,
+which returns the color $\vec X_v$ of node $v$, where $\vec X$ is a uniformly random valid coloring.
+Moreover, in this setting, multiple independent instances of $\func{Color}$ using the same random bits,
+should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
+We consider graphs with max degree $\Delta$ and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.
 
-\todo{Query access}
-We wish to locally sample an uniformly random coloring of a graph.
-A $q$-coloring of a graph $G = (V, E)$ is a function $\sigma : V\rightarrow [q]$,
-such that for all $(u,v)\in E$, $\sigma_u \not= \sigma_v$.
-We will consider only bounded degree graphs, i.e. graphs with max degree $\le \Delta$.
-Otherwise, the coloring problem becomes NP-hard\todo{cite}.
-
-Using the technique of path-coupling, Vigoda \todo{cite} showed that for $q > 2\Delta$,
-one can sample an uniformly random coloring by using a MCMC algorithm.
-
-The Markov Chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
+Using the technique of path-coupling, Vigoda \cite{glauber_survey} showed that for $q > 2\Delta$,
+one can sample an uniformly random coloring by using a simple Markov chain.
+The Markov chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
 Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
-
 In each step of the Markov process, a pair $(v, c)\in V\times [q]$ is sampled uniformly at random.
 Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in a conflict with $v$'s neighbors,
-i.e. $c\not\in \left\{ X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $X_v^{t+1}\leftarrow c$.
-
-After running the MC for $T = \mathcal{O}(n\log n)$ steps we reach the stationary distribution ($\epsilon$ close),
-and the coloring is an uniformly random one.
-
-\textbf{Exact Bound:}
-$t_{mix}(\epsilon) \le \left( \frac{q-\Delta}{q-2\Delta}\right)n\left( \log n + \log(1/\epsilon)\right)$
-\todo{cite book (Peres, Lyons)}
+i.e. $c\not\in \left\{ \vec X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $\vec X_v^{t+1}\leftarrow c$.
+After running this chain for $T = \mathcal{O}(n\log n)$ steps, the Markov chain is mixed,
+i.e. the distribution of resulting colors is close to the uniform distribution in $L_1$ distance.
 
 
 
 \subsection{Modified Glauber Dynamics}%
 \label{sec:modified_glauber_dynamics}
 
-Now we define a modified Markov Chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
+Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
 The modified Markov chain procceds in epochs.
 We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch $\mathcal E_k$:
@@ -48,8 +40,6 @@ This procedure is a special case of the \emph{Local Glauber Dynamics} presented 
 The goal in \cite{mohsen} is to find a simultaneous update rule that causes few conflicts among neighbors (and converges to the correct distribution).
 Notice that we \emph{can} have adjacent nodes update in the same epoch.
 However for the sake of succinctness we use their update rule and avoid a tedious path coupling argument.
-
-\todo{Cite Path Coupling}
 
 We can directly use the path coupling argument from \cite{mohsen} which be briefly describe below.
 Given two colorings $\vec X$ and $\vec Y$, we define $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$.
@@ -130,8 +120,8 @@ This lower bound on $q$ is however asymptotically worse that the sequential requ
 
 \subsubsection{Jumping Back to Past Epochs}
 \label{sec:jumping_back_to_past_epochs}
-\begin{wrapfigure}[19]{r}{0.48\textwidth}
-\vspace{-1.5em}
+\begin{wrapfigure}[18]{r}{0.48\textwidth}
+\vspace{-3.0em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Generator}
@@ -217,9 +207,8 @@ So, the number of probes required to check whether a color $c$ (assigned at epoc
 
 \begin{lemma}
 \label{lem:coloring_recurrence}
-\todo{Given graph G and q colors ...}
-For $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$ while sampling a single $\bm\chi^t_v$
-is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
+Given graph $G$ and $q=2\alpha\Delta$ colors, for $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$
+while sampling a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
 We start with the recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$
@@ -289,6 +278,6 @@ We compute the mixing time from Theorem~\ref{thm:modified_mixing_time} to obtain
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
 the number of calls to $\func{Accepted}$ is $\mathcal O(n^{6.12/\alpha}\Delta\log n)$  which is sublinear for $\alpha > 6.12$.
 Each call to $\func{Accepted}(v,t)$ potentially spends $t\Delta$ time looking for neighbors in each epoch before $t$.
-Since $t \le 6\ln n$, the overall runtime becomes $\mathcal O(n^{6.12/\alpha}\Delta\log n)$.
+Since $t \le 6\ln n$, the overall runtime is $\mathcal O(n^{6.12/\alpha}\Delta\log n)$.
 \end{proof}
 

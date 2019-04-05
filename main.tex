@@ -2,13 +2,14 @@
 \def\coloring{0}
 \documentclass[a4paper,UKenglish,cleveref,autoref]{lipics-v2019}
 
+\usepackage[dvipsnames]{xcolor}
 \hypersetup{
     colorlinks=true,
-    linkcolor=Sepia,
-    citecolor=ForestGreen,
+    linkcolor=BrickRed,
+    linkbordercolor=BrickRed,
+    citecolor=OliveGreen,
+    citebordercolor=OliveGreen,
     urlcolor=RoyalBlue}
-
-\usepackage[dvipsnames]{xcolor}
 
 \usepackage[noend]{algpseudocode}
 \usepackage{algorithm}
@@ -54,6 +55,7 @@
 
 \newcommand{\sectioninput}{\input}
 \newcommand{\hagu}{k}
+\newcommand{\thicksquare}{\tikz[baseline]\draw[very thick](0,0)rectangle(0.2,0.2);}
 
 \usepackage{bm}
 \usepackage{wrapfig, framed, caption}
@@ -92,7 +94,10 @@
 \maketitle
 
 \input{abs}
-\tableofcontents
+\begingroup
+  %\hypersetup{hidelinks}
+  \tableofcontents
+\endgroup
 \newpage
 
 \input{introduction}

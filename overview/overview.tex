@@ -1,140 +1,64 @@
-\section{Our Contributions and Techniques}
-\label{sec:our_contributions_and_techniques}
-
-The problem of computing local information of huge random objects was pioneered in \cite{huge_old,huge}.
-Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
-with $p = O(\poly(\log n)/n)$, which answers $\poly(\log n)$ \func{All-Neighbors} queries, listing the neighbors of queried vertices.
-While these implementations use polylogarithmic resources over their entire execution,
-they generate graphs that are  only guaranteed to {\em appear random} to algorithms that inspect a {\em limited portion} of the generated graph.
-For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
-Using our implementation, one can execute this algorithm on a random small world instance
-in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
-
-In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
-Unlike \cite{sparse}, their implementation allows for an arbitrary number of queries.
-This result is particularly interesting --  although the graphs in this model are generated via a sequential process,
-the oracle is able to locally generate arbitrary portions of it and answer queries in polylogarithmic time.
-Though preferential attachment graphs are sparse, they contain vertices of high degree,
-thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
-
-
-
-
-\input{model.tex}
-\input{overview/graphs}
-
-
-
-
-\subsection{Random Catalan Objects}
-\label{sec:overview_catalan_objects}
-We consider a one dimensional random walk with $n$ up and $n$ down steps starting from the origin,
-with a boundary constraint that the height after $t$ steps is always non-negative.
-Alternately, we can view this as a random sequence (permutation) of $n$ black (corresponding to $+1$) and $n$ white balls (corresponding to $-1$),
-with the restriction that the number of black balls is always at least the number of white balls in any prefix of the sequence.
-
-Over the course of the excecution, our algorithm will sample the height of the walk at many different positions $\{ x_1, x_2,\cdots, x_m\}$
-(with $x_i<x_{i+1})$) both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.
-These sampled positions divide the sequence into contiguous \emph{intervals} $[x_i,x_{i+1}]$,
-where the height of the endpoints $y_i, y_{i+1}$ have been sampled, but non of the intermediate heights are known.
-The important observation is that the section of the path within an \emph{interval} is completely independent of all other \emph{intervals}.
-So, each interval $[x_i,x_{i+1}]$ represents a generalized Dyck problem with $U$ up steps, $D$ down steps and the boundary constraint that
-for any prefix of the interval, the number of up steps can be at most $x_i$ smaller than the number of down steps.
-
-Another useful fact is that the \emph{imbalance} (difference in number of up and down steps) in any contiguous sub-interval of size $B$
-is bounded by $\mathcal O(\sqrt{B\log n})$ with high probability.
-
-\paragraph*{$\func{Height}$ Queries}
-\label{par:height_queries}
-We start by implementing a subroutine that given an \emph{interval} $[x_i,x_{i+1}]$ of length of length $2B$ with $2U$ up and $2D$ down steps,
-samples the number of up steps $U+d$ to the first half of the \emph{interval}, which effectively answers the query $\func{Height}(x_i+B)$.
-This is done by sampling the parameter $d$ from a distribution $\{ p_d\}$ with $p_d = S_{left}(d)\cdot S_{right}(d)/S_{total}$,
-where $S_{left}(d)$ (respectively $S_{right}(d)$) is the number of possible paths in the left (resp. right) half of the \emph{interval} when
-$U+d$ up steps and $D-d$ down steps are assigned to the first half, and $S_{total}$ is the number of possible paths in the original $2B$-interval.
-General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval} containing $x$ and performing binary search.
-
-The problem of sampling the number of up steps in the first half of the \emph{interval} was solved for the case where the sequence is fully random
-in \cite{huge}.
-Adding the non-negativity constraint introduces further difficulties as the distribution over $d$ has a CDF that is difficult to compute.
-We construct a different distribution $\{q_d\}$ that approximates $\{p_d\}$ pointwise to a factor of $\log n$ and has an efficiently computable CDF.
-This allows us to sample from $\{q_d\}$ and leverage the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}) to obtain samples from $\{p_d\}$.
-
-\paragraph*{$\func{First-Return}$ Queries}
-\label{par:_first-return_queries}
-$\func{First-Return}$ queries present an additional challenge because we don't know which \emph{interval} contains the first return.
-Since there could be up to $\Theta(n)$ intervals, is it inefficient to iterate through all of them.
-To circumvent this problem, we allow each interval to sample it's own boundary constraint $k>0$ instead of using the global non-negativity constraint.
-A boundary constraint of $k$ implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k$ or lower.
-Additionally, we maintain an invariant that states that this boundary $x_i-k$ coincides with $\min(x_i,x_{i+1})$.
-If this constraint is satisfied, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest sampled position $x_i>x$
-whose sampled height $y_i \le \func{Height}(x)$, and considering the interval $[x_{i-1},x_i]$ preceding $x_i$.
-
-Every time the $\func{Height}$ algorithm creates new intervals by sub-dividing an existing one, this invariant is potentially broken.
-We re-establish it by sampling a ``mandatory boundary'' (a $y$-coordinate that must be achieved within the interval $[x_i,x_{i+1}]$ but not exceeded),
-and then sampling a position $x$ where $x_i < x < x_{i+1}$ and $\func{Height}(x) = y$.
-The first step of sampling the mandatory boundary is performed by binary searching on the possible boundary locations.
-To find a position that touches this boundary, we parameterize the position with $d$ and find the distribution $\{p_d\}$ associated with these events.
-We then define a piecewise continuous PDF $\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$.
-We then use this to construct $q_d = \int_d^{d+1}\hat q(\delta)$,
-and use rejection sampling (Lemma~\ref{lem:rejection_sampling}) again to sample indirectly from $\{p_d\}$.
-
-
-
-
-\subsection{Random Coloring of a Graph}
-\label{sec:overview_random_coloring_of_a_graph}
-Finally, we introduce a new model for implementating huge random objects
-where the distribution is specified as a uniformly random solution to a huge combinatorial problem.
-In all the problems we have considered so far as well as the ones studied in prior work \cite{huge,sparse,reut}, the description size
-of the random object is small (typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters).
-In this new setting, we will implement local query access to random $q$-colorings of a given huge graph $G$ of size $n$ with maximum degree $\Delta$.
-The distribution in this case is defined by the graph structure which has size $\mathcal O(n\Delta)$.
-We present the following definition for local access implementations in this setting.
+\section{Overview of our Techniques}
+\label{sec:overview_of_our_techniques}
+\subsection{Local-Access Implementations}
+We begin by formalizing the model of \emph{local-access implementations} \textcolor{Maroon}{(trutuful implementation from \cite{huge}?)}.
+Our work provides local-access implementations for various random objects described below.
 
 \begin{definition}
-\label{def:local_access_LCA}
-Given a combinatorial problem on graphs,
-a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
-provides an oracle $\mathcal A$ with the following properties.
-$\mathcal A$ has query access to a graph $G$, and a tape of random bits $\vec R$.
-Assuming that the solution set of the combinatorial problem on $G$ is $\mathbb X$,
-$\mathcal A$ upon being queried with $F_i$, returns the value $F_i(X)$ for a specific solution $X\in\mathbb X$ where the choice of $X$
-depends only on $\vec R$ and the distribution of $X$ (over $\vec R$) is $\epsilon$-close to the uniform distribution over $\mathbb X$.
-Two different instances of $\mathcal A$ with the same graph oracle and the same random bits,
-must agree on the choice of $X$ that is consistent with all answered queries regardless of what queries were actually asked.
+\label{def:local_access}
+Given a distribution $X$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
+of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X\rightarrow \{0,1\}$,
+provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathbb X$ and a given query $F_i$, while satisfying the following:
+%For clarity, we assume that the generator is invoked until its entire graph $G$ is exposed.
+%The local-access generator for a probability distribution $\mathsf{D}$ of the desired random graph model must satisfy the following properties:
+\begin{itemize}
+    \item \textbf{Consistency:}
+    All the values $F_i(X)$ returned by the local-access implementation throughout the entire execution
+    must be consistent with a single $X\in \mathbb X$.
+    \item \textbf{Distribution equivalence:}
+    The random object $X\in \mathbb X$ consistent with the responses $\{ F_i(X)\}$ must be sampled from some distribution $\mathsf{X}'$
+    that is $\epsilon$-close to the desired distribution $\mathsf{X}$ in $L_1$-distance.
+    In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
+    \item \textbf{Performance:}
+    The computation time, additional random bits, and additional space required to answer a single query must be sub-linear,
+    and preferably $\poly(\log n)$ with high probability.
+\end{itemize}
 \end{definition}
-
-We can contrast this definition with the one for \emph{Local Computation Algorithms} \cite{LCA}
-which also allow query access to \emph{some} valid solution and can read the input through local probes.
-An additional difficulty in our setting is that we also have to make sure that we return a solution from the correct distribution.
-Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
+In particular, we allow queries to be made adversarially and non-deterministically.
+The adversary has full knowledge of the algorithm's behavior and its past random bits.
 
 
-\paragraph*{$\func{Color}$ queries}
-\label{par:color_queries}
-We are able to construct an efficient implementation for $\func{Color}(v)$ that returns the final color of $v$
-in a uniformly random $q$ coloring of $G$ using only a sub-linear number of probes when $q\ge 9\Delta$.
-Usually, a random coloring of a graph is sampled by proposing a random color update for a random vertex,
-and accepting the update if it does not create a conflict and repeating this process $\mathcal O(n\log n)$ times.
-This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
 
-To make the runtime analysis simpler, we define a modified version of Glauber Dynamics that proceeds in $\mathcal O(\log n)$ epochs.
-In each epoch, all the vertices propose a random color and update themselves if their proposals do not conflict with any of their neighbors.
-This Markov Chain is a special case of the one presented in \cite{mohsen} for distributed graph coloring
-and mixes in $\mathcal O(\log n)$ epochs when $q\ge 9\Delta$.
-While we do not have the same restrictions as the distributed computation setting,
-we choose to use this chain so as to avoid long analysis of mixing times.
-In order to implement $\func{Color}(v)$, it suffices to implement a query $\func{Accepted}(v,t)$
-that indicates whether the proposal for $v$ was accepted in the $t^{th}$ epoch.
-The answer to this question depends on the prior colors of the potentially $\Delta$ neighbors of $v$.
-Naively sampling the colors of all these neighbors would result in $\Delta$ recursive invocations on the previous epoch ($t-1$),
-and stepping \emph{backwards} through the epochs to find the last accepted proposal.
-This leads to a bound of $\Delta^t$ on the number of recursive invocations.
 
-We can improve this somewhat by only considering neighbors $w$ of $v$ who had any proposal for the same color $c$.
-In this case the expected number of recursive calls is bounded by $t\Delta/q$ ($t\Delta$ proposals to consider and each one is $c$ w.p. $1/q$).
-So, if $q > t\Delta = \mathcal O(\Delta\log n)$, this allows us to bound the total number of resulting invocations.
-The improvement to $q\ge 9\Delta$ comes from the observation that for $w\in\Gamma(v)$ such that $w$ proposed color $c$ at epoch $t'$,
-the recursive call for $w$ can jump to epoch $t'$ and then step \emph{forwards} through the epochs to find the first accepted proposal.
-Since the expected value of $t'$ is close to $t/2$, we dramatically reduce the sub-problem size in each recursion,
-and this allows us to bound the runtime by $\mathcal O\left(t\Delta n^{6.12\Delta/q}\right)$ which is sub-linear for $q \ge 9\Delta$.
+\subsection{Basic Tools for Efficient Sampling}
+\todo[inline]{This section is incomplete.}
+\label{sec:basic_tools_for_efficient_sampling}
+\begin{lemma}
+\label{lem:rejection_sampling}
+Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions
+\begin{enumerate}
+    \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
+    \item Generating an index $i$ according to $q_i$ is closely implementable.
+    \item There exists a $poly(log n)$-time recognizable set $B$ such that
+    \begin{itemize}
+        \item $1-\sum\limits_{i\in B} p_i$ is negligible
+        \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
+    \end{itemize}
+\end{enumerate}
+Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
+\end{lemma}
+
+\paragraph*{CDF Based Sampling}
+\label{par:cdf_based_sampling}
+
+Consider a probability distribution $\mathsf{X}$ over $O(n)$ consecutive integers,
+whose cumulative distribution function (CDF) for can be computed with at most $n^{-c}$ additive error for constant $c$.
+Using $\Bo(\log n)$ CDF evaluations, one can sample from a distribution that is $\frac{1}{\poly(n)}$-close to $\mathsf{X}$ in $L_1$-distance.
+\footnote{Generate a random $N$-bit number $r$, and binary-search for the smallest domain element $x$ where $\mathbb P[X\leq x] \geq r$.}
+
+
+
+
+\input{overview/graphs}
+\input{overview/catalan_overview}
+\input{overview/coloring_overview}

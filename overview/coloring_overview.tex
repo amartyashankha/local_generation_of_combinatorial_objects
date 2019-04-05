@@ -1,0 +1,58 @@
+\subsection{Random Coloring of a Graph}
+\label{sec:overview_random_coloring_of_a_graph}
+Finally, we introduce a new model for implementating huge random objects
+where the distribution is specified as a uniformly random solution to a huge combinatorial problem.
+In all the problems we have considered so far as well as the ones studied in prior work \cite{huge,sparse,reut}, the description size
+of the random object is small (typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters).
+In this new setting, we will implement local query access to random $q$-colorings of a given huge graph $G$ of size $n$ with maximum degree $\Delta$.
+The distribution in this case is defined by the graph structure which has size $\mathcal O(n\Delta)$.
+We present the following definition for local access implementations in this setting.
+
+\begin{definition}
+\label{def:local_access_LCA}
+Given a combinatorial problem on graphs,
+a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
+provides an oracle $\mathcal A$ with the following properties.
+$\mathcal A$ has query access to a graph $G$, and a tape of random bits $\vec R$.
+Assuming that the solution set of the combinatorial problem on $G$ is $\mathbb X$,
+$\mathcal A$ upon being queried with $F_i$, returns the value $F_i(X)$ for a specific solution $X\in\mathbb X$ where the choice of $X$
+depends only on $\vec R$ and the distribution of $X$ (over $\vec R$) is $\epsilon$-close to the uniform distribution over $\mathbb X$.
+Two different instances of $\mathcal A$ with the same graph oracle and the same random bits,
+must agree on the choice of $X$ that is consistent with all answered queries regardless of what queries were actually asked.
+\end{definition}
+
+We can contrast this definition with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
+which also allow query access to \emph{some} valid solution and can read the input through local probes.
+An additional difficulty in our setting is that we also have to make sure that we return a solution from the correct distribution.
+Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
+
+
+\paragraph*{$\func{Color}$ queries}
+\label{par:color_queries}
+We are able to construct an efficient implementation for $\func{Color}(v)$ that returns the final color of $v$
+in a uniformly random $q$ coloring of $G$ using only a sub-linear number of probes when $q\ge 9\Delta$.
+Usually, a random coloring of a graph is sampled by proposing a random color update for a random vertex,
+and accepting the update if it does not create a conflict and repeating this process $\mathcal O(n\log n)$ times.
+This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
+
+To make the runtime analysis simpler, we define a modified version of Glauber Dynamics that proceeds in $\mathcal O(\log n)$ epochs.
+In each epoch, all the vertices propose a random color and update themselves if their proposals do not conflict with any of their neighbors.
+This Markov Chain is a special case of the one presented in \cite{mohsen} for distributed graph coloring
+and mixes in $\mathcal O(\log n)$ epochs when $q\ge 9\Delta$.
+While we do not have the same restrictions as the distributed computation setting,
+we choose to use this chain so as to avoid long analysis of mixing times.
+In order to implement $\func{Color}(v)$, it suffices to implement a query $\func{Accepted}(v,t)$
+that indicates whether the proposal for $v$ was accepted in the $t^{th}$ epoch.
+The answer to this question depends on the prior colors of the potentially $\Delta$ neighbors of $v$.
+Naively sampling the colors of all these neighbors would result in $\Delta$ recursive invocations on the previous epoch ($t-1$),
+and stepping \emph{backwards} through the epochs to find the last accepted proposal.
+This leads to a bound of $\Delta^t$ on the number of recursive invocations.
+
+We can improve this somewhat by only considering neighbors $w$ of $v$ who had any proposal for the same color $c$.
+In this case the expected number of recursive calls is bounded by $t\Delta/q$ ($t\Delta$ proposals to consider and each one is $c$ w.p. $1/q$).
+So, if $q > t\Delta = \mathcal O(\Delta\log n)$, this allows us to bound the total number of resulting invocations.
+The improvement to $q\ge 9\Delta$ comes from the observation that for $w\in\Gamma(v)$ such that $w$ proposed color $c$ at epoch $t'$,
+the recursive call for $w$ can jump to epoch $t'$ and then step \emph{forwards} through the epochs to find the first accepted proposal.
+Since the expected value of $t'$ is close to $t/2$, we dramatically reduce the sub-problem size in each recursion,
+and this allows us to bound the runtime by $\mathcal O\left(t\Delta n^{6.12\Delta/q}\right)$ which is sub-linear for $q \ge 9\Delta$.
+

@@ -357,25 +357,25 @@
 \setlength\leftmarginv  {1.2em}
 \setlength\leftmarginvi {1.2em}
 \renewcommand\labelenumi{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
 \renewcommand\labelenumii{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
 \renewcommand\labelenumiii{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
 \renewcommand\labelenumiv{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
 \renewcommand\labelitemi{%
-  \textcolor{CadetBlue}{\ifnum\@listdepth=\@ne
+  \textcolor{DarkOrchid}{\ifnum\@listdepth=\@ne
                                   \rule{0.67em}{0.33em}%
                                 \else
                                   \rule{0.45em}{0.225em}%
                                 \fi}}
 \renewcommand\labelitemii{%
-  \textcolor{CadetBlue}{\rule{0.45em}{0.225em}}}
+  \textcolor{DarkOrchid}{\rule{0.45em}{0.225em}}}
 \renewcommand\labelitemiii{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\textasteriskcentered}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\textasteriskcentered}}
 \renewcommand\labelitemiv{%
-  \textcolor{CadetBlue}{\sffamily\bfseries\textperiodcentered}}
+  \textcolor{DarkOrchid}{\sffamily\bfseries\textperiodcentered}}
 \renewenvironment{description}
                {\list{}{\advance\partopsep\topsep\topsep\z@\@plus\p@
                         \labelwidth\z@ \itemindent-\leftmargin
@@ -745,17 +745,18 @@
                       Acknowledgements\enskip}}
 \RequirePackage{amsthm}
 \thm@headfont{%
-  \textcolor{Orchid}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
+  \textcolor{Periwinkle}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
 \def\th@remark{%
   \thm@headfont{%
-    \textcolor{darkgray}{$\blacktriangleright$}\nobreakspace\sffamily}%
+    \textcolor{Periwinkle}{$\blacktriangleright$}\nobreakspace\sffamily}%
   \normalfont % body font
   \thm@preskip\topsep \divide\thm@preskip\tw@
   \thm@postskip\thm@preskip
 }
 \def\@endtheorem{\endtrivlist}%\@endpefalse
-\renewcommand\qedsymbol{\textcolor{CadetBlue}{\ensuremath{\bm\square}}}
-%\renewcommand\qedsymbol{\setlength{\fboxsep}{2.5pt}\setlength{\fboxrule}{1pt}\fcolorbox{CadetBlue}{white}{\null}}
+\renewcommand\qedsymbol{\textcolor{Periwinkle}{\ensuremath{\square}}}
+\renewcommand\qedsymbol{\textcolor{Periwinkle}{\ensuremath{\thicksquare}}}
+%\renewcommand\qedsymbol{\setlength{\fboxsep}{2.5pt}\setlength{\fboxrule}{1pt}\fcolorbox{DarkOrchid}{white}{\null}}
 \renewenvironment{proof}[1][\proofname]{\par
   \pushQED{\qed}%
   \normalfont \topsep6\p@\@plus6\p@\relax

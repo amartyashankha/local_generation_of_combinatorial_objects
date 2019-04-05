@@ -1,5 +1,11 @@
 \subsection{Undirected Graphs}
 \label{sec:undirected_graphs}
+In Section~\ref{sec:undirected}, we implement queries to both the adjacency matrix and adjacency list representation
+for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
+where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
+Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
+\todo[inline]{Stuff goes here}
+\func{Random-Neighbor} queries present particularly interesting challenges that are outlined below.
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
