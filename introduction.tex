@@ -14,6 +14,10 @@ One emerging theme that we develop further in this work is to provide common dat
 For example, for random graph implementations, in addition to supporting adjacency matrix queries about the existence of edge $(u,v)$,
 \cite{reut} introduced the idea of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
 
+For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
+Using our implementation, one can execute this algorithm on a random small world instance
+in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
+
 
 
 
@@ -96,10 +100,7 @@ The problem of computing local information of huge random objects was pioneered 
 Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
 with $p = O(\poly(\log n)/n)$, which answers $\poly(\log n)$ \func{All-Neighbors} queries, listing the neighbors of queried vertices.
 While these implementations use polylogarithmic resources over their entire execution,
-they generate graphs that are  only guaranteed to {\em appear random} to algorithms that inspect a {\em limited portion} of the generated graph.
-For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
-Using our implementation, one can execute this algorithm on a random small world instance
-in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.
+they generate graphs that are  only guaranteed to \emph{appear random} to algorithms that inspect a \emph{limited portion} of the generated graph.
 
 In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
 Unlike \cite{sparse}, their implementation allows for an arbitrary number of queries.

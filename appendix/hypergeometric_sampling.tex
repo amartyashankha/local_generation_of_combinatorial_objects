@@ -47,13 +47,7 @@ That is, this process halves the domain size $B$ in each step, requiring $\log B
 \end{proof}
 
 Lastly we generalize to support larger $r$.
-\begin{restatable}{theorem}{res:new-marble}
-\label{thm:sampling_many_colors}
-Given $B$ marbles of $r$ different colors, such that there are $C_i$ marbles of color $i$,
-there exists an algorithm that samples $\langle s_1, s_2,\cdots, s_r \rangle$,
-the number of marbles of each color appearing when drawing $l$ marbles from the urn without replacement,
-in $O(r\cdot\poly(\log B))$ time and random words.
-\end{restatable}
+\SamplingManyColors*
 \begin{proof}
 Observe that we may reduce $r>2$ to the two-color case by sampling the number of marbles of the first color,
 collapsing the rest of the colors together.
@@ -64,7 +58,6 @@ So it remains to generate the number of marbles of each color from the remaining
 In total, we may generate $\mathbf{S}^{\vec{C}}_{\ell}$ by performing $r$ iterations of the two-colored case.
 The error in the $L_1$-distance may be established similarly to the proof of Lemma~\ref{lemma:transition}.
 \end{proof}
-\todo{faster sampling for first $k$ colors}
 \begin{theorem}
 \label{thm:sampling_many_colors_contiguous}
 Given $B$ marbles of $r$ different colors in $[r]$, such that there are $C_i$ marbles of color $i$ and a parameter $k\le r$,
@@ -72,6 +65,7 @@ there exists an algorithm that samples $s_1 + s_2 +\cdots + s_k$,
 the number of marbles among the first $k$ colors appearing when drawing $\ell$ marbles from the urn without replacement,
 in $O(\poly(\log B))$ time and random words.
 \end{theorem}
+\todo{Remove this?}
 \begin{proof}
 Since we don't have to find the individual counts, we can be more efficient by grouping half the colors together at each step.
 Formally, we define a pair $\vec  D= \langle D_1,D_2 \rangle$ where $D_1=C_1 + C_2 +\cdots + C_{r/2}$ and $D_2=C_{r/2+1}+\cdots+C_{r-1}+C_r$.
@@ -85,26 +79,3 @@ We then generate $ \langle D_1', D_2'\rangle = \mathbf S^{\vec D}_\ell$.
 The number of recursive calls is $\mathcal O(\log r) = \mathcal O(\log B)$ (since $r\le B$).
 So, the overall runtime is $\mathcal O(\poly(\log B))$.
 \end{proof}
-
-
-
-
-\subsection{Data structure}
-We now show that Theorem~\ref{thm:sampling_many_colors} may be used in order to create the following data structure.
-Recall that $\mathsf{R}$ denote the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex).
-Our data structure generates and maintains random variables $X_1, \ldots, X_n$,
-each of which is drawn independently at random from $\mathsf{R}$: $X_i$ denotes the community of vertex $i$.
-Then given a pair $(i, j)$, it returns the vector $\vec{C}(i, j) = \langle c_1, \ldots, c_r \rangle$
-where $c_k$ counts the number of variables $X_i, \ldots, X_j$ that takes on the value $k$.
-Note that we may also find out $X_i$ by querying for $(i, i)$ and take the corresponding index.
-
-We maintain a complete binary tree whose leaves corresponds to indices from $[n]$.
-Each node represents a range and stores the vector $\vec{C}$ for the corresponding range.
-The root represents the entire range $[n]$, which is then halved in each level.
-Initially the root samples $\vec{C}(1, n)$ from the multinomial distribution according to $\mathsf{R}$
-(see e.g., Section 3.4.1 of \cite{knuth}).
-Then, the children are generated on-the-fly using the lemma above.
-Thus, each query can be processed within $O(r\,\poly(\log n))$ time, yielding Theorem~\ref{thm:sbm-data}.
-Then, by embedding the information stored by the data structure into the state (as in the proof of Lemma~\ref{lemma:transition}),
-we obtain the desired Corollary~\ref{cor:sbm-construct}.
-

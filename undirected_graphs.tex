@@ -19,9 +19,9 @@ The deterministic guarantee comes at the cost of more complicated data-structure
 \fi
 
 First, consider the adjacency matrix $\ADJ$ of $G$ where each entry $\ADJ[u][v]$ can exist in three possible states:
-$\ADJ[u][v] = \ONE$ or $\ZERO$ if the generator has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$ respectively,
+$\ADJ[u][v] = \ONE$ or $\ZERO$ if the algorithm has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$ respectively,
 and $\ADJ[u][v] = \PHI$ if the marginal probability of $\mathbb P[(u,v)\in E]$ conditioned on all prior samples is $p_{uv}$.
-Our generator also maintains the vector $\LAST$ (used in the same sense as \cite{reut}),
+Our implementation also maintains the vector $\LAST$ (used in the same sense as \cite{reut}),
 where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
 All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
 

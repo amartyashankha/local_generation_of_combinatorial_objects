@@ -25,7 +25,7 @@ using $\poly(\log n)$ random bits, which may be of independent interest. We rema
 \label{sec:app_er}
 As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
 \begin{restatable}{corollary}{res:oblivious:corol}
-The final algorithm in Section~\ref{sec:undirected} locally generates a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
+The final algorithm in Section~\ref{sec:undirected} locally implements a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
 \end{restatable}
 
 We remark that there exists an alternative approach that picks $F\sim\mathsf{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
@@ -36,7 +36,7 @@ While we are able to generate our random graph on-the-fly supporting all three t
 \label{thm:er-optimal}
 The final algorithm in Section~\ref{sec:undirected} can generate a complete random graph
 from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using overall
-$\tilde{\mathcal{O}}(n+m)$ time, random bits and space, which is $\tilde{\bo}(pn^2)$ in expectation.
+$\widetilde{\mathcal{O}}(n+m)$ time, random bits and space, which is $\widetilde{\bo}(pn^2)$ in expectation.
 This is optimal up to $ \mathcal{O}(\poly(\log n))$ factors.
 \end{restatable}
 
@@ -56,7 +56,7 @@ However, this only requires one $N$-bit random word.
 For the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.
 By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$,
 as $\prod_{u=a}^b (1-p_{vu}) = \prod_{j=1}^r (1-p_{ij})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{vu}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{ij}$.
-Thus, it is sufficient to design a data structure, or a \emph{generator},
+Thus, it is sufficient to design a data structure,
 that draws a community assignment for the vertex set according to the given distribution $\mathsf{R}$.
 This data structure should be able to efficiently count the number of occurrences of vertices of each community in any contiguous range,
 namely the value $|[a,b]\cap C_j|$ for each $j \in [r]$.
@@ -64,23 +64,22 @@ To this end, we use the following lemma (proven in Section~\ref{sec:multivariate
 yielding an implementation for the Stochastic Block model using $O(r\, \poly(\log n))$ resources per query.
 
 \begin{restatable}{theorem}{res:sbm-data}\label{thm:sbm-data}
-There exists a data structure (generator) that samples a community for each vertex independently at random from $\mathsf{R}$
+There exists a data structure that samples a community for each vertex independently at random from $\mathsf{R}$
 with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that ask for the number of occurrences of vertices of each community
 in any contiguous range, using $O(r\,\poly(\log n))$ time, random $N$-bit words and additional space per query.
 Further, this data structure may be implemented in such a way that requires no overhead for initialization.
 \end{restatable}
 \begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct}
-The final algorithm in Section~\ref{sec:undirected} generates a random graph from the Stochastic Block model with randomly-assigned communities
+The final algorithm in Section~\ref{sec:undirected} implements a random graph from the Stochastic Block model with randomly-assigned communities
 using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per query with high probability.
 \end{restatable}
 
-\todo{Update}
-We provide the full details of the construction in the following Section~\ref{sec:multivariate_hypergeometric_sampling}.
-Our construction extends upon a similar generator in the work of \cite{huge} which only supports $r = 2$.
+We provide the full details of the construction in Section~\ref{sec:multivariate_hypergeometric_sampling}.
+Our construction extends upon a similar implementation in the work of \cite{huge} which only supports $r = 2$.
 Our overall data structure is a balanced binary tree, where the root corresponds to the entire range of indices $\{1, \ldots, n\}$,
 and the children of each vertex corresponds to each half of the parent's range.
-Each node\footnote{For clarity, ``vertex'' is only used in the generated graph,
-and ``node'' is only used in the internal data structures of the generator.}
+Each node\footnote{For clarity, ``vertex'' is only used in the sampled graph,
+and ``node'' is only used in the internal data structures of the algorithm.}
 holds the number of vertices of each community in its range.
 The tree initially contains only the root, with the number of vertices of each community sampled according to the multinomial distribution
 \footnote{See e.g., section 3.4.1 of \cite{knuth}} (for $n$ samples (vertices) from the probability distribution $\mathsf{R}$).
@@ -89,4 +88,33 @@ The technical difficulties arise when generating the children,
 where one needs to sample ''half'' of the counts of the parent from the correct marginal distribution.
 To this end, we show how to sample such a count as described in the statement below.
 Namely, we provide an algorithm for sampling from the \emph{multivariate hypergeometric distribution}.
-\todo{Link back to previous section}
+\todo{Move this to appendix?}
+
+\begin{restatable}{theorem}{SamplingManyColors}
+\label{thm:SamplingManyColors}
+Given $B$ marbles of $r$ different colors, such that there are $C_i$ marbles of color $i$,
+there exists an algorithm that samples $\langle s_1, s_2,\cdots, s_r \rangle$,
+the number of marbles of each color appearing when drawing $l$ marbles from the urn without replacement,
+in $O(r\cdot\poly(\log B))$ time and random words.
+\end{restatable}
+
+\begin{proof}[Proof of Theorem~\ref{thm:sbm-data}]
+We now show that Theorem~\ref{thm:SamplingManyColors} may be used in order to create the following data structure.
+Recall that $\mathsf{R}$ denote the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex).
+Our data structure generates and maintains random variables $X_1, \ldots, X_n$,
+each of which is drawn independently at random from $\mathsf{R}$: $X_i$ denotes the community of vertex $i$.
+Then given a pair $(i, j)$, it returns the vector $\vec{C}(i, j) = \langle c_1, \ldots, c_r \rangle$
+where $c_k$ counts the number of variables $X_i, \ldots, X_j$ that takes on the value $k$.
+Note that we may also find out $X_i$ by querying for $(i, i)$ and take the corresponding index.
+
+We maintain a complete binary tree whose leaves corresponds to indices from $[n]$.
+Each node represents a range and stores the vector $\vec{C}$ for the corresponding range.
+The root represents the entire range $[n]$, which is then halved in each level.
+Initially the root samples $\vec{C}(1, n)$ from the multinomial distribution according to $\mathsf{R}$
+(see e.g., Section 3.4.1 of \cite{knuth}).
+Then, the children are generated on-the-fly using the lemma above.
+Thus, each query can be processed within $O(r\,\poly(\log n))$ time, yielding Theorem~\ref{thm:sbm-data}.
+\end{proof}
+
+Then, by embedding the information stored by the data structure into the state (as in the proof of Lemma~\ref{lemma:transition}),
+we obtain the desired Corollary~\ref{cor:sbm-construct}.

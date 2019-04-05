@@ -1,29 +1,31 @@
 \subsection{Random Catalan Objects}
 \label{sec:overview_catalan_objects}
-We consider a one dimensional random walk with $n$ up and $n$ down steps starting from the origin,
-with a boundary constraint that the height after $t$ steps is always non-negative.
+We consider a one dimensional random walk on the line with $n$ up and $n$ down steps, starting from the origin,
+with a boundary constraint that the height is always non-negative.
 Alternately, we can view this as a random sequence (permutation) of $n$ black (corresponding to $+1$) and $n$ white balls (corresponding to $-1$),
 with the restriction that the number of black balls is always at least the number of white balls in any prefix of the sequence.
+\todo[inline,color=Red!20]{What queries do we support?}
 
-Over the course of the excecution, our algorithm will sample the height of the walk at many different positions $\{ x_1, x_2,\cdots, x_m\}$
-(with $x_i<x_{i+1})$) both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.
+Over the course of the execution, our algorithm will sample the height of the walk at many different positions $\{ x_1, x_2,\cdots, x_m\}$
+(with $x_i<x_{i+1}$), both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.
 These sampled positions divide the sequence into contiguous \emph{intervals} $[x_i,x_{i+1}]$,
-where the height of the endpoints $y_i, y_{i+1}$ have been sampled, but non of the intermediate heights are known.
-The important observation is that the section of the path within an \emph{interval} is completely independent of all other \emph{intervals}.
-So, each interval $[x_i,x_{i+1}]$ represents a generalized Dyck problem with $U$ up steps, $D$ down steps and the boundary constraint that
-for any prefix of the interval, the number of up steps can be at most $x_i$ smaller than the number of down steps.
-
-Another useful fact is that the \emph{imbalance} (difference in number of up and down steps) in any contiguous sub-interval of size $B$
-is bounded by $\mathcal O(\sqrt{B\log n})$ with high probability.
+where the height of the endpoints $y_i, y_{i+1}$ have been sampled, but none of the intermediate heights are known.
+The important observation is that, since the beginning and ending heights are known,
+the section of the path within an \emph{interval} is completely independent of all other \emph{intervals}.
+So, each interval $[x_i,x_{i+1}]$ along with the corresponding heights $y_i,y_{i+1}$,
+represents a generalized Dyck problem with $U$ up steps, $D$ down steps, and the constraint that the path never goes below $0$.
 
 \paragraph*{$\func{Height}$ Queries}
 \label{par:height_queries}
 We start by implementing a subroutine that given an \emph{interval} $[x_i,x_{i+1}]$ of length of length $2B$ with $2U$ up and $2D$ down steps,
-samples the number of up steps $U+d$ to the first half of the \emph{interval}, which effectively answers the query $\func{Height}(x_i+B)$.
+samples the number of up steps $U'=U+d$ to the first half of the \emph{interval}
+(we parameterize $U'$ with $d$ in order to make the analysis cleaner).
+Note that this is equivalent to answering the query $\func{Height}(x_i+B)$.
 This is done by sampling the parameter $d$ from a distribution $\{ p_d\}$ with $p_d = S_{left}(d)\cdot S_{right}(d)/S_{total}$,
 where $S_{left}(d)$ (respectively $S_{right}(d)$) is the number of possible paths in the left (resp. right) half of the \emph{interval} when
 $U+d$ up steps and $D-d$ down steps are assigned to the first half, and $S_{total}$ is the number of possible paths in the original $2B$-interval.
-General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval} containing $x$ and performing binary search.
+General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval},
+and sampling the height of the midpoint, until the height of $x$ is sampled.
 
 The problem of sampling the number of up steps in the first half of the \emph{interval} was solved for the case where the sequence is fully random
 in \cite{huge}.
@@ -35,17 +37,19 @@ This allows us to sample from $\{q_d\}$ and leverage the rejection sampling lemm
 \label{par:_first-return_queries}
 $\func{First-Return}$ queries present an additional challenge because we don't know which \emph{interval} contains the first return.
 Since there could be up to $\Theta(n)$ intervals, is it inefficient to iterate through all of them.
-To circumvent this problem, we allow each interval to sample it's own boundary constraint $k>0$ instead of using the global non-negativity constraint.
+To circumvent this problem, we allow each interval to sample its own boundary constraint $k>0$ instead of using the global non-negativity constraint.
 A boundary constraint of $k$ implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k$ or lower.
 Additionally, we maintain an invariant that states that this boundary $x_i-k$ coincides with $\min(x_i,x_{i+1})$.
 If this constraint is satisfied, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest sampled position $x_i>x$
 whose sampled height $y_i \le \func{Height}(x)$, and considering the interval $[x_{i-1},x_i]$ preceding $x_i$.
 
 Every time the $\func{Height}$ algorithm creates new intervals by sub-dividing an existing one, this invariant is potentially broken.
-We re-establish it by sampling a ``mandatory boundary'' (a $y$-coordinate that must be achieved within the interval $[x_i,x_{i+1}]$ but not exceeded),
-and then sampling a position $x$ where $x_i < x < x_{i+1}$ and $\func{Height}(x) = y$.
+We re-establish it by sampling a ``mandatory boundary''
+(a boundary constraint with the additional restriction that some position within the interval $[x_i,x_{i+1}]$ \emph{must} touch the boundary),
+%(a $y$-coordinate that must be achieved within the interval $[x_i,x_{i+1}]$ but not exceeded),
+and then sampling a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = y$.
 The first step of sampling the mandatory boundary is performed by binary searching on the possible boundary locations.
 To find a position that touches this boundary, we parameterize the position with $d$ and find the distribution $\{p_d\}$ associated with these events.
 We then define a piecewise continuous PDF $\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$.
-We then use this to construct $q_d = \int_d^{d+1}\hat q(\delta)$,
+We then use this to construct $q_d = \int_d^{d+1}\hat q(\delta)$, where the CDF of $q_d$ is efficently computable using integration,
 and use rejection sampling (Lemma~\ref{lem:rejection_sampling}) again to sample indirectly from $\{p_d\}$.

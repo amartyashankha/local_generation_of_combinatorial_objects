@@ -4,8 +4,13 @@ In Section~\ref{sec:undirected}, we implement queries to both the adjacency matr
 for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
 where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
 Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
-\todo[inline]{Stuff goes here}
-\func{Random-Neighbor} queries present particularly interesting challenges that are outlined below.
+In this model, \func{Vertex-Pair} queries can be implemented trivially,
+since the existence of any edge $(u,v)$ is an independent Bernoulli random variable.
+Inspired by \cite{reut}, we provide an implementation of $\func{next-neighbor}$ queries,
+which return the neighbors of any given vertex one by one in lexicographic order.
+Finally, we introduce a new query: \func{Random-Neighbor} that returns a uniformly random neighbor of any given vertex.
+This would be useful for any algorithm that performs random walks.
+$\func{Random-Neighbor}$ queries present particularly interesting challenges that are outlined below.
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
@@ -41,15 +46,15 @@ without resorting to ``knowing'' its degree.
 (2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries
 affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner.
 \footnote{\label{conditional}Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
-such that vertices will have $\tilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
-After $\tilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
+such that vertices will have $\widetilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
+After $\widetilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
 so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}
 
 We formulate a \emph{bucketing approach} (Section~\ref{sec:buckets}) which samples multiple consecutive edges at once,
 in such a way that the conditional probabilities of the unsampled edges remain independent and ``well-behaved'' during subsequent queries.
 For each vertex $v$, we divide the potential neighbors of $v$ into consecutive ranges $\{B^{(i)}_v\}$ (buckets),
 so that each $B^{(i)}_v$ contains, in expectation, $\Theta(1)$ neighbors (i.e. $\sum_{u\in B_i} p_{vu} = \Theta(1)$).
-The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a bucket in expected $\mathcal{\tilde O}(1)$ time.
+The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a bucket in expected $\mathcal{\widetilde O}(1)$ time.
 We can now obtain a neighbor of $v$ by picking a random neighbor from a random bucket,
 but this introduces a bias because all buckets may not have the same number of neighbors.
 We remove this bias by rejecting samples from bucket $B^{(i)}_v$ with probability proportional to the number of neighbors in $B^{(i)}_v$.
@@ -62,22 +67,14 @@ We remove this bias by rejecting samples from bucket $B^{(i)}_v$ with probabilit
 \label{sec:applications_to_random_graph_models}
 We now consider the application of our construction above to actual random graph models,
 where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{vu})$ and $\sum^{b}_{u=a} p_{vu}$ can be computed efficiently.
-\textcolor{Maroon}
-{This holds trivially for the $G(n,p)$ model via closed-form formulas, but requires an additional data structure for the Stochastic Block model.}
-
-
-\paragraph*{Erd\"{o}s-R\'{e}nyi}
-\label{par:erdos_renyi}
-In Section~\ref{sec:app_er}, we apply our construction to random $G(n,p)$ graphs for arbitrary $p$, and obtain $\func{Vertex-Pair}$,
-$\func{Next-Neighbor}$, and $\func{Random-Neighbor}$ queries, using polylogarithmic resources (time, space and random bits) per query.
+For the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, these quantities have simple closed-form expressions.
+Thus, we obtain implementations of $\func{Vertex-Pair}$, $\func{Next-Neighbor}$, and $\func{Random-Neighbor}$ queries,
+using polylogarithmic resources (time, space and random bits) per query, for \emph{arbitrary} values of $p$,
 We remark that, while $\Omega(n+m) = \Omega(p n^2)$ time and space is clearly necessary to generate and represent a full random graph,
 our implementation supports local-access via all three types of queries, and yet can generate a full graph in $\widetilde{O}(n+m)$ time and space
 (Corollary~\ref{thm:er-optimal}), which is tight up to polylogarithmic factors.
 
-
-\paragraph*{Stochastic Block Model}
-\label{par:stochastic_block_model}
-We generalize our construction to the Stochastic Block Model.
+We also generalize our construction to implement the Stochastic Block Model.
 In this model, the vertex set is partitioned into $r$ \emph{communities} $\left\{ C_1, \ldots, C_r \right\}$.
 The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{ij}$.
 As communities in the observed data are generally unknown a priori,

@@ -29,30 +29,31 @@ Similarly to LCAs, we can have multiple independent instances of our algorithm a
 
 \paragraph*{$\func{Color}$ queries}
 \label{par:color_queries}
-We are able to construct an efficient implementation for $\func{Color}(v)$ that returns the final color of $v$
-in a uniformly random $q$ coloring of $G$ using only a sub-linear number of probes when $q\ge 9\Delta$.
-Usually, a random coloring of a graph is sampled by proposing a random color update for a random vertex,
-and accepting the update if it does not create a conflict and repeating this process $\mathcal O(n\log n)$ times.
-This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
+Given a graph $G$ with maximum degree $\Delta$, and the number of colors $q\ge 9\Delta$,
+we are able to construct an efficient implementation for $\func{Color}(v)$ that returns the final color of $v$
+in a uniformly random $q$-coloring of $G$ using only a sub-linear number of probes.
+Random colorings of a graph are sampled using $\mathcal O(n\log n)$ iterations of a Markov chain \cite{glauber_survey}.
+Each step of the chain proposes a random color update for a random vertex, and accepts the update if it does not create a conflict.
+This is an inherently sequential process, with the acceptance of a particular proposal depending on all preceding neighboring proposals.
 
 To make the runtime analysis simpler, we define a modified version of Glauber Dynamics that proceeds in $\mathcal O(\log n)$ epochs.
-In each epoch, all the vertices propose a random color and update themselves if their proposals do not conflict with any of their neighbors.
-This Markov Chain is a special case of the one presented in \cite{mohsen} for distributed graph coloring
+In each epoch, all of the $n$ vertices propose a random color and update themselves if their proposals do not conflict with any of their neighbors.
+This Markov chain is a special case of the one presented in \cite{mohsen} for distributed graph coloring,
 and mixes in $\mathcal O(\log n)$ epochs when $q\ge 9\Delta$.
-While we do not have the same restrictions as the distributed computation setting,
-we choose to use this chain so as to avoid long analysis of mixing times.
-In order to implement $\func{Color}(v)$, it suffices to implement a query $\func{Accepted}(v,t)$
+%While we do not have the same restrictions as the distributed computation setting,
+%we choose to use this chain so as to avoid long analysis of mixing times.
+In order to implement the query $\func{Color}(v)$, it suffices to implement a query $\func{Accepted}(v,t)$
 that indicates whether the proposal for $v$ was accepted in the $t^{th}$ epoch.
 The answer to this question depends on the prior colors of the potentially $\Delta$ neighbors of $v$.
 Naively sampling the colors of all these neighbors would result in $\Delta$ recursive invocations on the previous epoch ($t-1$),
 and stepping \emph{backwards} through the epochs to find the last accepted proposal.
-This leads to a bound of $\Delta^t$ on the number of recursive invocations.
+Naively, this leads to a bound of $\Delta^t$ on the number of recursive invocations.
 
 We can improve this somewhat by only considering neighbors $w$ of $v$ who had any proposal for the same color $c$.
-In this case the expected number of recursive calls is bounded by $t\Delta/q$ ($t\Delta$ proposals to consider and each one is $c$ w.p. $1/q$).
+In this case the expected number of recursive calls is bounded by $t\Delta/q$
+($t\Delta$ proposals to consider and each one is $c$ with probability $1/q$).
 So, if $q > t\Delta = \mathcal O(\Delta\log n)$, this allows us to bound the total number of resulting invocations.
 The improvement to $q\ge 9\Delta$ comes from the observation that for $w\in\Gamma(v)$ such that $w$ proposed color $c$ at epoch $t'$,
 the recursive call for $w$ can jump to epoch $t'$ and then step \emph{forwards} through the epochs to find the first accepted proposal.
-Since the expected value of $t'$ is close to $t/2$, we dramatically reduce the sub-problem size in each recursion,
-and this allows us to bound the runtime by $\mathcal O\left(t\Delta n^{6.12\Delta/q}\right)$ which is sub-linear for $q \ge 9\Delta$.
-
+We show that this dramatically reduces the sub-problem size (given by $t'$) in each recursion,
+thus allowing us to bound the runtime by $\mathcal O\left(t\Delta n^{6.12\Delta/q}\right)$ which is sub-linear for $q \ge 9\Delta$.

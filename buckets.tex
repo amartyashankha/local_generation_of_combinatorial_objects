@@ -63,7 +63,7 @@ We postpone the description of our implementation of $\func{Fill}$ to Section~\r
 \vspace{-1.2em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
-    \caption{Bucketing Generator}
+    \caption{Bucketing Implementation}
     \label{alg:random}
     \begin{algorithmic}
         \Procedure{Random-Neighbor}{$v$}
@@ -80,7 +80,7 @@ We postpone the description of our implementation of $\func{Fill}$ to Section~\r
 \end{framed}
 \end{wrapfigure}
 
-Consider Algorithm~\ref{alg:random} for generating a random neighbor via rejection sampling.
+Consider Algorithm~\ref{alg:random} for sampling a random neighbor via rejection sampling.
 For simplicity, throughout the analysis, we assume $|\vec B_v| = \Omega(\log n)$;
 otherwise, invoke $\func{Fill}(v,i)$ for all $i \in [|\vec B_v|]$ to obtain the entire neighbor list $\Gamma(v)$.
 
@@ -177,13 +177,13 @@ The condition for $\ADJ[v][u]=\ONE$ still holds by constuction. Otherwise, obser
 
 
 %More formally, let $u \in B^{(i)}_v$ and $v \in B_u^{(j)}$. Similarly to For $\ADJ[v][u] \neq \ONE$ (i.e., $u \notin B^{(i)}_v$ and $v \notin B_u^{(i)}$), we maintain the following invariant: $\ADJ[v][u]\neq \PHI$ if and only if at least one of $B^{(i)}_v$ or $B_u^{(j)}$ is \filled. Ensuring this invariant is very simple for Algorithm~\ref{alg:random}: fill an entire bucket at a time. Thus, we obtain the following criteria for computing $\ADJ[v][u]$ while filling $B^{(i)}_v$: if $u \in P_v$ then $\ADJ[v][u]=\ONE$; else if $B_u^{(j)}$ is \filled~then $\ADJ[v][u] = \ZERO$; else $\ADJ[v][u] = \PHI$.
-Note that $P_v^{(i)}$'s, maintained by our generator, are initially empty but may not still be empty at the beginning of the \func{Fill} function call. These $P_v^{(i)}$'s are again instantiated and stored in a dictionary once they become non-empty.
+Note that $P_v^{(i)}$'s, maintained by our implementation, are initially empty but may not still be empty at the beginning of the \func{Fill} function call. These $P_v^{(i)}$'s are again instantiated and stored in a dictionary once they become non-empty.
 Further, observe that the coin-flips are simulated independently of the state of $P_v^{(i)}$, so the number of iterations of Algorithm~\ref{alg:fill} is the same as the number of coins $C_{vu} = \ONE$ which is, in expectation, a constant (namely $\sum_{u\in B^{(i)}_v} \mathbb P[C_{vu}=\ONE] = \sum_{u\in B^{(i)}_v} p_{vu} \leq L+1$). % at most $M = O(\log n)$ with high probability (over the entire process of filling all $O(n^2)$ buckets throughout the iteration of the generator).
 %Identifying $B_u^{(j)}$ containing $v$ requires a binary search, adding $O(\log n)$ time per iteration.
 
 
 
-By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the generator must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B^{(i)}_v$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
+By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the implementation must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B^{(i)}_v$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
 
 \begin{restatable}{lemma}{fill_time}
 \label{lem:fill_time}
