@@ -1,7 +1,30 @@
 \begin{table}[htpb]
 \centering
+%\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{| >{\centering\arraybackslash}m{120pt} || >{\centering\arraybackslash}m{50pt} | >{\centering\arraybackslash}m{60pt} | >{\centering\arraybackslash}m{70pt} | >{\centering\arraybackslash}m{60pt} |}
+    \hline
+    \textbf{Model}                             & \func{Vertex-Pair} & \func{Next-Neighbor} & \func{Random-Neighbor} & \func{All-Neighbors} \\      \hline \hline
+    $G(n,p)$ with $p=\log^{\mathcal O(1)} n/n$ & \cite{sparse}      & \cite{sparse}        & \cite{sparse}          & \cite{sparse}        \\[5pt] \cline{1-5}
+    $G(n,p)$ for arbitrary $p$                 & This paper         & This paper           & This paper             & \UBD                 \\[5pt] \cline{1-5}
+    Stochastic Block Model                     & This paper         & This paper           & This paper             & \UBD                 \\[5pt] \cline{1-5}
+    BA Preferential Attachment                 & \cite{reut}        & \cite{reut}          & $\textsf{??}$          & \UBD                 \\[5pt] \cline{1-5}
+    Small world model                          & This paper         & This paper           & This paper             & This paper           \\[5pt] \cline{1-5}
+    Random ordered rooted trees                & This paper         & This paper           & This paper             & This paper           \\[5pt] \cline{1-5}
+    \end{tabular}
+    \vspace{0.7em}
+    \caption{\textbf{A summary of our results for random graphs:}
+        A \BD\ indicates that the particular query follows as a trivial consequence of \func{All-Neighbors}, because the graph has bounded degree.
+        A \UBD\ in the \func{All-Neighbors} column indicates that the graphs in this model may have un-bounded degree,
+        and it is therefore impossible to sample \func{All-Neighbors} efficiently.}
+    \label{table:graph_results}
+\end{table}
+
+
+\iffalse
+\begin{table}[htpb]
+\centering
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{| >{\centering\arraybackslash}m{70pt} || >{\centering\arraybackslash}m{50pt} || >{\centering\arraybackslash}m{50pt} | >{\centering\arraybackslash}m{60pt} | >{\centering\arraybackslash}m{70pt} | >{\centering\arraybackslash}m{60pt} |}
+\begin{tabular}{| >{\centering\arraybackslash}m{120pt} || >{\centering\arraybackslash}m{50pt} || >{\centering\arraybackslash}m{50pt} | >{\centering\arraybackslash}m{60pt} | >{\centering\arraybackslash}m{70pt} | >{\centering\arraybackslash}m{60pt} |}
     \hline
     \textbf{Model}           & \textbf{Reference}   & \func{Vertex-Pair} & \func{Next-Neighbor} & \func{Random-Neighbor} & \func{All-Neighbors} \\      \hline \hline
     $G(n,p)$ with $p=\ln^{\mathcal O(1)} n/n$ & \cite{sparse}        & \OPL               & \OPL                 & \OPL                   & \OPL                 \\[5pt] \cline{1-6}
@@ -18,3 +41,4 @@
         and it is therefore impossible to sample \func{All-Neighbors} efficiently.}
     \label{table:graph_results}
 \end{table}
+\fi

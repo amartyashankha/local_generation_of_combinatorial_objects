@@ -1,11 +1,11 @@
-\section{Dyck Path Generator}%
+\section{Omitted Proofs for the Dyck Path Implementation}%
 \label{sec:dyck_appendix}
 
 \begin{theorem}
 \label{thm:number_of_dyck_paths}
 There are $\frac{1}{n+1}\binom{2n}{n}$ Dyck paths for length $2n$ (construction from \cite{catalan_book}).
 \end{theorem}
-\begin{proof}
+\begin{proof}[Proof from \cite{catalan_book}]
 Consider all possible sequences containing $n+1$ up-steps and $n$ down-steps with the restriction that the first step is an up-step.
 We say that two sequences belong to the same \emph{class} if they are cyclic shifts of each other.
 Because of the restriction, the total number of sequences is $\binom{2n}{n}$ and each class is of size $n+1$.
@@ -37,17 +37,15 @@ The central binomial coefficient can be approximated as:
 \binom{n}{n/2} = \sqrt{\frac{2}{\pi n}}2^n\left( 1 + \mathcal O\left( \frac 1n\right)\right)
 \]
 \end{lemma}
-\todo{Cite Asymptopia}
 
 Now, we consider a ``off-center'' Binomial coefficient $\binom{n}{k}$ where $k = \frac{n+c\sqrt n}{2}$.
 \begin{lemma}
 \label{lem:close_to_central_binomial_coefficient}
-Proof from \cite{asymptopia}
 \[
 \binom{n}{k} = \binom{n}{n/2} e^{-c^2/2}exp\left( \mathcal O(c^3/\sqrt n)\right)
 \]
 \end{lemma}
-\begin{proof}
+\begin{proof}[Proof from \cite{asymptopia}]
 We consider the ratio: $R = \binom{n}{k}/\binom{n}{n/2}$:
 \begin{align}
 R &= \frac{\binom{n}{k}}{\binom{n}{n/2}}
@@ -117,12 +115,11 @@ $\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
 
 
 
-\subsection{Computing Probabilities}%
+\subsection{Estimating Probabilities}%
 \label{sec:computing_probabilities}
 Oracle for estimating probabilities:
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
-\todo{Point to section referencing the left right/ total.}
 Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
 $p_d = \frac{S_{left}\cdot S_{right}}{S_{total}}$, there exists a $\poly(\log n)$ time oracle that returns a
 $\left( 1\pm 1/n^2\right)$ multiplicative approximation to $p_d$ if $p_d = \Omega(1/n^2)$ and returns $0$ otherwise.
@@ -157,22 +154,9 @@ Otherwise, we can exponentiate the approximation to obtain $p_d\cdot e^{-\mathca
 
 \subsection{Sampling the Height}%
 \label{sec:sampling_the_height}
-
-
-\todo{fix}
-\begin{itemize}
-    \item $d < c\cdot \sqrt B \log n$
-    \item $k < c\cdot \sqrt B \log n \implies U-D < c\cdot \sqrt B \log n$
-    \item $k' < c\cdot \sqrt B \log n$
-    \item $B > \log^2 n \implies \sqrt B \log n < B$
-\end{itemize}
-
 \begin{lemma}
 \label{lem:taylor_bound}
-For $x < 1$ and $k\ge 1$,
-\[
-1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2.
-\]
+For $x < 1$ and $k\ge 1$, we claim that $1-kx < (1-x)^k < 1 - kx + \frac{k(k-1)}{2}x^2$
 \end{lemma}
 
 
