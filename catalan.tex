@@ -58,7 +58,8 @@ Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 
 \subsection{Catalan Trapezoids and Generalized Dyck Paths}
 In order to sample Dyck paths locally, we will need to analyze more general Catalan objects.
-Specifically, we consider a sequence of $U$ up-steps and $D$ down-steps, such that the sum of any initial sub-string is not less than $1-k$.
+Specifically, we consider a sequence of $U$ up-steps and $D$ down-steps,
+such that any prefix of the sequence with $U'$ up and $D'$ down steps satisfies $U'-D' \ge 1-k$.
 This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
 
 \begin{figure}[htbp]
@@ -92,11 +93,11 @@ where $k - 1 = y_i$, $U + D = x_{i+1} - x_i$, and $U-D = y_{i+1} - y_i$, and thi
 Next, we will show how one can sample heights within such an interval,
 and in Section~\ref{sec:supporting_first_return_queries} we will move on to the more complicated $\func{First-Return}$ queries.
 
-\todo{Is this necessary?}
 We also maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
 If a query lands in an interval that has length less than $\mathcal T$, then we brute force sample the entire interval one step at a time.
 Assuming that the probabilities of these events can be approximated efficiently (Lemma~\ref{lem:probability_approximation_oracle},
 this take $\poly(\log n)$ time.
+\todo{Is this necessary?}
 
 
 
@@ -108,7 +109,7 @@ If the interval in question has odd length, we sample one step on the boundary a
     \centering
     \includegraphics[width=\textwidth]{images/dyck_height_sampling.pdf}
     \caption{The $2B$-interval is split into two equal parts resulting in two separate Dyck problems.
-             The green node (center) is the sampled height of the midpoint corresponding to a specific value of $d$.
+             The green node (center) is the sampled height of the midpoint parameterized by the value of $d$.
              The path considered in both sub-intervals starts at a yellow node (left and right edges) and ends at the green node.
              From this perspective, the path on the right is reversed with up and down steps being swapped.
              A possible path is shown in gray.}
@@ -117,7 +118,7 @@ If the interval in question has odd length, we sample one step on the boundary a
 
 Our general recursive step is as follows.
 We consider an interval of length $2B$ comprising of $2U$ up-steps and $2D$ down-steps where the sum of any prefix cannot be less than $k-1$
-i.e. this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factor of two makes the analysis cleaner).
+i.e. this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factors of two makes the analysis cleaner).
 Without loss of generality, we assume that $2D\le B$; if this were not the case, we could simply flip the sequence and negate the elements.
 This essentially means that the overall path in the interval is non-decreasing in height.
 
@@ -154,7 +155,6 @@ are all $<c\sqrt{B\log n}$ with probability at least $1-1/n^2$ for every possibl
 
 \subsubsection{The Simple Case: Far Boundary}%
 \label{sec:the_simple_case}
-\todo{unconstrained random walks will not dip below $1-k$ threshold whp}
 \begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
 \label{lem:dyck_path_irrelevant_boundary}
 Given a Dyck path sampling problem of length $B$ with $U$ up and $D$ down steps with a bounary at $k$,
@@ -267,11 +267,9 @@ We then binary search by updating either the successor or predecessor of $x$ and
 \subsection{Supporting ``First Return'' Queries}%
 \label{sec:supporting_first_return_queries}
 
-We also support more complex queries to a Dyck path.
-Specifically, in addition to querying the height after $t$ steps,
-we introduce a $\func{First-Return}$ query that allows the user to query the next time the path returns to that height
+In this section, we show how to implement more complex queries to a Dyck path.
+Specifically, we introduce a $\func{First-Return}$ query that allows the user to query the next time the path returns to that height
 (if at all i.e. only if the step from $x$ to $x+1$ is an up-step).
-
 The utility of this kind of query can be seen in other interpretations of Catalan objects.
 For instance, if we interpret it as a well bracketed expression,
 $\func{First-Return}(x)$ returns the position of the bracket matching the one started at $x$.
@@ -295,17 +293,18 @@ the function effectively returns the next child of a vertex (see Section~\ref{se
 %\todo{Is this necessary?}
 
 
-\subsubsection{Maintaining a Boundary Invariant}%
+\subsubsection{Maintaining a Boundary Invariant}
 \label{sec:maintaining_a_boundary_invariant}
 Notice that over a sequence of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
 many different positions are revealed (possibly in adverserial locations).
 This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with set boundary conditions.
 The first step towards finding the $\func{First-Return}$ from position $t$ would be to locate the \emph{interval} where the return occurs.
 Even if we had an efficient technique to filter intervals, we would want to avoid considering all $\Theta(m)$ intervals to find the correct one.
-In addition the inefficiency, the fact that a specific interval \emph{does not} contain the first return causes dependencies for all subsequent samples.
+In addition, the fact that a specific interval \emph{does not} contain the first return implies dependencies for all subsequent samples.
 
-We resolve this issue by maintaining the following invariant.
-Consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
+We resolve these difficulties by maintaining the following invariant.
+Consider all positions whose heights have have already been sampled, either directly as a result of user given $\func{Height}$ queries,
+or indirectly due to recursive $\func{Height}$ calls; $\langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order i.e. $x_i<x_{i+1}$)
 along with their corresponding heights $ \langle y_1, y_2,\cdots, y_m \rangle$.
 \begin{invariant}
 \label{inv:boundary_invariant}
@@ -320,10 +319,10 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
     \label{fig:dyck_boundary_invariant}
 \end{figure}
 
-It's not even clear that it is always possible to maintain such an invariant.
+How can one maintain such an invariant?
 After sampling the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
-We will re-establish the invariant by sampling an additional point on either side.
+We re-establish the invariant by sampling an additional point on either side.
 This proceeds as follows for the interval between $x_i$ and $x_{i+1}$
 (see error in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
@@ -331,26 +330,59 @@ This proceeds as follows for the interval between $x_i$ and $x_{i+1}$
     \item Sample a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$.
 \end{enumerate}
 Since $h$ is the minimum height along this interval, sampling the point $x$ suffices to preserve the invariant.
-Lemma~\ref{lem:first_return_interval} shows how this invariant can be used to efficiently find the interval containing the first return.
+Lemma~\ref{lem:first_return_interval} shows/how this invariant can be used to efficiently find the interval containing the first return.
 
 
-\subsubsection{Sampling the Lowest Achievable Height in an Interval}%
+\subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}
 \label{sec:sampling_the_lowest_achievable_height}
-For the first step, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with $x_i < x_{i+1}$).
-Say that this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps with a boundary that is $k-1$ units below $y_i$.
+First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$.
+We will also refer to $h$ as the \emph{``mandatory boundary''} in this interval;
+i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
+We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
+Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps with a boundary that is $k-1$ units below $y_i$.
+\begin{wrapfigure}[16]{R}{0.496\textwidth}
+\vspace{-3.0em}
+\begin{framed}
+    \renewcommand\figurename{Algorithm}
+    \caption{Finding the Mandatory boundary}
+    \label{alg:mandatory_boundary}
+    \begin{algorithmic}[1]
+        \Function{Mandatory-Boundary}{$U, D, k$}
+            \State {$k_{low}\gets k$}
+            \State {$k_{up}\gets 0$}
+            \While {$k_{low} < k_{up} - 1$}
+                \vspace{.3em}
+                \State {$k_{mid}\gets \floor{\frac{(k_{low} + k_{up})}{2}}$}
+                \vspace{.3em}
+                \State {$P_{total}\gets C_{k_{low}}(U,D) - C_{k_{up}}(U,D)$}
+                \vspace{.3em}
+                \State {$P_{k_{low}}^{k_{mid}}\gets C_{k_{low}}(U,D) - C_{k_{mid}}(U,D)$}
+                \vspace{.3em}
+                \State {\textbf{with probability} $P_{k_{low}}^{k_{mid}}/P_{total}$}
+                    \State {\hspace{\algorithmicindent}$k_{up}\gets k_{mid}$}
+                \State {\textbf{else}}
+                    \State {\hspace{\algorithmicindent}$k_{low}\gets k_{mid}$}
+            \EndWhile
+            \State \Return $k_{low}$
+        \EndFunction
+    \end{algorithmic}
+\end{framed}
+\end{wrapfigure}
 
-Given any two boundaries $k_{lower}$ and $k_{upper}$ on the same interval (with $k_{lower} < k_{upper}$,
-we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as
-$P(k_{lower}, k_{upper}) = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)$.
-We set $k_{low} = k, k_{up} = 0$, and $k_{mid} = (k_{low} + k_{up})/2$.
-Since we can compute $P(k_{low},k_{up})$, $P(k_{low},k_{mid})$, and $P(k_{mid},k_{up})$,
-we can sample a single bit to decide if the ``lower boundary'' should move up or if the ``upper boundary'' should move down.
-We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k'$ becomes the ``mandatory boundary''
+Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper}$),
+we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as:
+\[
+P_{k_{lower}}^{k_{upper}} = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)
+\]
+We define the current lower and upper boundaries as $k_{low} = k, k_{up} = 0$, and set $k_{mid} = (k_{low} + k_{up})/2$.
+Since we can compute the quantities $P_{k_{mid}}^{k_{up}}$, $P_{k_{low}}^{k_{mid}}$, and $P_{total} = P_{k_{low}}^{k_{up}}$,
+we can sample a single bit to decide if the \emph{``lower boundary''} should move up or if the \emph{``upper boundary''} should move down.
+We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k'$ becomes the \emph{``mandatory boundary''}
 (i.e. the walk reaches the height exactly $k'-1$ units below $y_i$ but no lower.
 
 
 
-\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}%
+\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}
 \label{sec:sampling_first_position_touching_mandatory_boundary}
 
 Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to sample a position $x$ with height $h = x_i-k+1$.
@@ -360,30 +392,34 @@ As before, we assume that this interval contains $U$ up steps and $D$ down steps
     \centering
     \includegraphics[width=\textwidth]{images/dyck_first_approach_sampling.pdf}
     \caption{Zooming into the error in Figure~\ref{fig:dyck_boundary_invariant}}
-    \label{fig:dyck_first_approach_sampling}
+    \label{fig:dyck_mandatory_boundary_sampling}
 \end{figure}
 
-We will parameterize the position $x$ the number of up-steps $d$ between $x_i$ and $x$ (See Figure~\ref{fig:dyck_first_approach_sampling}).
+We will parameterize the position $x$ the number of up-steps $d$ between $x_i$ and $x$ (See Figure~\ref{fig:dyck_mandatory_boundary_sampling}).
 implying that $x = x_{i} + 2d + k - 1$.
 Given a specific $d$, we want to compute the number of valid paths that result in
 $d$ up-steps before the first approach to the boundary.
 We will calculate this quantity by counting the total number of paths to the left and right
 of the first approach and multiplying them together.
 
-Since we only care about getting a asymptotic (up to $\poly(\log n)$ factors) estimate of the probabilities,
-it suffices to estimate the number of paths asymptotically as well.
 As in Section~\ref{sec:path_segments_close_to_zero}, we define
-$S_{left}$ to be the number of paths in the sub-interval before the first approach (left side of Figure~\ref{fig:dyck_first_approach_sampling}),
+$S_{left}$ to be the number of paths in the sub-interval before the first approach (left side of Figure~\ref{fig:dyck_mandatory_boundary_sampling}),
 $S_{right}$ to be the number of paths following the first approach,
-and $S_{total}$ to be the toal number of paths that touch the ``mandatory boundary'' at $k$:
+and $S_{total}$ to be the total number of paths that touch the ``mandatory boundary'' at $k$
+(note that these quantities are functions of $U,D,k$ and $d$, but we drop the parameters for the sake of clarity):
+{\small
 \begin{align*}
     S_{left} = C_{k}(d, d+k-2)
     &&S_{right} = C_1(U-d, D-d-k+1)
     &&S_{total} = C_k(U,D) - C_{k-1}(U,D)
-\end{align*}
-
+\end{align*}}
 Our goal is to sample $d$ from the distribution $\{ p_d\}$ where $p_d = S_{left}\cdot S_{right}/S_{total}$.
-Using Equation~\ref{eq:catalan_trapezoid}, we obtain the following approximations for $S_{left}$ and $S_{right}$.
+The application of Lemma~\ref{lem:rejection_sampling} requires us to approximate $\{p_d\}$
+with a ``well behaved'' $\{q_d\}$ (one whose CDF can be efficiently estimated).
+Since we only require a asymptotic (up to $\poly(\log n)$ factors) approximation to $\{p_d\}$,
+it suffices to estimate the number of paths asymptotically as well.
+Using Equation~\ref{eq:catalan_trapezoid}, we obtain the following approximations for $S_{left}$ and $S_{right}$
+(proofs in Section~\ref{sec:omitted_supporting_first_return_queries}).
 \begin{restatable}{lemma}{ReturnDLeftBound}
 \label{lem:ReturnDLeftBound}
 If $d > \log^4 n$, then $S_{left}(d)
@@ -399,12 +435,11 @@ If $U+D-2d-k > \log^4 n$, then $S_{right}(d)
 where $r_{right}(d) = \frac{(U-D-k-1)^2}{4(U+D-2d-k+1)}$.
 Furthermore, $r_{right}(d)=\mathcal O(\log^2 n)$.
 \end{restatable}
-\todo{Deal with other values of $d$}
 
 We now consider the values of $d$ that are outside the range of the two preceding lemmas.
 These values are the ones where $d < \log^4 n$ or $2d > U+D-k-\log^4 n$.
-Since $d$ is the number of up steps (in the left sub-interval), $d \ge 0$
-and since the length of the right sub-interval nust be non-negative, we get $U+D-2d-k+1 \ge 0$.
+Since $d$ is the number of up steps in the left sub-interval, $d \ge 0$
+and since the length of the right sub-interval nust be non-negative (see Figure~\ref{fig:dyck_mandatory_boundary_sampling}), we get $U+D-2d-k+1 \ge 0$.
 Thus, we define the set
 \begin{align}
 \label{eq:SetDefinition}
@@ -423,42 +458,50 @@ where $r(d)=\mathcal O(\log^2 n)$.
 
 
 
-\subsubsection{Estimating the CDF}%
+\subsubsection{Estimating the CDF}
 \label{sec:estimating_the_cdf}
-We will now use these observations to construct a suitable $\{ q_d\}$ that can be used to invoke the rejection sampling lemma.
-In addition to beign a good approximation to $\{ p_d\}$, $\{ q_d\}$ must be of a form that allows us to compute its CDF efficiently.
-First, we rewrite the approximate probability as $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)$ where:
-\begin{align*}
+We use these observations to construct a suitable $\{ q_d\}$ that can be used to invoke the rejection sampling lemma.
+This is achieved by constructing a piecewise continuous function $\hat q$, such that $\hat q(\delta)$ approximates $p_{\floor\delta}$,
+and then using the integral of $\hat q$ to define $q_d$.
+%In addition to being a good approximation to $\{ p_d\}$, $\{ q_d\}$ must be of a form that allows us to compute its CDF efficiently.
+First, we rewrite $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)$ where:
+{\small
+\begin{align}
+\label{eq:dyck_integrable_function}
     \mathcal K = \frac{2^{U+D}}{S_{total}} = \frac{2^{U+D}}{C_k(U,D)-C_{k-1}(U,D)}\ \ \ \
     &&f(d) = \frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}
-\end{align*}
+\end{align}}
 Notice that $\mathcal K$ is a constant and $f(d)$ is a function whose integral has a closed form.
 Using the fact that $r(d) = \mathcal O(\log^2 n)$ (from Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized}), we obtain the following lemma:
 
 \begin{lemma}
 \label{lem:ReturnProbabilityPiecewiseContinuous}
 Given the piecewise continuous function
-{\large
-    \begin{align*}
-        \hat q(\delta) &=
-        \begin{cases}
-            p_{\floor\delta} &\mbox{if } \floor\delta \in \mathcal R \\ 
-            \mathcal K\cdot f(\delta)\cdot exp\left(\lfloor{r({\scriptstyle\floor\delta})}\rfloor\right) & \mbox{if } \floor\delta \not\in \mathcal R
-        \end{cases}
-        && \mathlarger \implies
-        && p_d = \Theta\left( \int\limits_d^{d+1} \hat q(\delta)\right)
-    \end{align*}
-}
+\begin{align*}
+    \hat q(\delta) &=
+    \begin{cases}
+        p_{\floor\delta} &\mbox{if } \floor\delta \in \mathcal R \\ 
+        \mathcal K\cdot f(\delta)\cdot exp\left(-\lfloor{r({\scriptstyle\floor\delta})}\rfloor\right)
+        & \mbox{if } \floor\delta \not\in \mathcal R
+    \end{cases}
+    && \mathlarger \implies
+    && p_d = \Theta\left( \int\limits_d^{d+1} \hat q(\delta)\right)
+\end{align*}
 Furthermore, $\hat q(\delta)$ has $\mathcal O(\log^4 n)$ continuous pieces.
 %Note that this integral has a closed form for a fixed value of $\floor{r(d)}$.
 \end{lemma}
 \begin{proof}
-For $d \in \mathcal R$, the integral trivially evaluateds to exactly $p_d$.
+For $d \in \mathcal R$, the integral trivially evaluates to exactly $p_d$.
 For $d\not\in \mathcal R$, it suffices to show that $p_d = \Theta\left( \hat q(\delta)\right)$ for all $\delta\in [d,d+1)$.
 We already know that $p_d = \Theta\left( \mathcal K\cdot f(d)\cdot e^{-r(d)}\right)$.
-Moreover, for any $\delta\in [d,d+1)$, the exponential term in $\hat q(\delta)$ is within a factor of $e$ of the original $e^{-r(d)}$ term.
+Moreover, for any $\delta\in [d,d+1)$, the exponential term $e^{-\floor{r(\floor\delta)}}$ in $\hat q(\delta)$ is within a factor of $e$ of the original $e^{-r(d)}$ term.
 
 For all $\mathcal O(\log^4 n)$ values $d\in \mathcal R$, $\hat q(\delta)$ is constant on the interval $[d,d+1]$.
+Since $r(d) = \mathcal O(\log^2 n)$ by Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized},
+the exponential term $e^{-\floor{r(\floor\delta)}}$ in $\hat q(\delta)$ taken on at most $\mathcal O(\log^2 n)$ values.
+Thus, $\hat q$ is continuous for a range of $\delta$ correspoding to a fixed value of $\floor{r(\floor\delta)}$,
+and so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log n)$ pieces.
+so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log n)$ pieces.
 \end{proof}
 
 Now, we have everything in place to define the distribution $\{ q_d\}$ that we will be sampling from.
@@ -467,21 +510,18 @@ Specifically, we will define $q_d$ and it's CDF $Q_d$ as follows:
     q_d = \frac{\int\limits_d^{d+1} \hat q(\delta)}{\mathcal N}
     && Q_d = \frac{\int\limits_0^{d+1} \hat q(\delta)}{\mathcal N}
 \end{align}
-Here the normalizing factor $\mathcal N$ is $\int\limits_0^{d_{max}+1} \hat q(\delta)$.
-To show that these can be computed efficiently, it suffices to show that any integral of $\hat q_d$ can be efficiently evaluated.
+Here the normalizing factor $\mathcal N$ is $\int_0^{d_{max}+1} \hat q(\delta)$.
+To show that these can be computed efficiently, it suffices to show that any integral of $\hat q(\delta)$ can be efficiently evaluated.
+This follows from the fact that $\hat q$ is piecewise continuous with $\mathcal O(\log^4)$ pieces (Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous}),
+each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{eq:dyck_integrable_function} has an integral),
+thus yielding the following lemma.
 
 \begin{lemma}
 \label{lem:ReturnProbabilityPiecewiseContinuousIntegral}
 Given the function $\hat q_d$ defined in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous},
-it is possible to compute the integral $\int\limits_{d_1}^{d_2+1} \hat q(\delta)$ in $\poly(\log n)$ time for any valid $d_1, d_2$
-(i.e. the bounds must be such that $d_i \ge 0$ and $U+D-2d-k+1 \ge 0$).
+it is possible to compute the integral $\int_{d_1}^{d_2+1} \hat q(\delta)$ in $\poly(\log n)$ time for any valid $d_1, d_2\in \mathbb Z$
+(the bounds must be such that $d_i \ge 0$ and $U+D-2d_i-k+1 \ge 0$).
 \end{lemma}
-\begin{proof}
-As noted in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous}, $\hat q(\delta)$ is piecewise continuous function with $\mathcal O(\log^4 n)$ pieces.
-For all $\mathcal O(\log^4 n)$ values $d\in \mathcal R$, $\hat q(\delta)$ is constant on the interval $[d,d+1]$.
-Now consider values
-We claim that the number of continuous segments in the \emph{valid} range is $\mathcal O(\log^4 n)$.
-\end{proof}
 
 \begin{theorem}
 \label{thm:first_return_in_interval}
@@ -510,18 +550,42 @@ So, it is not possible for the first return to be in this interval.
 \end{proof}
 
 The good news is that there are only two intervals that we need to worry about.
-Now the challenge is to find the smallest index $f>i$ such that $y_f\le y_i$.
-One solution is to maintain an interval tree \todo{cite} over the range $[2n]$ storing the position of the boundary.
-Specifically, we have a balanced binary tree with $2n$ leaves with the $i^{th}$ leaf storing the boundary at position $i$.
-Each internal node stores the minimum value amongst all the leaves in its sub-tree.
-In this setting, we can binary search for $f$ by guessing a bound $f'$ and performing a \emph{range minimum query} over the interval $(x_i,x_{f'}]$.
-Overall, this requires $\mathcal O(\log n)$ range queries each of which makes $\mathcal O(\log n)$ probes to the binary tree.
+Now, the challenge is to find the smallest index $f>i$ such that $y_f\le y_i$.
+To this end, we define $M_{[a,b]}$ as the minimum sampled height in the range of positions $[a,b]$.
+%(lowest $y$-value) of any sampled boundary in the range of positions $[a,b]$ along the Dyck path.
 
-However, we cannot explicitly maintain or even construct this tree, and updates can be as expensive as $\Theta(n)$.
-To mitigate this, we start with just a root node (indicating that the initial boundary is $1$ everywhere) and build the tree dynamically as needed.
-We perform updates using \emph{lazy propagation} \todo{cite} by only propagating updates down to the children (creating children if necessary) when needed.
-So, at any given time, some nodes in the tree may not hold the correct value, but the correct value must be present on the path to the root.
-\todo{This probably needs more explanation}
+One solution is to maintain a range tree $\mathbf R$ \todo{cite} over the range $[2n]$, storing the $y$-value of the boundary at each point.
+Assuming that $2n = 2^l$, we can view $\mathbf R$ as a complete binary tree with depth $r$.
+Every non-leaf node is denoted by $\mathbf R_{[a,b]}$, and corresponds to a range $[a,b]\subseteq[2n]$ that is the union of the ranges of its children.
+Each $\mathbf R_{[a,b]}$ stores the value $M_{[a,b]}$ which is is the minimum sampled height
+in the range of positions $[a,b]$, or $\infty$ if none of the heights have been revealed.
+%the height of the last boundary update that affected the entire range $[a,b]$.
+The leaf nodes are denoted as $\{\mathbf R_i\}_{i\in[2n]}$, and correspond to the singleton range corresponding to position $i\in [2n]$.
+%and by definition, this is the min of the values stored at the children of $\mathbf R_{[a,b]}$.
+Note that a node at depth $l'$ will correspond to a range of size $2^{l-l'}$, with the root being associated with the entire range $[2n]$.
+
+We say that the range $[a,b]$ is \emph{canonical} if it corresponds to a range of some $\mathbf{R}_{[a,b]}$ in $\mathbf R$.
+By the property of range trees, any arbitrary range can be decomposed into a disjoint union of $O(\log n)$ canonical ranges.
+We implement $\mathbf{R}$ to support the following operations:
+\begin{itemize}
+    \item \func{Update}$(x,y)$: Update the height of the position $x$ to $y$.\\
+    This update affects all ranges $[a_i,b_i]$ containing $x$.
+    So, for each $[a_i,b_i]$ we set $M_{[a_i,b_i]} = \min\left( M_{[a_i,b_i]}, y\right)$.
+    \item \func{Query}$(a,b)$: Return the minimum boundary height in the range $[a,b]$.\\
+    We decompose $[a,b]$ into $\mathcal O(\log n)$ \emph{canonical} ranges $ \langle r_1, r_2,\cdots\rangle$,
+    %For each $r_i$, we compute $M_{r_i}$ as the minimum over all $R_r$ such that the \emph{canonical} range $r$ contains $r_i$.
+    %Equivalently, we set $M_{r_i}$ to be the minimum of all values on the path from $\mathbf R_{r_i}$ to the root of $\mathbf R$,
+    %which takes $\mathcal O(\log n)$ time.
+    %Note that the values stores in the sub-tree rooted at $\mathbf R_{r_i}$ do not affect $M_{r_i}$,
+    %since the coreesponding boundary updates did not affect the \emph{entire} range $r_i$ (these updates only affected canonical sub-ranges of $r_i$).
+    and return the minimum of all the $M_{r_i}$ values as $M_{[a,b]}$ (since $[a,b]$ is the union of all $r_i$).
+\end{itemize}
+
+Now, we can binary search for $f$ by guessing a value $f'$ and checking if $\func{Query}(x_i,x_{f'}) \le y_i$.
+Overall, this requires $\mathcal O(\log n)$ calls to $\func{Query}$, each of which makes $\mathcal O(\log n)$ probes to the range tree.
+To avoid an initialization overhead, we only create the node $\mathbf{R}_{[a,b]}$ during the first $\func{Update}$ affecting a position $x\in[a,b]$.
+Since a call to $\func{Update}$ can create at most $\mathcal O(\log n)$ new nodes in $\mathbf R$,
+the additional space required for each $\func{Height}$ or $\func{First-Return}$ query is still bounded.
 
 \begin{theorem}
 \label{thm:dyck_first_return_sampling}
@@ -531,11 +595,13 @@ where $y>x_i$ is the position where the Dyck path first returns to $\func{Height
 \end{theorem}
 \begin{proof}
 We first query the interval $(x_i,x_{i+1}]$ to find a first return using Theorem~\ref{thm:first_return_in_interval}.
-If a return is not found, we calculate $f$ using \todo{what?}.
+If a return is not found, we calculate $f$ using the range tree data structure described above.
 Since $x_{f-1}<x_i\le x_f$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $y_i$.
 We sample a point in the middle of this interval and fix the boundary invariant by sampling another point,
 essentially breaking it up into $\mathcal O(1)$ sub-intervals each at most half the size of the original.
-Based on the new samples, we find the sub-interval containing the first return in $\mathcal O(1)$ time.
-We repeat up to $\mathcal O(\log n)$ times until the current interval size drops below the threshold $\mathcal T$.
-Then we spend $\tilde{\mathcal O}(\mathcal T)$ time to brute force sample this interval and find the first return position (if it wasn't revealed in previous steps).
+Based on the new samples, we again find the (newly created) sub-interval containing the first return in $\mathcal O(1)$ time.
+We repeat up to $\mathcal O(\log n)$ times, performing binary search to find the position of the first return.
+%\todo{Remove Threshold}
+%We repeat up to $\mathcal O(\log n)$ times until the current interval size drops below the threshold $\mathcal T$.
+%Then we spend $\tilde{\mathcal O}(\mathcal T)$ time to brute force sample this interval and find the first return position (if it wasn't revealed in previous steps).
 \end{proof}

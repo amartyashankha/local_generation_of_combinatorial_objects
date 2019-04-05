@@ -116,9 +116,19 @@ Given a neighbor $w$, one naive way to do this is to iterate backwards from epoc
 until the first accepted proposal (from the latest epoch $t' < t$) is found.
 At this point, if $\mathcal C^{t'}_w = C^t_v$, then the current color of $w$ conflicts with $v$'s proposal.
 Otherwise there is no conflict and we can proceed to the next neighbor.
-THis process however makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
+This process however makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
 This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired $t = \Omega(\log n)$.
 
+We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $C^t_v$ during \emph{some} epoch.
+In this case, the expected number of neighbors that have to be probed recursively is $\le t\Delta/q$
+(since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$).
+So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
+For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sublinear.
+This lower bound on $q$ is however asymptotically worse that the sequential requirement $q > 2\Delta = \mathcal O(\Delta)$.
+
+
+\subsubsection{Jumping Back to Past Epochs}
+\label{sec:jumping_back_to_past_epochs}
 \begin{wrapfigure}[19]{r}{0.50\textwidth}
 \vspace{-1.5em}
 \begin{framed}
@@ -154,17 +164,6 @@ This leads to a running time upper bound of $\Delta^{t}$ which is superlinear fo
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
-
-We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $C^t_v$ during \emph{some} epoch.
-In this case, the expected number of neighbors that have to be probed recursively is $\le t\Delta/q$
-(since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$).
-So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
-For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sublinear.
-This lower bound on $q$ is however asymptotically worse that the sequential requirement $q > 2\Delta = \mathcal O(\Delta)$.
-
-
-\subsubsection{Jumping Back to Past Epochs}
-\label{sec:jumping_back_to_past_epochs}
 The expected number of neighbors that need to be checked can always be $t\Delta$ in the worst case.
 The crucial observation is that even though these recursive calls seem unavoidable,
 we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.

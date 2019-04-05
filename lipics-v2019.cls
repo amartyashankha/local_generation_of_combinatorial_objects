@@ -754,7 +754,8 @@
   \thm@postskip\thm@preskip
 }
 \def\@endtheorem{\endtrivlist}%\@endpefalse
-\renewcommand\qedsymbol{\textcolor{CadetBlue}{\ensuremath{\square}}}
+\renewcommand\qedsymbol{\textcolor{CadetBlue}{\ensuremath{\bm\square}}}
+%\renewcommand\qedsymbol{\setlength{\fboxsep}{2.5pt}\setlength{\fboxrule}{1pt}\fcolorbox{CadetBlue}{white}{\null}}
 \renewenvironment{proof}[1][\proofname]{\par
   \pushQED{\qed}%
   \normalfont \topsep6\p@\@plus6\p@\relax
