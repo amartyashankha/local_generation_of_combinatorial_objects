@@ -101,46 +101,55 @@ If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left(
 \subsection{Local Coloring Algorithm}%
 \label{sec:local_coloring_algortihm}
 Given query access to the adjacency matrix of a graph $G$ with maximum degree $\Delta$ and a vertex $v$,
-the algorithm has to output the color of $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
+the algorithm has to output the color assigned to $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
+We want to be able to answer such queries in sublinear time, without simulating the entire Markov Chain.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
+\todo[inline,color=red!80!green!25]{Explain the model. Public randomness.}
 The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
 where $\vec C^t_v$ is the color proposed by $v$ in the $t^{th}$ epoch.
 Note that these values are fully independent and as such any $\vec C^t_v$ can be sampled trivially.
 We also use $\vec X^t$ to denote the final vector of vertex colors at the end of the $t^{th}$ epoch.
-Finally, we define indicator variables $\bm \chi^t_v$ to denote if the color $\vec C^t_v$ proposed by vertex $v$ was accepted at the $t^{th}$ epoch;
-$\bm \chi^t_v = \ONE$ if and only if for all neighbors $w\in \Gamma(v)$,
-we satisfy the condition $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$.
+Finally, we define indicator variables $\bm \chi^t_v$ to indicate whether the color $\vec C^t_v$ proposed by vertex $v$
+was accepted at the $t^{th}$ epoch: $\bm \chi^t_v = \ONE$ if and only if for all neighbors $w\in \Gamma(v)$,
+we satisfy the condition $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$
+(i.e. the proposed color does not conflict with any neighboring proposal or any neighbor's color from the preceding epoch).
 So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
-While the proposals $\vec C^t_v$ are easy to sample, it is much less clear how we can sample the $\bm \chi^t_v$ values.
+While the proposals $\vec C^t_v$ are easy \textcolor{Maroon}{to sample}, it is much less clear how we can determine the $\bm \chi^t_v$ values.
 Note that we can compute $\vec X^t_v$ quite easily if we know the values $\bm\chi^i_v$ for all $i\le t$.
 So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm\chi^t_v$.
 
 
 \subsubsection{Naive Coloring Implementations}%
 \label{sec:naive_coloring_implementations}
-A general strategy to sample $\bm\chi^t_v$ is to check for all neighbors $w$ of $v$,
-whether $w$ conflicts with $v$'s proposed color in the $t^{th}$ epoch.
+Our general strategy to determine $\bm\chi^t_v$ will be to check for all neighbors $w$ of $v$,
+whether $w$ causes a conflict with $v$'s proposed color in the $t^{th}$ epoch.
 One naive way to achieve this, is to iterate backwards from epoch $t$, querying to find out whether $w$'s proposal was accepted,
-until the first accepted proposal (latest epoch $t' < t$ such that $\bm\chi^{t'}_w=\ONE$) is found.
+until the most recent accepted proposal (latest epoch $t' < t$ such that $\bm\chi^{t'}_w=\ONE$) is found.
 At this point, if $\vec C^{t'}_w =\vec C^t_v$, then the current color of $w$ conflicts with $v$'s proposal.
 Otherwise there is no conflict, and we can proceed to the next neighbor.
 However, this process potentially makes $\Delta$ recursive calls to a sub-problem that is only slightly smaller i.e. $T(t) \le \Delta\cdot T(t-1)$.
-This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired mixing time $t = \Omega(\log n)$.
+This leads to a running time upper bound of $\Delta^{t}$ which is superlinear for the desired number of epochs $t = \Omega(\log n)$ (the mixing time).
 
 We can prune the number of recursive calls by only processing the neighbors $w$ which actually proposed the color $\vec C^t_v$ during \emph{some} epoch.
-In this case, the expected number of neighbors that have to be probed recursively is $\le t\Delta/q$
-(since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$).
+In this case, the expected number of neighbors that have to be probed recursively is less than $t\Delta/q$
+(since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$, and there are $q$ possible colors).
 So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
 For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sublinear.
-This lower bound on $q$ is however asymptotically worse that the sequential requirement $q > 2\Delta = \mathcal O(\Delta)$.
+So, we can use this simple algorithm only when $q$ is sufficiently large.
+However, we want a sub-linear time algorithm for $q = \mathcal O(\Delta)$.
 
 
-\subsubsection{Jumping Back to Past Epochs}
+\subsubsection{A Sublinear Time Algorithm for $q = \mathcal O(\Delta)$}
 \label{sec:jumping_back_to_past_epochs}
-\begin{wrapfigure}[18]{r}{0.48\textwidth}
-\vspace{-3.0em}
+The expected number of neighbors that need to be checked can always be $t\Delta/q$ in the worst case.
+The crucial observation is that even though these recursive calls seem unavoidable,
+we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
+\textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
+
+\begin{wrapfigure}[19]{r}{0.48\textwidth}
+\vspace{-2.3em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Checking if proposal is accepted}
@@ -174,11 +183,6 @@ This lower bound on $q$ is however asymptotically worse that the sequential requ
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
-The expected number of neighbors that need to be checked can always be $t\Delta$ in the worst case.
-The crucial observation is that even though these recursive calls seem unavoidable,
-we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
-Because of the more complex structure of this epoch jumping process, the main challenge is to analyze the runtime.
-
 Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
 We iterate through all neighbors $w$ of $v$, checking for conflicts.
 The condition $c\not=\vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$.
