@@ -41,7 +41,8 @@ We remark that this approach may be extended to support \func{Vertex-Pair} queri
 We provide \func{Random-Neighbor} queries (Section~\ref{sec:buckets}) using $\poly(\log n)$ resources.
 The ability to do so is surprising since:
 (1) Sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} implementations, because this quantity alone
-imposes dependence on the existence of \emph{all} of its potential incident edges and on the rest of the graph \textcolor{Maroon}{(Why?)}.
+imposes dependence on the existence of \emph{all} of its potential incident edges and on the rest of the graph \textcolor{Fuchsia}{(Why?)}.
+\todo[inline]{Fix This!}
 Therefore, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
 without resorting to ``knowing'' its degree.
 (2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries

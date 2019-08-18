@@ -11,27 +11,39 @@
 %Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
 %\todo{Connect with previous part on SBM}
 
-We consider a sequence of $n$ white and $n$ black marbles such that every prefix of the sequence has at least as many white marbles as black ones.
-This can be interpreted as a Dyck path; a $2n$ step \emph{balanced} one-dimensional walk with exactly $n$ up and down steps.
-In Figure~\ref{fig:basic_dyck}, each step moves one unit along the positive $x$-axis (time) and one unit up or down the positive $y$-axis (position).
-The prefix constraint implies that the $y$-coordinate of any point on the walk is $\ge 0$ i.e. the walk never crosses the $x$-axis.
-The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) is the $n^{th}$ Catalan number $C_n=\frac{1}{n+1}\cdot{2n\choose n}$.
-Many important combinatorial objects occur in Catalan families of which these are an example.
+In the previous Section~\ref{sec:application_sbm} on the Stochastic Block Model, we considered random sequences of colored marbles.
+Next, we focus on an important variant of these sequences as Catalan objects, which impose a global constraint on the types of allowable sequences.
+Specifically, consider a sequence of $n$ white and $n$ black marbles,
+such that every \emph{prefix} of the sequence has at least as many white marbles as black ones.
+Our goal will be to support queries to a uniformly random instance of such an object.
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/basic_dyck_path.pdf}
     \caption{Simple Dyck path with $n = 35$ up and down steps.}
     \label{fig:basic_dyck}
 \end{figure}
+One interpretation of Catalan objects is given by Dyck paths (Figure~\ref{fig:basic_dyck}).
+A Dyck path is essentially a $2n$ step \emph{balanced} one-dimensional walk with exactly $n$ up and down steps.
+In Figure~\ref{fig:basic_dyck}, each step moves one unit along the positive $x$-axis (time) and one unit up or down the positive $y$-axis (position).
+The prefix constraint implies that the $y$-coordinate of any point on the walk is $\ge 0$ i.e. the walk never crosses the $x$-axis.
+The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) is the $n^{th}$ Catalan number $C_n=\frac{1}{n+1}\cdot{2n\choose n}$.
+Many important combinatorial objects occur in Catalan families of which these are an example.
 
-Our goal will be to support queries to a uniformly random instance of a Dyck path,
-which will in turn allow us to sample other random Catalan objects such as rooted trees, and bracketed expressions.
+\textcolor{Maroon}{We will approach the problem of partially sampling Catalan objects through Dyck paths.}
+This, in turn, will allow us to sample other random Catalan objects such as rooted trees, and bracketed expressions.
 Specifically, we will want to answer the following queries:
 \begin{itemize}
-    \item \func{Height}$(i)$: Returns the position of the path after $i$ steps
-    \item \func{First-Return}$(i)$: Returns an index $j>i$ such that $\func{Height}(j)=\func{Height}(i)$ and for any $k$ between $i$ and $j$,
+    \item \textcolor{Maroon}{\func{Direction}$(i)$: Returns the value of the $i^{th}$ step in the Dyck path (whether the step is up or down).}
+    \item \func{Height}$(i)$: Returns the position of the path after $i$ steps.
+    \item \func{First-Return}$(i)$: Returns an index $j>i$ such that $\func{Height}(j)=\func{Height}(i)$, and for any other $k$ between $i$ and $j$,
     $\func{Height}(k)$ is strictly greater than $\func{Height}(i)$.
+    \textcolor{Maroon}{
+    While it may not be clear why this kind of query is important, it will be useful for querying bracketed expressions and random trees.
+    We defer this discussion to Section~\ref{sec:bijections_to_other_catalan_objects}.}
 \end{itemize}
+\textcolor{Maroon}{Since a $\func{Direction}(i)$ query can be simulated using the queries $\func{Height}(i)$ and $\func{Height}(i-1)$,
+we will not explicitly discuss the \func{Direction} queries in what follows.}
 
 
 
