@@ -1,8 +1,9 @@
 \section{Random Coloring of a Graph}%
 \label{sec:random_coloring_of_a_graph}
 A $q$-coloring of a graph $G=(V, E)$ is a function $\vec X : V\rightarrow [q]$, such that for all $(u,v)\in E$, $\vec X_u \not= \vec X_v$.
-We will locally sample an uniformly random $q$-coloring of a graph, by implementing an oracle $\func{Color}(v)$,
-which returns the color $\vec X_v$ of node $v$, where $\vec X$ is a uniformly random valid coloring.
+We present a sublinear time algorithm to locally sample an uniformly random $q$-coloring of a graph.
+This is done by implementing an oracle $\func{Color}(v)$, which returns the color $\vec X_v$ of node $v$,
+where $\vec X$ is a uniformly random valid coloring of the input graph.
 Moreover, in this setting, multiple independent instances of $\func{Color}$ using the same random bits,
 should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
 We consider graphs with max degree $\Delta$ and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.
@@ -11,66 +12,85 @@ Using the technique of path-coupling, \cite{glauber_survey} showed that for $q >
 one can sample an uniformly random coloring by using a simple Markov chain.
 The Markov chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
 Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
-In each step of the Markov process, a pair $(v, c)\in V\times [q]$ is sampled uniformly at random.
+In each step of the Markov process, a vertex and a color are sampled uniformly at random i.e. a pair $(v, c)\thicksim_{\mathcal U} V\times [q]$.
 Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in a conflict with $v$'s neighbors,
 i.e. $c\not\in \left\{ \vec X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $\vec X_v^{t+1}\leftarrow c$.
 After running this chain for $T = \mathcal{O}(n\log n)$ steps, the Markov chain is mixed,
-i.e. the distribution of resulting colors is close to the uniform distribution in $L_1$ distance.
+implying that the distribution of resulting colors is close to the uniform distribution in $L_1$ distance.
+
+\todo[inline,color=red!80!green!25]{How to initialize? \cite{coloring_initialize}}
+\todo[inline,color=red!80!green!25]{Formalize model. Public randomness.}
+\todo[inline,color=red!80!green!25]{Use $q = 2\alpha\Delta$ everywhere.}
 
 
 
-\subsection{Modified Glauber Dynamics}%
+\subsection{Modified Glauber Dynamics based on a Distributed Algorithm}%
 \label{sec:modified_glauber_dynamics}
 
-Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
+Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{ghaffari_fischer}.
 The modified Markov chain proceeds in epochs.
-We denote the initial coloring of the graph by $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
-In the $k^{th}$ epoch $\mathcal E_k$:
+We denote the initial coloring of the graph by the vector $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
+In the $k^{th}$ epoch, every node attempts to recolor itself simultaneously in a conservative manner, as described below:
 \begin{itemize}
-    \item Sample $|V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the proposed color for vertex $v$.
+    \item Sample $|V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the color proposed by vertex $v$.
     \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$ if for all neighbors $w$ of $v$, $\vec X^k_w\not=c_v$ and $\vec X^{k-1}_w\not=c_v$.
 \end{itemize}
-%\begin{itemize}
-    %\item Pick a random permutation $\pi^{(i)}$ of the vertices $V$.
-    %\item Sample $n = |V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$.
-    %\item Perform the standard update using the pairs $\left\langle (\pi^{(i)}_1, c_1), (\pi^{(i)}_2, c_2), \cdots, (\pi^{(i)}_n, c_n)\right\rangle$.
-%\end{itemize}
 
-This procedure is a special case of the \emph{Local Glauber Dynamics} presented in \cite{mohsen}.
-We can directly use their path coupling argument, which we briefly describe below.
-Given two colorings $\vec X$ and $\vec Y$, we define $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$.
-We define the coupling $(\vec X,\vec Y)\rightarrow(\vec X',\vec Y')$ where $\vec X$ and $\vec Y$
-differ only at a single vertex $v$ such that $\vec X_v = c_X$ and $\vec Y_v = c_Y$.
-Now, we pick a random permutation of the vertices along with uniformly sampled colors:
-\[
-\left\langle (v_1, c_1), (v_2, c_2), \cdots, (v_n, c_n)\right\rangle
-= \left\langle (\pi_1, c_1), (\pi_2, c_2), \cdots, (\pi_n, c_n)\right\rangle
-\]
-Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
-\begin{itemize}
-    \item If the current color of $v_i$ as well as $c_i$ are both in $\{c_X,c_Y\}$,
-    then the $\vec X$ chain picks the color $c_i$ and the $\vec Y$ chain picks the other color.
-    \item Otherwise, both chains pick the same color $c_i$ for the vertex $v_i$.
-\end{itemize}
-We use the following result from \cite{mohsen} that bounds the coupled distance.
+This procedure is a special case of the \emph{Local Glauber Dynamics},
+which was presented in \cite{ghaffari_fischer} as a distributed algorithm for sampling a random coloring.
+In the dirtributed setting, our epochs correspond to synchronous rounds, where many vertices recolor themselves simultaneously.
+Specifically, a vertex $v$ is recolored if and only if its proposed color $c_v$
+does not conflict with any of it's neighbors current colors (at the end of the previous epoch), or their current proposals.
+
+In order to bound the mixing time of this Markov chain,
+\cite{ghaffari_fischer} uses the standard technique of \emph{path coupling}, introduced in \cite{path_coupling}.
+The argument begins by considering two initial states of the Markov Chains, say two colorings $\vec X^0$ and $\vec Y^0$,
+that differ at only one vertex.
+Formally, we can define the distance between two colorings $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$,
+which results in the condition $d(\vec X^0, \vec Y^0) = 1$.
+A \emph{coupling} is a joint evolution rule for a pair of states $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$,
+such that both of the individual evolutions $(\vec X^0\rightarrow \vec X^1)$ and $(\vec Y^0\rightarrow \vec Y^1)$
+have the same transition probabilities as the original Markov Chain.
+%Now, we pick a random permutation of the vertices along with uniformly sampled colors:
+%\[
+%\left\langle (v_1, c_1), (v_2, c_2), \cdots, (v_n, c_n)\right\rangle
+%= \left\langle (\pi_1, c_1), (\pi_2, c_2), \cdots, (\pi_n, c_n)\right\rangle
+%\]
+%Now, for each $(v_i, c_i)$ in order, we update the coloring of $X$ and $Y$ as follows:
+%\begin{itemize}
+    %\item If the current color of $v_i$ as well as $c_i$ are both in $\{c_X,c_Y\}$,
+    %then the $\vec X$ chain picks the color $c_i$ and the $\vec Y$ chain picks the other color.
+    %\item Otherwise, both chains pick the same color $c_i$ for the vertex $v_i$.
+%\end{itemize}
+We can directly use the result from the coupling defined in \cite{ghaffari_fischer}.
 \begin{lemma}
-\label{lem:mohsen_single_epoch_distance}
-If $q = 2\alpha\Delta$ and $d(\vec X, \vec Y) = 1$,
-then $\mathbb E[d(\vec X',\vec Y')] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
+\label{lem:ghaffari_fischer_single_epoch_distance}
+If $q = 2\alpha\Delta$, then there exists a coupling $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$, such that if $d(\vec X^0, \vec Y^0) = 1$,
+then $\mathbb E[d(\vec X^1,\vec Y^1)] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
 \end{lemma}
 \begin{corollary}
 \label{cor:single_epoch_distansce}
-If $q \ge 9\Delta$ and $d(\vec X, \vec Y) = 1$, then $\mathbb E[d(\vec X',\vec Y')] < \frac1{e^{1/3}}$
+If $q \ge 9\Delta$ and $d(\vec X^0, \vec Y^0) = 1$, then $\mathbb E[d(\vec X^1,\vec Y^1)] < \frac1{e^{1/3}}$
 \end{corollary}
 
-\begin{theorem}
-\label{thm:modified_mixing_time}
+The \emph{path coupling} lemma from \cite{path_coupling} uses a coupling on adjacent states to bound the mixing time.
+\begin{lemma}
+\label{lem:path_coupling}
+\textbf{(Simplified Path Coupling from \cite{path_coupling})}
+If there exists a coupling $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$ defined for states where $d(\vec X^0, \vec Y^0) = 1$,
+such that $\mathbb{E}[d(\vec X^1, \vec Y^1) \mid \vec X^0, \vec Y^0] \le \beta$ (for $\beta < 1$),
+then, the mixing time $\tau_{mix}(\epsilon) = \mathcal O(\ln (n\epsilon^{-1})/\ln \beta^{-1})$.
+\end{lemma}
+
+\begin{corollary}
+\label{cor:modified_mixing_time}
 If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left( \ln n + \ln(\frac1{\epsilon})\right)$ epochs.
-\end{theorem}
-\begin{proof}
-Starting for a maximum distance of $n$, the distance decreases to $1$ after at most $3\ln n$ epochs,
-and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the distance to $\epsilon$.
-\end{proof}
+\end{corollary}
+%\begin{proof}
+%Starting for a maximum distance of $n$, the distance decreases to $1$ after at most $3\ln n$ epochs,
+%and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the distance to $\epsilon$.
+%\end{proof}
+\todo[inline,color=red!80!green!25]{Distributed Algo + Parnas-Ron \cite{parnas_ron} and how we do better.}
 
 
 
@@ -267,7 +287,7 @@ using only $\mathcal O(n^{6.12/\alpha}\Delta\log n)$ time and random bits.
 %This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
 \end{theorem}
 \begin{proof}
-Since $q\ge 9\Delta$, we can use Theorem~\ref{thm:modified_mixing_time} to obtain $\tau_{mix}(1/n) \le 6\ln n$.
+Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(1/n) \le 6\ln n$.
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
 the number of calls to $\func{Accepted}$ is $\mathcal O(n^{6.12/\alpha})$.
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially samples $\mathcal O(t\Delta)$ color proposals,

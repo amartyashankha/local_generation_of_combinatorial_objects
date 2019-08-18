@@ -38,7 +38,7 @@ This is an inherently sequential process, with the acceptance of a particular pr
 
 To make the runtime analysis simpler, we define a modified version of Glauber Dynamics that proceeds in $\mathcal O(\log n)$ epochs.
 In each epoch, all of the $n$ vertices propose a random color and update themselves if their proposals do not conflict with any of their neighbors.
-This Markov chain is a special case of the one presented in \cite{mohsen} for distributed graph coloring,
+This Markov chain is a special case of the one presented in \cite{ghaffari_fischer} for distributed graph coloring,
 and mixes in $\mathcal O(\log n)$ epochs when $q\ge 9\Delta$.
 %While we do not have the same restrictions as the distributed computation setting,
 %we choose to use this chain so as to avoid long analysis of mixing times.
