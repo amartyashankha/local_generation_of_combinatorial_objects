@@ -33,14 +33,17 @@ We denote the initial coloring of the graph by the vector $\vec X^0$ and the sta
 In the $k^{th}$ epoch, every node attempts to recolor itself simultaneously in a conservative manner, as described below:
 \begin{itemize}
     \item Sample $|V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the color proposed by vertex $v$.
-    \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$ if for all neighbors $w$ of $v$, $\vec X^k_w\not=c_v$ and $\vec X^{k-1}_w\not=c_v$.
+    \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$, if and only if for all neighbors $w$ of $v$, $\vec X^{k-1}_w\not=c_v$ and $c_w\not=c_v$.
+Specifically, a vertex $v$ is recolored if and only if its proposed color $c_v$
+does not conflict with any of it's neighbors current colors (at the end of the previous epoch), or their current proposals.
 \end{itemize}
 
 This procedure is a special case of the \emph{Local Glauber Dynamics},
-which was presented in \cite{ghaffari_fischer} as a distributed algorithm for sampling a random coloring.
-In the dirtributed setting, our epochs correspond to synchronous rounds, where many vertices recolor themselves simultaneously.
-Specifically, a vertex $v$ is recolored if and only if its proposed color $c_v$
-does not conflict with any of it's neighbors current colors (at the end of the previous epoch), or their current proposals.
+which was presented in \cite{ghaffari_fischer} as a distributed algorithm for sampling a random coloring.\footnote{
+Note that \cite{ghaffari_fischer} also uses a marking probability $\gamma$,
+which indicates the likelihood of any vertex participating in a given round.
+For our purposes, it suffices to set $\gamma = 1$.}
+In the distributed setting, our epochs correspond to synchronous rounds, where many vertices recolor themselves simultaneously.
 
 In order to bound the mixing time of this Markov chain,
 \cite{ghaffari_fischer} uses the standard technique of \emph{path coupling}, introduced in \cite{path_coupling}.
@@ -91,7 +94,7 @@ If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left(
 %and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the distance to $\epsilon$.
 %\end{proof}
 \todo[inline,color=red!80!green!25]{Distributed Algo + Parnas-Ron \cite{parnas_ron} and how we do better.}
-
+\todo[inline,color=red!80!green!25]{Similar to LCA for MIS}
 
 
 
