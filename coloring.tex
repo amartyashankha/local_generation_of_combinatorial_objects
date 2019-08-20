@@ -143,64 +143,72 @@ However, we want a sub-linear time algorithm for $q = \mathcal O(\Delta)$.
 
 \subsubsection{A Sublinear Time Algorithm for $q = \mathcal O(\Delta)$}
 \label{sec:jumping_back_to_past_epochs}
-The expected number of neighbors that need to be checked can always be $t\Delta/q$ in the worst case.
+The expected number of neighbors that need to be checked recursively can always be $t\Delta/q$ in the worst case.
 The crucial observation is that even though these recursive calls seem unavoidable,
 we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
 \textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
 
-\begin{wrapfigure}[19]{r}{0.48\textwidth}
-\vspace{-2.3em}
+\todo[inline,color=red!80!green!25]{High Level algorithm.}
+%\begin{wrapfigure}[19]{r}{0.58\textwidth}
+%\vspace{-2.0em}
+\begin{figure}[htpb]
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Checking if proposal is accepted}
     \label{alg:coloring}
     \begin{algorithmic}[1]
         \Procedure{Accepted}{$v, t$}
-            \State {$c\gets\vec C^t_v$}
+            \State {$c\gets\vec C^t_v$} \Comment{\textcolor{Maroon}{Sample the color.}}
             \For{$w \gets \Gamma(v)$}
-                \If {$\vec C_w^t = c$}
+                \If {$\vec C_w^t = c$} \Comment{Check for conflict with neighbor's current proposal}
                     \State \Return $\ZERO$
                 \EndIf
-                \For{$t' \gets [t, t-1, t-2, \cdots, 1]$}
-                    \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)}
-                        \State $flag\gets \ONE$
-                        \While{$t' < t-1$}
-                            \State $t'\gets t' + 1$
-                            \If {\func{Accepted}($w, t'$)}
-                                \State $flag\gets \ZERO$
+                \For{$t' \gets [t, t-1, t-2, \cdots, 1]$} \label{alg:line:iterate_backwards}
+                    \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)} \label{alg:line:check_accepted}
+                        \Comment{Potential conflict with neighbor's color}
+                        \State $overwritten\gets \FALSE$ \Comment{Check if color $c$ was overwritten by a future proposal}
+                        \For{$\widetilde t \gets [t'+1, t'+2, \cdots, t-1]$} \label{alg:line:check_overwritten}
+                            \If {\func{Accepted}($w, \widetilde t$)} \label{alg:line:check_overwritten_recursive}
+                                \State $overwritten\gets \TRUE$
                                 \State \textbf{break}
                             \EndIf
-                        \EndWhile
-                        \If {$flag = \ONE$}
-                            \State \Return $\ZERO$
+                        \EndFor
+                        \If {\textbf{not} $overwritten$}
+                        \State \Return $\ZERO$ \Comment{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict}
                         \EndIf
                         \State \textbf{break}
                    \EndIf
                 \EndFor
             \EndFor
-            \State \Return $\ONE$
+            \State \Return $\ONE$ \Comment{No conflicts! This proposal is accepted} \label{alg:line:no_conflict}
         \EndProcedure
     \end{algorithmic}
 \end{framed}
-\end{wrapfigure}
+\end{figure}
+%\end{wrapfigure}
 Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
 We iterate through all neighbors $w$ of $v$, checking for conflicts.
 The condition $c\not=\vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$.
 If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
-To achieve this, we iterate through all the epochs in reverse order (without making recursive calls)
+To achieve this, we iterate through all the epochs in reverse order (line~\ref{alg:line:iterate_backwards})
 to check whether the color $c$ was ever proposed for vertex $w$.
-If not, we can ignore $w$, and otherwise let's say that the last proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
-Now, we directly ``jump'' to the $t'^{th}$ epoch and recursively check if this proposal was accepted.
-If the proposal $\vec C^{t'}_w$ was not accepted, we keep iterating back until we find another epoch when $c$ was proposed $w$, or we run out of epochs.
-Otherwise if $c$ was accepted i.e. $\bm\chi^{t'}_w = \ONE$,
-we successively consider epochs $t'+1, t'+2, t'+3, \cdots, t-1$ to see whether the color $c$ was replaced by an accepted proposal in a future epoch,
-by recursively invoking $\func{Accepted}(w,t'+i)$ in order to sample $\bm\chi^{t'+i}_w$.
-At this point we have seen that $\bm\chi^{t'}_w = \ONE$ (color $c$ was accepted) and every subsequent proposal until the current epoch was rejected,
-implying that color $c$ \emph{survived}, i.e. $\vec X^{t-1}_w = c$.
-This leads to a conflict with $v$'s current proposal for color $c$ and hence $\bm\chi^t_v = \ZERO$.
-If at any of the iterations, we see that a different proposal was accepted, then $w$ does not cause a conflict and we can move on to the next neighbor.
-If we exhaust all the neighbors and don't find any conflicts then $\bm\chi^t_v = \ONE$.
+If not, we can ignore $w$, and otherwise let's say that the most recent proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
+Now, we directly ``jump'' to the $(t')^{th}$ epoch and recursively check if this proposal was accepted (line~\ref{alg:line:check_accepted}).
+If the proposal $\vec C^{t'}_w$ was not accepted, we keep iterating back in time until we find the next most recent epoch
+when $c$ was proposed by $w$, or until we run out of epochs.
+When we find the most recent epoch $t'$ in which $c$ was accepted i.e. $\bm\chi^{t'}_w = \ONE$,
+we successively consider epochs $t'+1, t'+2, t'+3, \cdots, t-1$ to see whether the color $c$ was overwritten
+(line~\ref{alg:line:check_overwritten}) by an accepted proposal in a future epoch.
+This is done by recursively invoking $\func{Accepted}(w,t'+i)$ in order to compute $\bm\chi^{t'+i}_w$ (line~\ref{alg:line:check_overwritten_recursive}).
+If at any of these subsequent iterations, we see that a different proposal was accepted (thus overwriting the color $c$),
+then neighbor $w$ does not cause a conflict, and we can move on to the next neighbor.
+Otherwise, we have seen that $\bm\chi^{t'}_w = \ONE$ (color $c$ was accepted) and every subsequent proposal until the current epoch $t$ was rejected,
+implying that color $c$ \emph{survived} as the color of neighbor $w$, i.e. $\vec X^{t-1}_w = c$.
+This leads to a conflict with $v$'s current proposal for color $c$ (line~\ref{alg:line:conflict}) and hence $\bm\chi^t_v = \ZERO$.
+If we exhaust all the neighbors and don't find any conflicts (line~\ref{alg:line:no_conflict}) then $\bm\chi^t_v = \ONE$.
+
+\todo[inline,color=red!80!green!25]{Picture?}
 
 Now we analyze the runtime of $\func{Accepted}$ by constructing and solving a recurrence relation.
 We will use the following lemma to evaluate the expectation of products of relevant random variables.
@@ -218,25 +226,37 @@ Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/
 \begin{definition}
 \label{def:coloring_recursions}
 We define $T_t$ to be a random variable indicating the number of recursive calls performed during the execution of $\func{Accepted}(v,t)$
-while sampling a single $\bm \chi_v^t$.
+while computing a single $\bm \chi_v^t$.
 \end{definition}
-So, the number of probes required to check whether a color $c$ (assigned at epoch $t'$) was overwritten at some epoch before $t$ is:
+
+\begin{definition}
+\label{def:blah}
+We define $R^t_{t'}$ to be a random variable indicating the number of calls to \func{Accepted} that are required,
+to check whether a color $c$ assigned at epoch $t'$ was overwritten at some epoch before $t$.
+\end{definition}
+Using $\mathcal B(p)$ to denote the Bernoulli random variable with bias $p$, we obtain an expression for $R^t_{t'}$.
 \begin{align}
 \label{eq:color_overwrite}
-\Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
+R^t_{t'} = \Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
 + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots
 + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]
 \end{align}
+The aforementioned Equation~\ref{eq:color_overwrite} indicates that the call to $\func{Accepted}(v, t'+1)$
+(line~\ref{alg:line:check_overwritten_recursive}) is always invoked (resulting in $T_{t'+1}$ invocations of \func{Accepted}).
+However, the next call to $\func{Accepted}(v, t'+2)$ is invoked only if the previous one was not accepted,
+which occurs with probability at most $1/\alpha$ (Lemma~\ref{lem:color_reject_probability}).
+This gives us the $\mathcal B(1/\alpha)\cdot T_{t'+2}$ term in the expression.
+In general, $\func{Accepted}(v, t'+i)$ is only invoked if the preceding $i-1$ calls to \func{Accepted} all returned $\ZERO$.
+This event happens with probability at most $1/\alpha^{i-1}$.
 
 \begin{lemma}
 \label{lem:coloring_recurrence}
 Given graph $G$ and $q=2\alpha\Delta$ colors, for $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$
-while sampling a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
+while computing a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
 We start with the recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$
 (equivalently calls to $\func{Accepted}$) used by the algorithm.
-We will use $\mathcal B(p)$ to refer to the Bernoulli random variable with bias $p$.
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
 (in reality, only the last occurence matters, but we are looking for an upper bound).
 If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
