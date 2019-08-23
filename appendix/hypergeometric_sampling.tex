@@ -11,7 +11,7 @@ where the distribution is supported by all vectors satisfying $s_k \in \{0, \ldo
 
 The sample $\mathbf{S}^\vec{C}_\ell$ above may be generated easily by simulating the drawing process, but this may take $\Omega(\ell)$ iterations, which have linear dependency in $n$ in the worst case: $\ell = \Theta(B) = \Theta(n)$. Instead, we aim to generate such a sample in $O(r\,\poly(\log n))$ time with high probability. We first make use of the following procedure from \cite{huge}.
 
-\begin{restatable}{lemma}{res:ggn-marble}\label{claim:ggn}
+\begin{restatable}{lemma}{res:ggn-marble}\label{lem:ggn_interval_summable}
 Suppose that there are $T$ marbles of color $1$ and $B-T$ marbles of color $2$ in an urn,
 where $B \leq n$ is even. There exists an algorithm that samples $\langle s_1, s_2 \rangle$,
 the number of marbles of each color appearing when drawing $B/2$ marbles from the urn without replacement,

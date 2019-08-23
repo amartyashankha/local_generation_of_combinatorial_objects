@@ -75,8 +75,9 @@ Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 \subsection{Catalan Trapezoids and Generalized Dyck Paths}
 In order to sample Dyck paths locally, we will need to analyze more general Catalan objects.
 Specifically, we consider a sequence of $U$ up-steps and $D$ down-steps,
-such that any prefix of the sequence with $U'$ up and $D'$ down steps satisfies $U'-D' \ge 1-k$.
+such that any prefix of the sequence containing $U'$ up and $D'$ down steps satisfies $U'-D' \ge 1-k$.
 This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
+Note that the case $k=1$ corresponds to the standard description of Dyck paths, as mentioned previously (Figure~\ref{fig:basic_dyck}).
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/complex_dyck_path.pdf}
@@ -100,12 +101,15 @@ Now, we state a result from \cite{trap} without proof:
 For $k = 1$ and $n=m$, these represent the vanilla Catalan numbers i.e. $C_n = C_1(n,n)$ (number of simple Dyck paths).
 Our goal is to sample from the distribution $\mathsf C_1(n,n)$.
 
-Consider the situation after sampling the height of the Dyck path at various locations $\langle x_1, x_2,\cdots, x_m \rangle$.
-The revealed locations partition the path into disjoint \emph{intervals} $[x_i,x_{i+1}]$ where the heights of the endpoints have been sampled.
-We define $y_i = \func{Height}(x_i)$ and notice that these intervals are independent of each other.
-Specifically, the path in the interval $[x_i, x_{i+1}]$ will be sampled from $\mathsf C_k(U,D)$,
-where $k - 1 = y_i$, $U + D = x_{i+1} - x_i$, and $U-D = y_{i+1} - y_i$, and this happens independent of any samples outside the interval.
-Next, we will show how one can sample heights within such an interval,
+Consider the situation after a sequence of \func{Height} queries to the Dyck path at various locations $\langle x_1, x_2,\cdots, x_m \rangle$,
+such that the corresponding heights were sampled to be $ \langle y_1, y_2,\cdots, y_m \rangle$.
+These revealed locations partition the path into disjoint \emph{intervals} $[x_i,x_{i+1}]$,
+where the heights of the endpoints of each interval have been determined (as $y_i = \func{Height}(x_i)$).
+We notice that these intervals can be sampled independently of each other.
+Specifically, the path within the interval $[x_i, x_{i+1}]$ will be sampled from $\mathsf C_k(U,D)$,
+where $k - 1 = y_i$, $U + D = x_{i+1} - x_i$, and $U-D = y_{i+1} - y_i$.
+Moreover, since the heights of the endpoints $y_i$ and $y_{i+1}$ are known, this choice is independent of any samples outside the interval.
+Next, in Section~\ref{sec:sampling_the_height}, we will show how one can sample heights within such an interval,
 and in Section~\ref{sec:supporting_first_return_queries} we will move on to the more complicated $\func{First-Return}$ queries.
 
 %We also maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
@@ -118,9 +122,9 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 
 \subsection{Sampling the Height}
 \label{sec:sampling_the_height}
-We will implement $\func{Height}(t)$ by showing how to (efficiently) sample the position of the path in the midpoint of an existing interval.
+We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$.
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
-If the interval in question has odd length, we sample one step on the boundary and proceed with a shortened interval.
+If the interval in question has odd length, \textcolor{Maroon}{we sample one step on the boundary}, and proceed with a shortened even length interval.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_height_sampling.pdf}
@@ -134,32 +138,33 @@ If the interval in question has odd length, we sample one step on the boundary a
 
 Our general recursive step is as follows.
 We consider an interval of length $2B$ comprising of $2U$ up-steps and $2D$ down-steps where the sum of any prefix cannot be less than $k-1$
-i.e. this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factors of two makes the analysis cleaner).
-Without loss of generality, we assume that $2D\le B$; if this were not the case, we could simply flip the sequence and negate the elements.
-This essentially means that the overall path in the interval is non-decreasing in height.
+i.e. the path within this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factors of two makes the analysis cleaner).
+Without loss of generality, we assume that $D\le U$; if this were not the case, we could simply flip the interval, and swap the up and down steps.
+This ensures that the overall path in the interval is non-decreasing in height.
 
-We will sample the height of the path $B = U+D$ steps into the interval at the midpoint (see Figure~\ref{fig:dyck_height_sampling}).
+We sample the height of the path $B = U+D$ steps into the interval at the midpoint (see Figure~\ref{fig:dyck_height_sampling}).
 This is equivalent to sampling the number of up or down steps that get assigned to the first half of the interval.
 We parameterize the possibilities by $d$ and define $p_d$ to be the probability that exactly $U+d$ up-steps and $D-d$ down steps
 get assigned to the first half, and therefore the second half gets exactly $U-d$ up steps and $D+d$ down steps.
-\[
+\begin{align}
+\label{eq:height_sampling_probability}
 p_d = \frac{S_{left}(d)\cdot S_{right}(d)}{S_{total}(d)}
-\]
+\end{align}
 Here, $S_{left}(d)$ denotes the number of possible paths in the first half (using $U+d$ up steps)
 and $S_{right}(d)$ denotes the number of possible paths in the second half (using $U-d$ up steps).
 Note that all of these paths have to respect the $k$-boundary constraint (cannot dip more than $k-1$ units below the starting height).
 Moving forwards, we will drop the $d$ when referring to the path counts.
 We (conceptually) flip the second half of the interval,
 such that the corresponding path begins from the end of the $2B$-interval and terminates at the midpoint (Figure~\ref{fig:dyck_height_sampling}).
-This results in a different starting point, and the boundary constraint will also be different.
+This results in a different starting point, and the prefix/boundary constraint will also be different.
 Hence, we define $k' = k + 2U - 2D$  to represent the new boundary constraint (since the final height of the $2B$-interval is $k'-1$).
-Finally, $S_{total}$ is the total number of possible paths in the interval (of length $2B$).
+Finally, $S_{total}$ is the total number of possible paths in the $2B$ interval.
 
-We will use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}, restated from \cite{huge}).
+We will now use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}).
 An important point to note is that in order to apply this lemma, we must be able to compute the $p_d$ values at least approximately.
-For now, we will assume that we have access to an oracle that will compute the value for us.
-Lemma~\ref{lem:probability_approximation_oracle} shows how to construct such an oracle.
-We also use the following lemma to bound the deviation of the path.
+For now, we assume that we have access to an oracle that will compute the value for us.
+Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:dyck_appendix} shows how to construct such an oracle.
+We also use the following lemma to bound the deviation of the path with high probability.
 \begin{restatable}{lemma}{DyckPathDeviationBound}
 \label{lem:DyckPathDeviationBound}
 Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
@@ -167,13 +172,25 @@ where the sub-path is of length $2B$ comprising of $U$ up-steps and $D$ down-ste
 Then there exists a constant $c$ such that the quantities $|B-U|$, $|B-D|$, and $|U-D|$
 are all $<c\sqrt{B\log n}$ with probability at least $1-1/n^2$ for every possible sub-path.
 \end{restatable}
+\textcolor{Maroon}{This lemma allows us to ignore potential midpoint heights that cause a deviation greater than $c \sqrt{B\log n}$}.
+A proof is presented in Section~\ref{sec:dyck_path_boundaries_and_deviations}.
+One implication of Lemma~\ref{lem:DyckPathDeviationBound} is that with high probability,
+the correctly sampled value for $d$ will be $\mathcal O(\sqrt{B\log n})$.
+In other words, The height of the midpoint takes on one of only  $\mathcal O(\sqrt{B\log n})$ distinct values with high probability.
+This immediately suggests a $\tilde{\mathcal O}(\sqrt{B})$ time algorithm for sampling the midpoint height,
+by explicitly computing the probabilities of each of these potential heights, and directly sampling from the resulting distribution.
+However, we can go further and obtain a $\mathcal O(poly(\log n))$ time algorithm.
 
 
 \subsubsection{The Simple Case: Far Boundary}%
 \label{sec:the_simple_case}
+We first consider the case when the boundary constraint is far away from the starting point, i.e. $k$ is large.
+The following lemma (proof in Section~\ref{sec:dyck_path_boundaries_and_deviations}) shows that in this case,
+we can safely \emph{ignore} the constraint.  Intuitively, this is because the boundary is so far away,
+that we do not hit it with high probability even if we choose a random \emph{unconstrained} path.
 \begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
 \label{lem:dyck_path_irrelevant_boundary}
-Given a Dyck path sampling problem of length $B$ with $U$ up and $D$ down steps with a bounary at $k$,
+Given a Dyck path sampling problem of length $B$ with $U$ up and $D$ down steps with a boundary at $k$,
 there exists a constant $c$ such that if $k > c \sqrt{B\log n}$, then the distribution of paths sampled without a boundary $\mathsf C_{\infty}(U,D)$
 (hypergeometric sampling) is statistically $\mathcal O(1/n^2)$-close in $L_1$ distance to the distribution of Dyck paths $\mathsf C_k(U+D)$.
 \end{restatable}
@@ -183,24 +200,33 @@ i.e. the probabilities $p_d$ can be approximated by:
 \[
 q_d = \frac{{{B}\choose{D-d}}\cdot{{B}\choose{D+d}}}{{{2B}\choose{2D}}}
 \]
-This problem of sampling from the hypergeometric distribution is equivalent to the interval summable functions
-implemented in \cite{huge} (using $\mathcal O(poly(\log n))$ resources).
+This problem of sampling from the hypergeometric distribution is implemented using $\mathcal O(poly(\log n))$ resources in \cite{huge}
+%in the context of interval summable functions
+(see Lemma~\ref{lem:ggn_interval_summable} in Section~\ref{sec:multivariate_hypergeometric_sampling}).
+We also used this result earlier in the paper in order to find the community assignments in the Stochastic Block Model.
 
-\subsubsection{Path Segments Close to Zero}
-\label{sec:path_segments_close_to_zero}
-A difficult case is when $k = \mathcal{O}(\sqrt{B\log n})$ and we need to compute the actual probability $p_d$,
-For the definitions in Section~\ref{sec:sampling_the_height}, we see that:
+\subsubsection{The Difficult Case: Intervals Close to Zero}
+\label{sec:the_difficult_case}
+The difficult case is when $k = \mathcal{O}(\sqrt{B\log n})$,
+and the previous approximation due to Lemma~\ref{lem:dyck_path_irrelevant_boundary} no longer works.
+In this case, we cannot just ignore the boundary constraint, and instead we have to analyze the true probability distribution given by $p_d$.
+We obtain an expression for $p_d$ by substituting the formula for generalized Catalan numbers as follows:
+(Equation~\ref{eq:catalan_trapezoid}) into Equation~\ref{eq:height_sampling_probability}.
 \begin{align}
     S_{left} = C_k(U+d,D-d)
     &&S_{right} = C_{k'}(U-d,D+d)
     &&S_{total} = C_k(2U,2D)
 \end{align}
-Here, $k' = k+2U-2D$, and so $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
-The distribution $\mathsf C_k(2U,2D)$ we wish to sample from has probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
-We will use rejection sampling (Lemma~\ref{lem:rejection_sampling}) by constructing a different distribution $q_d$
+Since the right interval is flipped in outr analysis, this changes the prefix/boundary constraint,
+and hence, the expression for $S_{right}$ uses $k' = k+2U-2D$.
+This also implies that $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
+We can now use Equation~\ref{eq:height_sampling_probability} to evaluate the probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
+
+We will invoke the rejection sampling technique (Lemma~\ref{lem:rejection_sampling}), by constructing a different distribution $q_d$
 that approximates $p_d$ up to logarithmic factors over the vast majority of its support
 (we ignore all $|d|>\Theta(\sqrt{B\log n})$ since the associated probability mass is negligible by Lemma~\ref{lem:DyckPathDeviationBound}).
-To invoke the rejection sampling lemma, we present a method to approximate the probabilities $p_d$ in Lemma~\ref{lem:probability_approximation_oracle}.
+In order to perform rejection sampling, we also need good approximations of $p_d$,
+which is acheved by Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:computing_probabilities}.
 The only thing left to do is to find an appropriate $q_d$ that also has an \emph{efficiently computable} $CDF$.
 Surprisingly, as in Section~\ref{sec:the_simple_case}, we will be able to use the hypergeometric distribution for $q_d$,
 \[
@@ -231,12 +257,12 @@ $S_{left} \le c_1 \frac{ k\cdot\sqrt{\log n}}{\sqrt{B}}\cdot{{B}\choose{D-d}}$ f
 
 \begin{restatable}{lemma}{DRightBound}
 \label{lem:DRightBound}
-$S_{right} < c_2 \frac{k'\cdot \sqrt{log n}}{\sqrt{B}}\cdot{{B}\choose{U-d}}$ for some constant $c_2$.
+$S_{right} \le c_2 \frac{k'\cdot \sqrt{log n}}{\sqrt{B}}\cdot{{B}\choose{U-d}}$ for some constant $c_2$.
 \end{restatable}
 
 \begin{restatable}{lemma}{DTotalNearBoundary}
 \label{lem:DTotalNearBoundary}
-When $kk' \le 2U + 1$, $S_{total} < c_3 \frac{k\cdot k'}{B}\cdot{{2B}\choose{2D}}$ for some constant $c_3$.
+When $kk' \le 2U + 1$, $S_{total} \ge c_3 \frac{k\cdot k'}{B}\cdot{{2B}\choose{2D}}$ for some constant $c_3$.
 \end{restatable}
 
 We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log n)$ and invoke Lemma~\ref{lem:rejection_sampling} to sample the value of $d$.
@@ -426,7 +452,7 @@ $d$ up-steps before the first approach to the boundary.
 We will calculate this quantity by counting the total number of paths to the left and right
 of the first approach and multiplying them together.
 
-As in Section~\ref{sec:path_segments_close_to_zero}, we define
+As in Section~\ref{sec:the_difficult_case}, we define
 $S_{left}$ to be the number of paths in the sub-interval before the first approach (left side of Figure~\ref{fig:dyck_mandatory_boundary_sampling}),
 $S_{right}$ to be the number of paths following the first approach,
 and $S_{total}$ to be the total number of paths that touch the ``mandatory boundary'' at $k$

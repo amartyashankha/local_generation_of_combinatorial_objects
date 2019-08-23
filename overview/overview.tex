@@ -23,9 +23,18 @@ provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathbb X$ an
 \end{itemize}
 \end{definition}
 
-\todo[inline,color=red!80!green!25]{Talk about memory}
 In particular, we allow queries to be made adversarially and non-deterministically.
 The adversary has full knowledge of the algorithm's behavior and its past random bits.
+
+\subsection{\textcolor{Maroon}{Memory-less Sampling from Distributions with Huge Description Size}}
+\label{sec:memory_less_sampling_from_distributions_with_huge_description_size}
+We also consider distributions whose description size is too large to be read by a sublinear algorithm.
+Specifically, we consider the uniform distribution over all valid colorings of a given input graph $G$.
+In this setting, we allow access to a uniformly random coloring of $G$,
+by implementing a query $\func{Color}(v)$, which returns the color of a \emph{single vertex} $v$.
+Since $\func{Color}(v)$ has to run in time sublinear in the size of $G$, it is not even possible to read the entire input graph during its execution.
+
+\todo[inline,color=red!80!green!25]{Talk about memory}
 
 \todo[inline,color=red!80!green!25]{Talk about LCA type model and public source of randomness.}
 

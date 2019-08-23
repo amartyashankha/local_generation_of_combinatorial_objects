@@ -215,13 +215,13 @@ we conclude that
 \DTotalNearBoundary*
 \begin{proof}
 Now we bound the term $1-\left(1-\frac{k'}{2U+1}\right)^k$, given that $kk'\le 2U+1\implies\frac{kk'}{2U+1} \le 1$.
-Using Taylor expansion, we see that
+Using Bernoulli's inequality, we know that $(1 - x)^n \le 1/(1+nx)$ for $x\in [0, 1]$ and $n\in \mathbb N$.
+Since the term $k'/(2U+1)$ is positive and $\le 1$ (since $kk' \le 2U+1$), we can apply this as follows:
 \begin{align}
 &1 - \left(1 - \frac{k'}{2U+1}\right)^k\\
-&\le \frac{kk'}{2U+1} - \frac{k(k-1)}{2}\cdot\frac{k'^2}{(2U+1)^2}\\
-&\le \frac{kk'}{2U+1} - \frac{k^2k'^2}{2(2U+1)^2}\\
-&\le \frac{kk'}{2U+1} \left(1 - \frac{kk'}{2(2U+1)}\right)\\
-&\le \frac{kk'}{2(2U+1)} \le \frac{kk'}{\Theta(B)}\\
+&\ge 1 - \frac{1}{1 + \frac{kk'}{2U+1} } = \frac{\frac{kk'}{2U+1}}{1 + \frac{kk'}{2U+1} } = \frac{kk'}{2U+1}\cdot \frac{1}{1 + \frac{kk'}{2U+1}} \\
+&\ge \frac{kk'}{2U+1}\cdot \frac{1}{2} &\left( \textrm{Since }\frac{kk'}{2U+1}\le 1\right) \\
+&\ge \frac{kk'}{\Theta(B)}
 \end{align}
 \end{proof}
 
