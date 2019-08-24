@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{413.31419356bp}%
+    \setlength{\unitlength}{462.81428615bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,11 +50,11 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.24972034)%
+  \begin{picture}(1,0.22301162)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{dyck_first_approach_sampling.pdf}}%
-    \put(-0.06410536,0.61741669){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{0.67638546\unitlength}\raggedright \end{minipage}}}%
+    \put(0.07239271,0.55138117){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{0.60404296\unitlength}\raggedright \end{minipage}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{dyck_first_approach_sampling.pdf}}%
   \end{picture}%
 \endgroup%

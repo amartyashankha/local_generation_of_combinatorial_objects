@@ -1,6 +1,5 @@
 \section{Sampling Random Catalan Objects}%
 \label{sec:catalan_objects}
-%\todo{Thresholding.}
 %\todo{Mention that this is imperfect sampling (close impl.)}
 %Earlier, we were interested in querying the following random object.
 %In a random permutation of $n$ white marbles and $n$ black marbles, how many white marbles are present in the first $k$ positions.
@@ -403,7 +402,8 @@ First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_
 We will refer to $h$ as the \emph{``mandatory boundary''} in this interval;
 i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
-Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps with a boundary that is $k-1$ units below $y_i$.
+Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps and a boundary that is $k-1$ units below $y_i$.
+\todo[inline,color=red!80!green!25]{Picture?}
 \begin{wrapfigure}[16]{R}{0.496\textwidth}
 \vspace{-3.0em}
 \begin{framed}
@@ -433,7 +433,7 @@ Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ d
 \end{framed}
 \end{wrapfigure}
 
-Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper}$),
+Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper} \le y_i$),
 we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as:
 \[
 P_{k_{lower}}^{k_{upper}} = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)
@@ -465,8 +465,9 @@ We will parameterize the position $x$ the number of up-steps $d$ between $x_i$ a
 implying that $x = x_{i} + 2d + k - 1$.
 Given a specific $d$, we want to compute the number of valid paths that result in
 $d$ up-steps before the first approach to the boundary.
-We will calculate this quantity by counting the total number of paths to the left and right
-of the first approach and multiplying them together.
+Note that unlike Section~\ref{sec:sampling_the_height}, $d$ is used here to parameterize the (horizontal) $x$-position of the desired point.
+We will calculate the probability $p_d$ associated with a particular position
+by counting the total number of paths to the left and right of the first approach and multiplying them together.
 
 As in Section~\ref{sec:the_difficult_case}, we define
 $S_{left}$ to be the number of paths in the sub-interval before the first approach (left side of Figure~\ref{fig:dyck_mandatory_boundary_sampling}),
@@ -484,8 +485,9 @@ The application of Lemma~\ref{lem:rejection_sampling} requires us to approximate
 with a ``well behaved'' $\{q_d\}$ (one whose CDF can be efficiently estimated).
 Since we only require a asymptotic (up to $\poly(\log n)$ factors) approximation to $\{p_d\}$,
 it suffices to estimate the number of paths asymptotically as well.
-Using Equation~\ref{eq:catalan_trapezoid}, we obtain the following approximations for $S_{left}$ and $S_{right}$
-(proofs in Section~\ref{sec:omitted_supporting_first_return_queries}).
+Using Equation~\ref{eq:catalan_trapezoid}, we obtain approximations for $S_{left}$ and $S_{right}$
+(Lemma~\ref{lem:ReturnDLeftBound} and Lemma~\ref{lem:ReturnDRightBound} with proofs in Section~\ref{sec:omitted_supporting_first_return_queries}).
+Our general strategy will be to integrate continuous versions of these approximations in order to obtain a CDF of some approximating distribution.
 \begin{restatable}{lemma}{ReturnDLeftBound}
 \label{lem:ReturnDLeftBound}
 If $d > \log^4 n$, then $S_{left}(d)
@@ -502,11 +504,19 @@ where $r_{right}(d) = \frac{(U-D-k-1)^2}{4(U+D-2d-k+1)}$.
 Furthermore, $r_{right}(d)=\mathcal O(\log^2 n)$.
 \end{restatable}
 
-We now consider the values of $d$ that are outside the range of the two preceding lemmas.
+Unfortunately, these continuous approximation functions obtained do not admit closed form integrals.
+The main culprit is the exponential term in both expressions.
+We tackle this issue by noticing that the values of the exponents are bounded by $\mathcal O(\log^2 n)$ over the majority of the range of $d$.
+Within this range of $d$ values, the approximating functions may be further simplified by taking a piecewise linear approximation,
+where each of the pieces corresponds to a fixed value of the \emph{floor of the corresponding exponent}.
+This technique is elaborated in Section~\ref{sec:estimating_the_cdf}.
+
+We now consider the \emph{``problematic''} values of $d$ that are outside the range of the two preceding lemmas.
 These values are the ones where $d < \log^4 n$ or $2d > U+D-k-\log^4 n$.
-Since $d$ is the number of up steps in the left sub-interval, $d \ge 0$
-and since the length of the right sub-interval nust be non-negative (see Figure~\ref{fig:dyck_mandatory_boundary_sampling}), we get $U+D-2d-k+1 \ge 0$.
-Thus, we define the set
+Since $d$ is the number of up steps in the left sub-interval, $d \ge 0$.
+Further, since the length of the right sub-interval nust be non-negative (see Figure~\ref{fig:dyck_mandatory_boundary_sampling}),
+we get $U+D-2d-k+1 \ge 0$.
+Thus, we define the \emph{``problematic''} set:
 \begin{align}
 \label{eq:SetDefinition}
     \mathcal R = \left\{ d\ \mathlarger|\ 0\le d < \log^4 n \textrm{\textbf{\ or\ }} -1 < 2d-U-D+k < \log^4 n \right\}
@@ -527,10 +537,14 @@ where $r(d)=\mathcal O(\log^2 n)$.
 \subsubsection{Estimating the CDF}
 \label{sec:estimating_the_cdf}
 We use these observations to construct a suitable $\{q_d\}$ that can be used to invoke the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}).
-This is achieved by constructing a piecewise continuous function $\hat q$, such that $\hat q(\delta)$ approximates $p_{\floor\delta}$,
-and then using the integral of $\hat q$ to define $q_d$.
-%In addition to being a good approximation to $\{ p_d\}$, $\{ q_d\}$ must be of a form that allows us to compute its CDF efficiently.
-First, we rewrite $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)$ where:
+We will achieve this by constructing a piecewise continuous function $\hat q$,
+such that $\hat q(\delta)$ approximates $p_{\floor\delta}$, and then use the integral of $\hat q$ to define the discrete distribution $\{q_d\}$.
+As stated in the previous section, we can leverage the fact that when $d \not \in \mathcal R$,
+the floor of the exponent $\floor{r(d)}$ only takes $\mathcal O(\log^2 n)$ distinct values
+(consequence of Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized}).
+Since the ``problematic'' set $\mathcal R$ only has $\mathcal O(\log^4 n)$ values,
+we can also deal with these remaining values by simply creating $|\mathcal R|$ additional continuous pieces in the function $\hat q$.
+We begin by rewriting $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)$ where:
 {\small
     \begin{align}
     \label{eq:dyck_integrable_function}
@@ -538,7 +552,8 @@ First, we rewrite $p_d = \Theta\left(\mathcal K \cdot f(d)\cdot e^{-r(d)}\right)
         &&f(d) = \frac{(k-1)(U-D+k)}{\sqrt{d(U+D-2d-k)}(d+k-1)(U-d+1)}
     \end{align}}
 Notice that $\mathcal K$ is a constant and $f(d)$ is a function whose integral has a closed form.
-Using the fact that $r(d) = \mathcal O(\log^2 n)$ (from Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized}), we obtain the following lemma:
+Using the fact that $r(d) = \mathcal O(\log^2 n)$ (Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized}),
+and $|\mathcal R| = \mathcal O(\log^4 n)$, we obtain the following lemma:
 
 \begin{lemma}
 \label{lem:ReturnProbabilityPiecewiseContinuous}
@@ -560,14 +575,14 @@ Furthermore, $\hat q(\delta)$ has $\mathcal O(\log^4 n)$ continuous pieces.
 For $d \in \mathcal R$, the integral trivially evaluates to exactly $p_d$.
 For $d\not\in \mathcal R$, it suffices to show that $p_d = \Theta\left( \hat q(\delta)\right)$ for all $\delta\in [d,d+1)$.
 We already know that $p_d = \Theta\left( \mathcal K\cdot f(d)\cdot e^{-r(d)}\right)$.
-Moreover, for any $\delta\in [d,d+1)$, the exponential term $e^{-\floor{r(\floor\delta)}}$ in $\hat q(\delta)$ is within a factor of $e$ of the original $e^{-r(d)}$ term.
+Moreover, for any $\delta\in [d,d+1)$, the exponential term $e^{-\floor{r(\floor\delta)}}$ in $\hat q(\delta)$
+is within a factor of $e$ of the original $e^{-r(\floor\delta)}$ term.
 
 For all $\mathcal O(\log^4 n)$ values $d\in \mathcal R$, $\hat q(\delta)$ is constant on the interval $[d,d+1]$.
 Since $r(d) = \mathcal O(\log^2 n)$ by Corollary~\ref{cor:ReturnProbabilityBoundNotNormalized},
 the exponential term $e^{-\floor{r(\floor\delta)}}$ in $\hat q(\delta)$ taken on at most $\mathcal O(\log^2 n)$ values.
 Thus, $\hat q$ is continuous for a range of $\delta$ correspoding to a fixed value of $\floor{r(\floor\delta)}$,
-and so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log n)$ pieces.
-so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log n)$ pieces.
+and so, we conclude that $\hat q$ is piecewise continuous with $\mathcal O(\log^2 n)$ pieces.
 \end{proof}
 
 Now, we have everything in place to define the distribution $\{ q_d\}$ that we will be sampling from.
@@ -588,6 +603,10 @@ Given the function $\hat q_d$ defined in Lemma~\ref{lem:ReturnProbabilityPiecewi
 it is possible to compute the integral $\int_{d_1}^{d_2+1} \hat q(\delta)$ in $\poly(\log n)$ time for any valid $d_1, d_2\in \mathbb Z$
 (the bounds must be such that $d_i \ge 0$ and $U+D-2d_i-k+1 \ge 0$).
 \end{lemma}
+\begin{proof}
+\todo[inline,color=red!80!green!25]{Talk about large numbers.}
+\end{proof}
+
 
 Now, we are finally ready to use Lemma~\ref{lem:rejection_sampling} to sample $d$ from the distribution $\{p_d\}$,
 using the efficient sampling procedure for $\{q_d\}$.
@@ -603,16 +622,27 @@ using $\poly(\log n)$ time, random bits, and additional space.
 
 
 
+\todo[inline,color=red!80!green!25]{Computing $\mathcal K$ and the integrals of $f(d)$}
 \subsubsection{Finding the Correct Interval: $\func{First-Return}$ Query}
 \label{sec:finding_the_correct_interval}
-
 As before, consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
 along with their corresponding heights $ \langle y_1, y_2,\cdots, y_m \rangle$.
+We wish to find the first return to height $y_i$ after $x_i$ (where $y_i = \func{Height}(x_i)$).
+Our strategy begins by using Invariant~\ref{inv:boundary_invariant} to find the interval $\mathcal I = [x_k, x_{k+1}]$
+containing $\func{First-Return}(x_i)$.
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{images/dyck_finding_correct_interval.pdf}
+    \caption{
+    \todo[inline,color=red!80!green!25]{Caption}
+    }
+    \label{fig:dyck_finding_correct_interval}
+\end{figure}
 \begin{restatable}{lemma}{FirstReturnInterval}
 \label{lem:first_return_interval}
 For any position $x_i$, assuming that Invariant~\ref{inv:boundary_invariant} holds,
-we can find the interval $(x_{k-1},x_{k}]$ that contains $\func{First-Return}(x_i)$
-We do this by by setting $k$ to be either the smallest index $f>i$ such that $y_f\le y_i$ or setting $k=i+1$.
+the interval $(x_{k-1},x_{k}]$ containing $\func{First-Return}(x_i)$ is obtained
+by setting $k$ to be either the smallest index $f>i$ such that $y_f\le y_i$ or setting $k-1=i$.
 \end{restatable}
 \begin{proof}
 We assume the contrary i.e. there exists some $k\not=f$ and $k\not=i+1$ such that the correct interval is $(x_{k-1},x_k]$.
@@ -623,8 +653,8 @@ Invariant~\ref{inv:boundary_invariant} implies that the boundary for this interv
 So, it is not possible for the first return to be in this interval.
 \end{proof}
 
-The good news is that there are only two intervals that we need to worry about.
-Now, the challenge is to find the smallest index $f>i$ such that $y_f\le y_i$.
+The good news is that there are only two intervals that we need to worry about, one of which is just the adjacent one $[x_i, x_{i+1}]$.
+The problem of finding the other interval that may contain the first return boils down to finding the smallest index $f>i$ such that $y_f\le y_i$.
 To this end, we define $M_{[a,b]}$ as the minimum sampled height in the range of positions $[a,b]$.
 %(lowest $y$-value) of any sampled boundary in the range of positions $[a,b]$ along the Dyck path.
 
@@ -668,9 +698,13 @@ by answering queries of the form \func{First-Return}$(x_i)$ with the correctly s
 where $y>x_i$ is the position where the Dyck path first returns to $\func{Height}(x_i)$ after position $x_i$.
 \end{theorem}
 \begin{proof}
-We first query the interval $(x_i,x_{i+1}]$ to find a first return using Theorem~\ref{thm:first_return_in_interval}.
-If a return is not found, we calculate $f$ using the range tree data structure described above.
-Since $x_{f-1}<x_i\le x_f$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $y_i$.
+In order to make the presentation simpler, we ensure that the next determined position after $x_i$ is $x_i+1$ (i.e. $x_{i+1} = x_i + 1$).
+This can be done by invoking $\func{Height}(x_i+1)$, if it has not been sampled already.
+If $\func{Height}(x_i+1) = y_{i+1} < y_i$, we can terminate because $\func{First-Return}(x_i)$ is not defined.
+Otherwise, we notice that in this setting, the first return cannot lie in the adjacent interval $[x_i,x_{i+1}] = [x_i, x_i+1]$.
+
+Hence, we proceed to finding the smallest value $f$ such that $y_f < y_i$, by using the range tree data structure described above.
+Since $\func{Height}(x_{f-1}) \ge y_i > \func{Height}(x_f)$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $y_i$.
 We sample a point in the middle of this interval and fix the boundary invariant by sampling another point,
 essentially breaking it up into $\mathcal O(1)$ sub-intervals each at most half the size of the original.
 Based on the new samples, we again find the (newly created) sub-interval containing the first return in $\mathcal O(1)$ time.
