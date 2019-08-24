@@ -218,7 +218,7 @@ We obtain an expression for $p_d$ by substituting the formula for generalized Ca
     &&S_{right} = C_{k'}(U-d,D+d)
     &&S_{total} = C_k(2U,2D)
 \end{align}
-Since the right interval is flipped in outr analysis, this changes the prefix/boundary constraint,
+Since the right interval is flipped in our analysis, this changes the prefix/boundary constraint,
 and hence, the expression for $S_{right}$ uses $k' = k+2U-2D$.
 This also implies that $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
 We can now use Equation~\ref{eq:height_sampling_probability} to evaluate the probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
@@ -385,14 +385,22 @@ This proceeds as follows for some violating interval $[x_i, x_{i+1}]$ (example v
 \end{enumerate}
 The sample $\func{Height}(x)$ results in two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
 Since $h = \func{Height}(x)$ has been determined to be the minimum height in the overall range $[x_i, x_{i+1}]$,
-the invariant is preserved in the new intervals.
-Lemma~\ref{lem:first_return_interval} shows how this invariant can help us efficiently search for the interval containing the first return.
+the invariant is preserved in the new intervals (see Figure~\ref{fig:dyck_invariant_preserve}).
+Lemma~\ref{lem:first_return_interval} in Section~\ref{sec:finding_the_correct_interval}
+shows how this invariant can help us efficiently search for the interval containing the first return.
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{images/dyck_invariant_preserve.pdf}
+    \caption{An interval $[x_i, x_{i+1}]$ that violates the invariant is ``fixed'' by first sampling the lowest height $h$ achieved within the interval,
+    and then sampling a position $x\in [x_i, x_{i+1}]$ such that $Height(x) = h$.}
+    \label{fig:dyck_invariant_preserve}
+\end{figure}
 
 
 \subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}
 \label{sec:sampling_the_lowest_achievable_height}
 First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$).
-We will also refer to $h$ as the \emph{``mandatory boundary''} in this interval;
+We will refer to $h$ as the \emph{``mandatory boundary''} in this interval;
 i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
 Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps with a boundary that is $k-1$ units below $y_i$.
@@ -596,6 +604,8 @@ using $\poly(\log n)$ time, random bits, and additional space.
 
 
 \subsubsection{Finding the Correct Interval: $\func{First-Return}$ Query}
+\label{sec:finding_the_correct_interval}
+
 As before, consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
 along with their corresponding heights $ \langle y_1, y_2,\cdots, y_m \rangle$.
 \begin{restatable}{lemma}{FirstReturnInterval}
