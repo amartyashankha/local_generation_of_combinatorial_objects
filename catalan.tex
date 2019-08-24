@@ -343,6 +343,7 @@ In case of trees, this would correspond to a leaf which has no children.
 
 \subsubsection{Maintaining a Boundary Invariant}
 \label{sec:maintaining_a_boundary_invariant}
+\todo[inline,color=red!80!green!25]{How does this affect \func{Height} queries?}
 Notice that after performing a set of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
 many different positions are revealed (possibly in adverserial locations).
 This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with known boundary conditions.
@@ -374,14 +375,17 @@ How can one maintain such an invariant?
 After sampling the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
 We re-establish the invariant by sampling an additional point on either side.
-This proceeds as follows for some violating interval $[x_i, x_{i+1}]$
-(example violation in Figure~\ref{fig:dyck_boundary_invariant}):
+This proceeds as follows for some violating interval $[x_i, x_{i+1}]$ (example violation in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
-    \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ (see Section~\ref{sec:sampling_the_lowest_achievable_height}).
-    \item Sample a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
+    \item \textcolor{Maroon}{Sample} the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ according to
+    the uniform distribution over all possible paths that respect the current boundary constraint
+    (see Section~\ref{sec:sampling_the_lowest_achievable_height}).
+    \item \textcolor{Maroon}{Sample} an intermediate position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
     (see Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
 \end{enumerate}
-Since $h$ is the minimum height in this interval, sampling $\func{Height}(x)$ suffices to preserve the invariant.
+The sample $\func{Height}(x)$ results in two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
+Since $h = \func{Height}(x)$ has been determined to be the minimum height in the overall range $[x_i, x_{i+1}]$,
+the invariant is preserved in the new intervals.
 Lemma~\ref{lem:first_return_interval} shows how this invariant can help us efficiently search for the interval containing the first return.
 
 
