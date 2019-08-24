@@ -122,7 +122,8 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 
 \subsection{Sampling the Height}
 \label{sec:sampling_the_height}
-We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$.
+We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
+(where the heights of the endpoitns are $y_i$ and $y_{i+1}$).
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
 If the interval in question has odd length, \textcolor{Maroon}{we sample one step on the boundary}, and proceed with a shortened even length interval.
 \begin{figure}[htpb]
@@ -136,6 +137,7 @@ If the interval in question has odd length, \textcolor{Maroon}{we sample one ste
     \label{fig:dyck_height_sampling}
 \end{figure}
 
+\todo[inline,color=red!80!green!25]{What if U and D are not even?}
 Our general recursive step is as follows.
 We consider an interval of length $2B$ comprising of $2U$ up-steps and $2D$ down-steps where the sum of any prefix cannot be less than $k-1$
 i.e. the path within this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factors of two makes the analysis cleaner).
@@ -152,7 +154,7 @@ p_d = \frac{S_{left}(d)\cdot S_{right}(d)}{S_{total}(d)}
 \end{align}
 Here, $S_{left}(d)$ denotes the number of possible paths in the first half (using $U+d$ up steps)
 and $S_{right}(d)$ denotes the number of possible paths in the second half (using $U-d$ up steps).
-Note that all of these paths have to respect the $k$-boundary constraint (cannot dip more than $k-1$ units below the starting height).
+Note that all of these paths have to respect the $k$-boundary constraint (cannot dip more than $k-1$ units below the starting height), where $k=y_i+1$.
 Moving forwards, we will drop the $d$ when referring to the path counts.
 We (conceptually) flip the second half of the interval,
 such that the corresponding path begins from the end of the $2B$-interval and terminates at the midpoint (Figure~\ref{fig:dyck_height_sampling}).
@@ -313,7 +315,6 @@ We then binary search by updating either the successor or predecessor of $x$ and
 
 \subsection{Supporting ``First Return'' Queries}%
 \label{sec:supporting_first_return_queries}
-
 In this section, we show how to implement more complex queries to a Dyck path.
 Specifically, we introduce $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$ (if at all).
 The utility of this kind of query can be seen through other random Catalan objects.
@@ -342,7 +343,6 @@ In case of trees, this would correspond to a leaf which has no children.
 
 \subsubsection{Maintaining a Boundary Invariant}
 \label{sec:maintaining_a_boundary_invariant}
-\todo[inline,color=red!80!green!25]{How does this affect \func{Height} queries?}
 Notice that after performing a set of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
 many different positions are revealed (possibly in adverserial locations).
 This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with known boundary conditions.
@@ -596,15 +596,54 @@ Specifically, we will define $q_d$ and it's CDF $Q_d$ as follows ($\mathcal N$ i
 %Here the normalizing factor $\mathcal N$ is $\int_0^{d_{max}+1} \hat q(\delta)$.
 To show that these can be computed efficiently, it suffices to show that any integral of $\hat q(\delta)$ can be efficiently evaluated.
 This follows from the fact that $\hat q$ is piecewise continuous with $\mathcal O(\log^4)$ pieces (Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous}),
-each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{eq:dyck_integrable_function} has an integral), thus yielding:
+each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{eq:dyck_integrable_function} has an integral).
+
+%However, we also need to be able to compute the constant $\mathcal K = 2^{U+D} = 2^{U+D}S_{total}$.
+%The issue is that this value could be too large to compute.
+%We mitigate this by fixing a threshold $\mathcal T = \Theta(\log^4 n)$, and ensuring that $U+D > \mathcal T$.
+%In the case that $U+D \le \mathcal T$, we directly compute the $p_d$ values, and sample from the explicit distribution.
+%Otherwise, we obtain the following lemma:}
+%\begin{lemma}
+%\label{lem:ReturnProbabilityConstant}
+%If $U+D > \Theta(\log^4 n)$, the quantity $\mathcal K = 2^{U+D} = 2^{U+D}S_{total}$ is bounded \todo[inline]{finish}
+%and can be computed efficiently.
+%\end{lemma}
+%\begin{proof}
+%First, notice that $S_{total} = C_k(U,D) - C_{k-1}(U,D)$ is the number of paths with $U$ up steps and $D$ down steps with a boundary at $k$
+%First, we compute a $\left( 1\pm 1/n^2\right)$ multiplicative approximation to $\log_2 S_{total}$,
+%by using the strategy in Lemma~\ref{lem:probability_approximation_oracle} (Section~\ref{sec:computing_probabilities}).
+%Now, we claim that 
+%\end{proof}
+
 \begin{lemma}
 \label{lem:ReturnProbabilityPiecewiseContinuousIntegral}
 Given the function $\hat q_d$ defined in Lemma~\ref{lem:ReturnProbabilityPiecewiseContinuous},
-it is possible to compute the integral $\int_{d_1}^{d_2+1} \hat q(\delta)$ in $\poly(\log n)$ time for any valid $d_1, d_2\in \mathbb Z$
-(the bounds must be such that $d_i \ge 0$ and $U+D-2d_i-k+1 \ge 0$).
+it is possible to approximate the integral $\int_{d_1}^{d_2+1} \hat q(\delta)$ to a multiplicative factor of $\left( 1\pm \frac{1}{n^2} \right)$,
+in $\poly(\log n)$ time for any valid $d_1, d_2\in \mathbb Z$ (the bounds must be such that $d_i \ge 0$ and $U+D-2d_i-k+1 \ge 0$).
 \end{lemma}
 \begin{proof}
-\todo[inline,color=red!80!green!25]{Talk about large numbers.}
+We will compute the integral by splitting it up into $\mathcal O(\log^4 n)$ continuous pieces and then approximating the integral over each piece.
+The pieces corresponding to values of $\delta$ where $\floor\delta\in \mathcal R$
+are explicitly computed as $p_d = \int\limits_d^{d+1} \hat q(\delta)$.
+We can do this using Lemma~\ref{lem:probability_approximation_oracle} from Section~\ref{sec:computing_probabilities}.
+
+Otherwise, if $\floor\delta\not\in \mathcal R$, we consider a range of values $[d_{min}, d_{max}]\subseteq [d_1, d_2+1]$,
+such that for any $d\in [d_{min}, d_{max}]$, the value of $\floor{r(\floor{d})}$ is a constant $E$.
+Recall that we can also compute a $\left( 1\pm 1/n^3\right)$ multiplicative approximation to $\ln \mathcal K = \ln 2\cdot(U + D) - \ln S_{total}$,
+by using the strategy in Lemma~\ref{lem:probability_approximation_oracle} (Section~\ref{sec:computing_probabilities}).
+Finally, we can compute $F = \int\limits_{d_{min}}^{d_{max}} f(\delta)$.
+Now, the logarithm of the integral is be written as:
+\[
+\ln\left( \int\limits_{d_{min}}^{d_{max}} \hat q(\delta)\right) = \ln \left( \mathcal K\cdot E\cdot F\cdot\right)
+= \ln 2\cdot(U + D) - \ln S_{total} + \ln E + \ln F
+\]
+If this value is smaller than $-3\ln n$, we can safely ignore it since it contrbuted less than $1/n^3$ to the probability mass.
+On the flipside, the logarithm is guaranteed to be bounded by $\mathcal O(1)$.
+The upper bound is a result of the fact that $\int \hat q(\delta) = \Theta(\sum p_d) = \mathcal O(1)$,
+where both the sum and the integral are taken over the entire \emph{valid} range of $d$.
+This means that we can exponentiate to obtain the true value of the piecewise integral up to a multiplicative approximation of $(1\pm 1/n^3)$.
+Adding all the $\mathcal O(\log^4 n)$ pieces together produces the desired value of the integral.
+\todo[inline,color=red!80!green!25]{Fix issues in this proof}
 \end{proof}
 
 
@@ -622,7 +661,6 @@ using $\poly(\log n)$ time, random bits, and additional space.
 
 
 
-\todo[inline,color=red!80!green!25]{Computing $\mathcal K$ and the integrals of $f(d)$}
 \subsubsection{Finding the Correct Interval: $\func{First-Return}$ Query}
 \label{sec:finding_the_correct_interval}
 As before, consider all positions that have been queried already $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order)
@@ -633,8 +671,8 @@ containing $\func{First-Return}(x_i)$.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_finding_correct_interval.pdf}
-    \caption{
-    \todo[inline,color=red!80!green!25]{Caption}
+    \caption{There are only two possible intervals (yellow boxes) that could contain $\func{First-Return}(x_i)$;
+    either the interval adjacent to $x_i$, or the interval $[x_{f-1}, x_f]$, where $f$ is the smallest index such that $y_f < x_i$.
     }
     \label{fig:dyck_finding_correct_interval}
 \end{figure}
@@ -713,3 +751,17 @@ We repeat up to $\mathcal O(\log n)$ times, performing binary search to find the
 %We repeat up to $\mathcal O(\log n)$ times until the current interval size drops below the threshold $\mathcal T$.
 %Then we spend $\widetilde{\mathcal O}(\mathcal T)$ time to brute force sample this interval and find the first return position (if it wasn't revealed in previous steps).
 \end{proof}
+
+\subsubsection{Maintaining \func{Height} Queries under Invariant~\ref{inv:boundary_invariant}}
+\label{sec:maintaining_height_queries_under_invariant}
+Finally, we show that the boundary constraints introduced in order to maintain Invariant~\ref{inv:boundary_invariant}
+do not interfere with the implementation of \func{Height} queries.
+As before, we consider the currently revealed heights $ \langle y_1, y_2,\cdots, y_m \rangle$,
+along with the corresponding positions $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order).
+Say that we are now presented with a a query $\func{Height}(x)$, where $x_i < x < x_{i+1}$.
+As in Section~\ref{sec:sampling_the_height}, we swap $x_i$ and $x_{i+1}$ if necessary in order to ensure that $y_i < y_{i+1}$.
+Due to Invariant~\ref{inv:boundary_invariant}, we know that the lowest achievable height in the interval $[x_i, x_{i+1}]$ is $y_i$,
+i.e. the boundary constraint for the left half becomes $k = 1$ instead of $k = y_i + 1$, since the constrained boundary is at height $y_i$.
+Similarly, the boundary constraint for the right half becomes $k' = 2U - 2D + 1$.
+The rest of the algorithm can proceed as described in Section~\ref{sec:sampling_the_height}.
+Of course, in this scenario, the boundary is never far away, and therefore we should always use the strategy in Section~\ref{sec:the_difficult_case}.
