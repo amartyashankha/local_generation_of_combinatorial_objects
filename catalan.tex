@@ -10,6 +10,7 @@
 %and saw that this could also be implemented efficiently.
 %Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
 %\todo{Connect with previous part on SBM}
+\todo[inline,color=red!80!green!25]{$S_{left}$ etc are too large to compute, but we can approximate teh ratios.}
 
 In the previous Section~\ref{sec:application_sbm} on the Stochastic Block Model, we considered random sequences of colored marbles.
 Next, we focus on an important variant of these sequences as Catalan objects, which impose a global constraint on the types of allowable sequences.
@@ -221,28 +222,33 @@ Since the right interval is flipped in outr analysis, this changes the prefix/bo
 and hence, the expression for $S_{right}$ uses $k' = k+2U-2D$.
 This also implies that $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
 We can now use Equation~\ref{eq:height_sampling_probability} to evaluate the probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
+Recall that $p_d = S_{left}(d)\cdot S_{right}(d)/S_{total}(d)$, where $S_{left}$ and $S_{right}$ are the number of possible paths
+in the left and right half of the interval respectively, when exactly $U+d$ up steps are assigned to the first half.
+$S_{total}$ is the total number of possible paths in the interval.
 
 We will invoke the rejection sampling technique (Lemma~\ref{lem:rejection_sampling}), by constructing a different distribution $q_d$
 that approximates $p_d$ up to logarithmic factors over the vast majority of its support
 (we ignore all $|d|>\Theta(\sqrt{B\log n})$ since the associated probability mass is negligible by Lemma~\ref{lem:DyckPathDeviationBound}).
 In order to perform rejection sampling, we also need good approximations of $p_d$,
 which is acheved by Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:computing_probabilities}.
-The only thing left to do is to find an appropriate $q_d$ that also has an \emph{efficiently computable} $CDF$.
+Next, we define an appropriate $q_d$ that approximates $p_d$ and also has an \emph{efficiently computable} $CDF$.
 Surprisingly, as in Section~\ref{sec:the_simple_case}, we will be able to use the hypergeometric distribution for $q_d$,
 \[
-q_d = \frac{{B\choose D-d}\cdot{B\choose D+d}}{{2B\choose 2D}} = \frac{{B\choose D-d}\cdot{B\choose U-d}}{{2B\choose 2D}}
+q_d \equiv \frac{{B\choose D-d}\cdot{B\choose D+d}}{{2B\choose 2D}} = \frac{{B\choose D-d}\cdot{B\choose U-d}}{{2B\choose 2D}}
 \]
 However, the argument for why this $q_d$ is a good approximation to $p_d$ is far less straightforward.
 
 First, we consider the case where $k\cdot k'\le 2U+1$.
-In this case, we use loose bounds for $S_{left} < \binom{B}{D-d}$ and $S_{right} < \binom{B}{U-d}$
-along with the following lemma (proven in Section~\ref{sec:dyck_appendix}).
+In this case, we use loose bounds for $S_{left} < \binom{B}{D-d}$ and $S_{right} < \binom{B}{U-d}$.
+The preceding upper bounds hold because $\binom{B}{D-d}$ and $\binom{B}{U-d}$ are the total number of \emph{unconstrained} paths
+in the left and right half respectively, and adding the boundary constraint can only reduce the number of paths.
+We also prove the following lemma in Section~\ref{sec:dyck_appendix} to bound the value of $S_{right}$.
 \begin{restatable}{lemma}{DTotalFarBoundary}
 \label{lem:DTotalFarBoundary}
 When $kk' > 2U + 1$, $S_{total} > \frac 12\cdot \binom{2B}{2D}$.
 \end{restatable}
 
-Combining the three bounds we obtain $p_d < \frac 12 q_d$.
+Combining the three bounds, we conclude that $p_d < \frac 12 q_d$.
 Intuitively, in this case the Dyck boundary is far away, and therefore the number of possible paths
 is only a constant factor away from the number of unconstrained paths (see Section~\ref{sec:the_simple_case}).
 The case where the boundaries are closer (i.e. $k\cdot k' \le 2U+1$) is trickier,
@@ -270,9 +276,9 @@ This gives us the height of the Dyck path at the midpoint of the two given point
 
 \begin{theorem}
 \label{thm:dyck_midpoint_sampling}
-Given two positions $a$ and $b$ (and the associated heights) in a Dyck path of length $2n$
+Given two positions $a$ and $b$ (and the associated heights) in a Dyck path of length $2n$,
 with the guarantee that no position between $a$ and $b$ has been sampled yet,
-there is an algorithm that returns the height of the path halfway between $a$ and $b$.
+there is an algorithm that returns the height of the path at the midpoint of $a$ and $b$ (or next to the midpoint if $b-a$ is odd).
 Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
 \end{theorem}
 \begin{proof}
@@ -315,10 +321,8 @@ The utility of this kind of query can be seen through other random Catalan objec
 For instance, if we consider a random well bracketed expression, $\func{First-Return}(x)$ is the position of the bracket matching the $x^{th}$ one.
 If we consider a random rooted tree,
 $\func{First-Return}$ corresponds to the next child of a vertex (see Section~\ref{sec:bijections_to_other_catalan_objects}).
-An important caveat here is that we do not consider first returns in the case that the step from $x$ to $x+1$ is an down-step.
-Of course, we could solve the same problem by flipping it upside down,
-but the aforementioned correspondence to other Catalan objects only requires the ability to sample first returns from ``above''
-(see Figure~\ref{fig:dyck_tree_bijection}).
+An important detail here is that if the first step from $x$ to $x+1$ is an down-step, there is no well defined ``\func{First-Return}''.
+In case of trees, this would correspond to a leaf which has no children.
 
 %We will use the following asymptotic formula for \emph{close-to-central} binomial coefficients
 %which will allow us the approximate the probabilities in Section~\ref{sec:estimating_the_cdf}.
@@ -339,17 +343,17 @@ but the aforementioned correspondence to other Catalan objects only requires the
 
 \subsubsection{Maintaining a Boundary Invariant}
 \label{sec:maintaining_a_boundary_invariant}
-Notice that over a sequence of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
+Notice that after performing a set of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
 many different positions are revealed (possibly in adverserial locations).
-This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with set boundary conditions.
-The first step towards finding the $\func{First-Return}$ from position $t$ would be to locate the \emph{interval} where the return occurs.
+This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with known boundary conditions.
+The first step towards finding the $\func{First-Return}$ from position $t$ would be to locate the \emph{interval} where the first return occurs.
 Even if we had an efficient technique to filter intervals, we would want to avoid considering all $\Theta(m)$ intervals to find the correct one.
 In addition, the fact that a specific interval \emph{does not} contain the first return implies dependencies for all subsequent samples.
 
-We resolve these difficulties by maintaining the following invariant.
+We resolve these difficulties by maintaining a new invariant.
 Consider all positions whose heights have have already been sampled, either directly as a result of user given $\func{Height}$ queries,
-or indirectly due to recursive $\func{Height}$ calls; $\langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order i.e. $x_i<x_{i+1}$)
-along with their corresponding heights $ \langle y_1, y_2,\cdots, y_m \rangle$.
+or indirectly due to recursive $\func{Height}$ calls; $\langle x_1, x_2,\cdots, x_m \rangle$ in increasing order i.e. $x_i<x_{i+1}$.
+Let the corresponding heights be $ \langle y_1, y_2,\cdots, y_m \rangle$ i.e. $\func{Height}(x_i) = y_i$.
 \begin{invariant}
 \label{inv:boundary_invariant}
 For any interval $[x_i,x_{i+1}]$ where the heights  of the endpoints have been sampled to be $y_i$ and $y_{i+1}$,
@@ -362,7 +366,7 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
     \caption{The set of intervals formed by a set of height samples.
         Each interval also has its own boundary constraint (red).
         Invariant~\ref{inv:boundary_invariant} implies that each boundary must coincide with one of the interval endpoints.
-        Note that the only interval which does not satisfy this is the third last one (shown in yellow box).}
+        Note that the only interval which violates the invariant is the third last one (shown in yellow box).}
     \label{fig:dyck_boundary_invariant}
 \end{figure}
 
@@ -370,8 +374,8 @@ How can one maintain such an invariant?
 After sampling the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
 We re-establish the invariant by sampling an additional point on either side.
-This proceeds as follows for the interval between $x_i$ and $x_{i+1}$
-(see error in Figure~\ref{fig:dyck_boundary_invariant}):
+This proceeds as follows for some violating interval $[x_i, x_{i+1}]$
+(example violation in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
     \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ (see Section~\ref{sec:sampling_the_lowest_achievable_height}).
     \item Sample a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
