@@ -4,9 +4,9 @@ We begin by formalizing our model of \emph{local-access implementations}, inspir
 
 \begin{definition}
 \label{def:local_access}
-Given a distribution $X$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
+Given a distribution $\mathsf  X$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
 of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X\rightarrow \{0,1\}$,
-provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathbb X$ and a given query $F_i$, while satisfying the following:
+provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathsf X$ and a given query $F_i$, while satisfying the following:
 %For clarity, we assume that the generator is invoked until its entire graph $G$ is exposed.
 %The local-access generator for a probability distribution $\mathsf{D}$ of the desired random graph model must satisfy the following properties:
 \begin{itemize}
@@ -18,8 +18,8 @@ provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathbb X$ an
     that is $\epsilon$-close to the desired distribution $\mathsf{X}$ in $L_1$-distance.
     In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
     \item \textbf{Performance:}
-    The computation time, random bits, and additional space required to answer a single query must be sub-linear,
-    and preferably $\poly(\log n)$ with high probability, without any initialization overhead.
+    The computation time, random bits, and additional space required to answer a single query must be $\poly(\log |X|)$ with high probability,
+    without any initialization overhead.
 \end{itemize}
 \end{definition}
 
@@ -40,6 +40,12 @@ Since $\func{Color}(v)$ has to run in time sublinear in the size of $G$, it is n
 
 
 
+\input{overview/graphs_overview}
+\input{overview/catalan_overview}
+\input{overview/coloring_overview}
+
+
+
 
 \subsection{Basic Tools for Efficient Sampling}
 \label{sec:basic_tools_for_efficient_sampling}
@@ -47,31 +53,27 @@ In this section, we describe the main techniques used to sample from a distribut
 which differ based on the type of access to $\{p_d\}$ provided to the algorithm.
 If the algorithm is given cumulative distribution function (CDF) queries to $\{p_d\}$,
 then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
-to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance (for constant $c$).
+to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance.
 
-When only given access to queries to the probability dsitribution function (PDF) of $\{p_d\}$, sampling can be more challenging.
+When only given access to queries to the probability dsitribution function of $\{p_d\}$, sampling can be more challenging.
 The approach that we use in this work is to construct an auxiliary distribution $\{q_d\}$ with the following two properties:
 First, $\{ q_d\}$ has an efficiently computable CDF.
 Second, $q_d$ approximates $p_d$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_d\}$.
-the following Lemma from \cite{huge} formalizes this concept, and shows that if we can provide such a $\{ q_d\}$,
-we can quickly sample according to a distribution that is close to $\{ p_d\}$.
+the following Lemma from \cite{huge} formalizes this concept. %, and shows that if we can provide such a $\{ q_d\}$,
+%we can quickly sample according to a distribution that is close to $\{ p_d\}$.
 \begin{lemma}
 \label{lem:rejection_sampling} (From \cite{huge})
-Let $\{p_i\}$ and $\{q_i\}$ be distributions satisfying the following conditions:
+Let $\{p_i\}$ and $\{q_i\}$ be distributions on $[n]$ satisfying the following conditions:
 \begin{enumerate}
-    \item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm n^{-2}$
-    \item Generating an index $i$ according to $q_i$ is closely implementable.
-    \item There exists a $poly(log n)$-time recognizable set $B$ such that
+\item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm \frac{1}{n^{c+1}}$ for any $i\in [n]$.
+    \item We can generate an index $i$ according to a distribution $\{\hat q_d\}$, that is $ \frac{1}{n^c}$ close to $\{q_d\}$ in $L_1$ distance.
+    \item There exists a $poly(log n)$-time recognizable set $S$ such that
     \begin{itemize}
-        \item $1-\sum\limits_{i\in B} p_i$ is negligible
-        \item There exists a constant $c$ such that for every $i$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
+        \item $1-\sum\limits_{i\in S} p_i < \frac 1{n^c}$
+        \item For every $i\in S$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
     \end{itemize}
 \end{enumerate}
-Then, generating an index $i$ according to the distribution $\{p_i\}$ is closely-implementable.
+Then, we can use $\log^{\mathcal O(1)}n$ samples from $\{\hat q_i\}$ to generating an index $i$
+according to a distribution that is $ \mathcal O\left(\frac{1}{n^c}\right)$-close to $\{p_i\}$ in $L_1$ distance.
 \end{lemma}
-
-
-
-\input{overview/graphs_overview}
-\input{overview/catalan_overview}
-\input{overview/coloring_overview}
+\todo[inline,color=red!80!green!25]{Should we prove this?}

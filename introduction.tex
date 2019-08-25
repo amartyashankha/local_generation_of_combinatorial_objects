@@ -123,7 +123,7 @@ Unlike LCAs which have to return \emph{some} valid solution, we also have to mak
 We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 9\Delta$.
 
 Unlike all prior results in the area, this implementation has an additional feature that it is memoryless,
-and the sampled color values only depend on the input random bits.
+and the sampled color values only depend on common random bits.
 Consequently, multiple independent instances of the algorithm having access to the same random bits,
 will respond to queries in a manner consistent with each other; they will sample exactly the same coloring, regardless of the queries asked.
 
@@ -147,4 +147,3 @@ thus \cite{reut} provides access to the adjacency list through \func{Next-Neighb
 
 For additional related work, see Section~\ref{sec:additional_related_work}.
 \todo[inline,color=red!80!green!25]{Computing large numbers (only poly). Maybe present a list of challenges including this.}
-\todo[inline,color=red!80!green!25]{Combining queries is often challenging.}
