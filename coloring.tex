@@ -1,25 +1,30 @@
 \section{Random Coloring of a Graph}%
 \label{sec:random_coloring_of_a_graph}
-A $q$-coloring of a graph $G=(V, E)$ is a function $\vec X : V\rightarrow [q]$, such that for all $(u,v)\in E$, $\vec X_u \not= \vec X_v$.
-We present a sublinear time algorithm to locally sample an uniformly random $q$-coloring of a graph.
-This is done by implementing an oracle $\func{Color}(v)$, which returns the color $\vec X_v$ of node $v$,
-where $\vec X$ is a uniformly random valid coloring of the input graph.
-Moreover, in this setting, multiple independent instances of $\func{Color}$ using the same random bits,
-should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
-We consider graphs with max degree $\Delta$ and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.
+A \emph{valid} $q$-coloring of a graph $G=(V, E)$ is a vector of colors $\vec X \in [q]^V$, such that for all $(u,v)\in E$, $\vec X_u \not= \vec X_v$.
+We present a sublinear time algorithm to provide local access to a uniformly random valid $q$-coloring of an input graph.
+Specifically, we implement $\func{Color}(v)$, which returns the color $\vec X_v$ of node $v$, where $\vec X$ is a uniformly random valid coloring.
+The implementation can access the input graph $G$ through a sub-linear number of \emph{neighborhood queries}.
+A neighborhood query of the form $\func{All-Neighbors}(v)$ returns a list of neighbors of $v$.
+The implementation can also access a tape of public random bits $\vec R$.
 
-Using the technique of path-coupling, \cite{glauber_survey} showed that for $q > 2\Delta$,
+Moreover, multiple independent instances of $\func{Color}$ that are given access to the same public tape of random bits $\vec R$,
+should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
+Unlike our previous results, the choice of $\vec X$ only depends on $\vec R$,
+%\footnote{In the case of undirected graphs and Catalan objects, the final sample depend both on the randomness and the order and content of queries},
+and the \func{Color} implementations do not need to use any additional memory to maintain consistency.
+For a formal description of this model, see Definition~\ref{def:local_access_LCA}.
+\textcolor{Maroon}{We consider graphs with max degree $\Delta$, and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.}
+\todo[inline,color=red!80!green!25]{Comparison to LCAs}
+
+In the sequential setting, \cite{glauber_survey} used the technique of path coupling to show that for $q > 2\Delta$,
 one can sample an uniformly random coloring by using a simple Markov chain.
 The Markov chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
 Specifically, the color of vertex $v$ at step $t$ is $\vec X^t_v$.
 In each step of the Markov process, a vertex and a color are sampled uniformly at random i.e. a pair $(v, c)\thicksim_{\mathcal U} V\times [q]$.
 Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in a conflict with $v$'s neighbors,
 i.e. $c\not\in \left\{ \vec X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $\vec X_v^{t+1}\leftarrow c$.
-After running this chain for $T = \mathcal{O}(n\log n)$ steps, the Markov chain is mixed,
-implying that the distribution of resulting colors is close to the uniform distribution in $L_1$ distance.
-
-\todo[inline,color=red!80!green!25]{How to initialize? \cite{coloring_initialize}}
-\todo[inline,color=red!80!green!25]{Formalize model. Public randomness.}
+After running this chain for $T = \mathcal{O}(n\log (n/\epsilon))$ steps, the Markov chain is mixed,
+implying that the distribution of resulting colors is $\epsilon$ close to the uniform distribution in $L_1$ distance.
 \todo[inline,color=red!80!green!25]{Use $q = 2\alpha\Delta$ everywhere.}
 
 
@@ -105,7 +110,6 @@ the algorithm has to output the color assigned to $v$ after running $t = \mathca
 We want to be able to answer such queries in sublinear time, without simulating the entire Markov Chain.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
-\todo[inline,color=red!80!green!25]{Explain the model. Public randomness.}
 The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
 where $\vec C^t_v$ is the color proposed by $v$ in the $t^{th}$ epoch.
 Note that these values are fully independent and as such any $\vec C^t_v$ can be sampled trivially.
@@ -120,6 +124,13 @@ While the proposals $\vec C^t_v$ are easy \textcolor{Maroon}{to sample}, it is m
 Note that we can compute $\vec X^t_v$ quite easily if we know the values $\bm\chi^i_v$ for all $i\le t$.
 So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm\chi^t_v$.
 
+
+\subsubsection{Local Access to an Initial Valid Coloring}
+\label{sec:local_access_to_an_initial_valid_coloring}
+One caveat that we have not addressed is how we should initialize the Markov Chain.
+The starting state can be any valid coloring of $G$.
+One way to
+\todo[inline,color=red!80!green!25]{How to initialize? \cite{coloring_initialize}}
 
 \subsubsection{Naive Coloring Implementations}%
 \label{sec:naive_coloring_implementations}
