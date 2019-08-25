@@ -304,7 +304,7 @@
   \vskip-\headsep
   \@titlerunning
   \@authorrunning
-  %%\let \footnote \thanks
+  \let \footnote \thanks
   \parindent\z@ \raggedright
   \if!\@title!\def\@title{\textcolor{red}{Author: Please fill in a title}}\fi
     {\LARGE\sffamily\bfseries\mathversion{bold}\@title \par}%
@@ -467,9 +467,9 @@
      {\@latex@warning{Empty `thebibliography' environment}}%
    \endlist}
 \renewcommand\footnoterule{%
-  \kern-8\p@
+  \kern-8\p@ % EDITED from -8
   {\color[rgb]{0.60,0.60,0.61}\hrule\@width40mm\@height1\p@}%
-  \kern6.6\p@}
+  \kern6.6\p@} % EDITED from 6.6
 \renewcommand\@makefntext[1]{%
     \parindent\z@\hangindent1em
     \leavevmode
