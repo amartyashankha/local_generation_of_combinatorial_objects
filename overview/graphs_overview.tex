@@ -38,11 +38,11 @@ We remark that this approach may be extended to support \func{Vertex-Pair} queri
 \paragraph*{\func{Random-Neighbor} Queries}
 \label{par:random_neighbor_queries}
 
-We provide \func{Random-Neighbor} queries (Section~\ref{sec:buckets}) using $\poly(\log n)$ resources.
+We provide \func{Random-Neighbor} queries (Section~\ref{sec:blocks}) using $\poly(\log n)$ resources.
 The ability to do so is surprising since:
 (1) Sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} implementations, because this quantity alone
-imposes dependence on the existence of \emph{all} of its potential incident edges and on the rest of the graph \textcolor{Fuchsia}{(Why?)}.
-\todo[inline]{Fix This!}
+imposes dependence on the existence of \emph{all} of its potential incident edges and on the rest of the graph.
+\todo[inline]{Why?}
 Therefore, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
 without resorting to ``knowing'' its degree.
 (2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries
@@ -52,15 +52,16 @@ such that vertices will have $\widetilde{\mathcal{O}}(\sqrt n)$ neighbors with h
 After $\widetilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
 so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}
 
-We formulate a \emph{bucketing approach} (Section~\ref{sec:buckets}) which samples multiple consecutive edges at once,
+\todo[inline,color=red!80!green!25]{Blocking??}
+We formulate a \emph{blocking approach} which samples multiple consecutive edges at once,
 in such a way that the conditional probabilities of the unsampled edges remain independent and ``well-behaved'' during subsequent queries.
-For each vertex $v$, we divide the potential neighbors of $v$ into consecutive ranges $\{B^{(i)}_v\}$ (buckets),
+For each vertex $v$, we divide the potential neighbors of $v$ into consecutive ranges $\{B^{(i)}_v\}$ (blocks),
 so that each $B^{(i)}_v$ contains, in expectation, $\Theta(1)$ neighbors (i.e. $\sum_{u\in B_i} p_{vu} = \Theta(1)$).
-The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a bucket in expected $\mathcal{\widetilde O}(1)$ time.
-We can now obtain a neighbor of $v$ by picking a random neighbor from a random bucket,
-but this introduces a bias because all buckets may not have the same number of neighbors.
-We remove this bias by rejecting samples from bucket $B^{(i)}_v$ with probability proportional to the number of neighbors in $B^{(i)}_v$.
-\func{Vertex-Pair} queries are implemented by sampling the relevant bucket.
+The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a block in expected $\mathcal{\widetilde O}(1)$ time.
+We can now obtain a neighbor of $v$ by picking a random neighbor from a random block,
+but this introduces a bias because all blocks may not have the same number of neighbors.
+We remove this bias by rejecting samples from block $B^{(i)}_v$ with probability proportional to the number of neighbors in $B^{(i)}_v$.
+\func{Vertex-Pair} queries are implemented by sampling the relevant block.
 
 
 

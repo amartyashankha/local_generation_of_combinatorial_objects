@@ -34,7 +34,7 @@ in $O(\poly(\log B))$ time and random words.
 For the base case where $B=1$, we trivially have $\mathbf{S}^\vec{C}_1=\vec{C}_1$ and $\mathbf{S}^\vec{C}_0=\vec{C}_2$.
 Otherwise, for even $B$, we apply the following procedure.
 \begin{itemize}
-\item If $\ell \leq B/2$, generate $\vec{C}'=\mathbf{S}^\vec{C}_{B/2}$ using Claim~\ref{claim:ggn}.
+\item If $\ell \leq B/2$, generate $\vec{C}'=\mathbf{S}^\vec{C}_{B/2}$ using Lemma~\ref{lem:ggn_interval_summable}.
 \begin{itemize}
 \item If $\ell = B/2$ then we are done.
 \item Else, for $\ell < B/2$ we recursively generate $\mathbf{S}^\vec{C'}_{\ell}$.

@@ -145,4 +145,5 @@ Unfortunately, in order to support \func{Random-Neighbor} queries, we will likel
 beyond $\LAST[v]$ or $\LAST[u]$, which cannot be captured by the current data structure.
 Specifically, to speed-up the sampling process for small $p_{vu}$'s, we must generate many random non-neighbors at once,
 but we cannot afford to spend time linear in the number of created $\ZERO$'s to update our data structure.
-We remedy these issues via the following bucketing approach.
+We remedy these issues via the following blocking approach.
+\todo[inline,color=red!80!green!25]{Blocking??}

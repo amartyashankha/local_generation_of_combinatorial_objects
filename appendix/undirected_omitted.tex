@@ -16,7 +16,7 @@ If Algorithm~\ref{alg:fill} (the \func{Fill} operation) is repeatedly invoked to
 \end{restatable}
 \begin{proof}
 \label{proof:transition}
-For simplicity, assume that the algorithm generates the graph to completion according to a sequence of up to $n^2$ distinct buckets $\mathcal{B} = \langle B^{(u_1)}_{v_1}, B^{(u_2)}_{v_2}, \ldots \rangle$, where each $B^{(u_i)}_{v_i}$ specifies the \unfilled~bucket in which any query instigates a \func{Fill} function call. Define an \emph{internal state} of our generator as the triplet $s = (k, u, \ADJ)$, representing that the algorithm is currently processing the $k^\textrm{th}$ \func{Fill}, in the iteration (the \textbf{repeat} loop of Algorithm~\ref{alg:fill}) with value $u$, and have generated $\ADJ$ so far. Let $t_{\ADJ}$ denote the \emph{terminal state} after processing all queries and having generated the graph $G_\ADJ$ represented by $\ADJ$. We note that $\ADJ$ is used here in the analysis but not explicitly maintained; further, it reflects the changes in every iteration: as $u$ is updated during each iteration of \func{Fill}, the cells $\ADJ[v][u'] = \PHI$ for $u' < u$ (within that bucket) that has been skipped are also updated to $\ZERO$.
+For simplicity, assume that the algorithm generates the graph to completion according to a sequence of up to $n^2$ distinct blocks $\mathcal{B} = \langle B^{(u_1)}_{v_1}, B^{(u_2)}_{v_2}, \ldots \rangle$, where each $B^{(u_i)}_{v_i}$ specifies the \unfilled~block in which any query instigates a \func{Fill} function call. Define an \emph{internal state} of our generator as the triplet $s = (k, u, \ADJ)$, representing that the algorithm is currently processing the $k^\textrm{th}$ \func{Fill}, in the iteration (the \textbf{repeat} loop of Algorithm~\ref{alg:fill}) with value $u$, and have generated $\ADJ$ so far. Let $t_{\ADJ}$ denote the \emph{terminal state} after processing all queries and having generated the graph $G_\ADJ$ represented by $\ADJ$. We note that $\ADJ$ is used here in the analysis but not explicitly maintained; further, it reflects the changes in every iteration: as $u$ is updated during each iteration of \func{Fill}, the cells $\ADJ[v][u'] = \PHI$ for $u' < u$ (within that block) that has been skipped are also updated to $\ZERO$.
 
 Let $\mathcal{S}$ denote the set of all (internal and terminal) states. For each state $s$, the generator samples $u$ from the corresponding $\mathsf{F}'(v,a,b)$ where $\|\mathsf{F}(v,a,b)-\mathsf{F}'(v,a,b)\|_1 \leq \epsilon = \frac{1}{\poly(n)}$, then moves to a new state according to $u$. In other words, there is an induced pair of collection of distributions over the states: $(\mathcal{T},\mathcal{T}')$ where $\mathcal{T}=\{\mathsf{T}_s\}_{s\in\mathcal{S}}, \mathcal{T}'=\{\mathsf{T}'_s\}_{s\in\mathcal{S}}$, such that $\mathsf{T}_s(s')$ and $\mathsf{T}'_s(s')$ denote the probability that the algorithm advances from $s$ to $s'$ by using a sample from the correct $\mathsf{F}(v,a,b)$ and from the approximated $\mathsf{F}'(v,a,b)$, respectively. Consequently, $\|\mathsf{T}_s-\mathsf{T}'_s\|_1 \leq \epsilon$ for every $s\in\mathcal{S}$.
 
@@ -38,11 +38,11 @@ We remark that \func{Random-Neighbor} queries also require that the returned edg
 
 
 
-\subsection{Bounding bucket sizes}\label{sec:bounding_bucket_sizes}
-\MaxBucketSize*
+\subsection{Bounding Block Sizes}\label{sec:bounding_block_sizes}
+\MaxBlockSize*
 \begin{proof}
-Fix a bucket $B_v^{(i)}$, and consider the Bernoulli RVs $\left\{ X_{vu}\right\}_{u\in B_v^{(i)}}$.
-The expected number of neighbors in this bucket is
+Fix a block $B_v^{(i)}$, and consider the Bernoulli RVs $\left\{ X_{vu}\right\}_{u\in B_v^{(i)}}$.
+The expected number of neighbors in this block is
 $ \textstyle\mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{vu} \right] < L+1$.
 Via the Chernoff bound,
 \[
@@ -52,13 +52,13 @@ Via the Chernoff bound,
 for any constant $c > 0$.
 \end{proof}
 
-\EmptyBucket*
+\EmptyBlock*
 \begin{proof}
 For $i < |B_v|$, since $ \mathbb{E} \left[ |\Gamma^{(i)}(v)| \right] =\mathbb{E} \left[ \sum_{u\in B_v^{(i)}} X_{vu} \right] > L-1$, we bound the probability that $B_v^{(i)}$ is empty:
 \[
 \mathbb P[B_v^{(i)}\textrm{ is empty}] = \prod_{u\in B_v^{(i)}} (1-p_{vu}) \leq e^{-\sum_{u\in B_v^{(i)}} p_{vu}} \leq e^{1-L}=c
 \]
-for any arbitrary small constant $c$ given sufficienty large constant $L$. Let $T_{i}$ be the indicator for the event that $B_v^{(i)}$ is \emph{not} empty, so $\mathbb E 1-c$. By the Chernoff bound, the probability that less than $|B_v|/3$ buckets are non-empty is 
+for any arbitrary small constant $c$ given sufficienty large constant $L$. Let $T_{i}$ be the indicator for the event that $B_v^{(i)}$ is \emph{not} empty, so $\mathbb E 1-c$. By the Chernoff bound, the probability that less than $|B_v|/3$ blocks are non-empty is 
 \[
 \textstyle
 \mathbb P\left[\sum_{i\in[|B_v|]} T_i<\frac{|B_v|}{3}\right]<\mathbb P\left[\sum_{i\in[|B_v|-1]} T_i<\frac{|B_v-1|}{2}\right]\leq e^{-\Theta(|B_v|-1)} = n^{-\Omega(1)}
