@@ -13,9 +13,17 @@ Unlike our previous results, the choice of $\vec X$ only depends on $\vec R$,
 %\footnote{In the case of undirected graphs and Catalan objects, the final sample depend both on the randomness and the order and content of queries},
 and the \func{Color} implementations do not need to use any additional memory to maintain consistency.
 For a formal description of this model, see Definition~\ref{def:local_access_LCA}.
-\textcolor{Maroon}{We consider graphs with max degree $\Delta$, and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.}
-\todo[inline,color=red!80!green!25]{Comparison to LCAs}
+This model is essentially a generalization of \emph{Local Computation Algorithms} \cite{LCA}.
+Given a computation problem with input $x$ and a set of valid outputs $F(x)$,
+LCAs provide query access to some $y\in F(x)$ using only a sub-linear number of probes to $x$.
+This makes it feasible to consider sub-linear algorithms for problems where the output size is super-linear.
+Our model has the additional restriction that the output must be drawn uniformly at random from $F(x)$, rather than just being an arbitrary member.
+Since the number of possible outputs ($|F(x)|$) may be exponential, it is not possible to encode all the requisite random bits in sublinear space.
+Therefore, we use a source of public randomness $\vec R$.
 
+\paragraph*{Sequential Algorithm for Random Coloring}
+\label{par:sequential_algorithm_for_random_coloring}
+We consider graphs with max degree $\Delta$, and $q = \Theta(\Delta)$, since this is the regime where this problem is feasible \cite{glauber_survey}.
 In the sequential setting, \cite{glauber_survey} used the technique of path coupling to show that for $q > 2\Delta$,
 one can sample an uniformly random coloring by using a simple Markov chain.
 The Markov chain proceeds in $T$ steps. The state of the chain at time $t$ is given by $\vec X^t\in [q]^{|V|}$.
@@ -25,7 +33,7 @@ Subsequently, if the recoloring of vertex $v$ with color $c$ does not result in 
 i.e. $c\not\in \left\{ \vec X^t_u : u\in \Gamma(v)\right\}$, then the vertex is recolored i.e. $\vec X_v^{t+1}\leftarrow c$.
 After running this chain for $T = \mathcal{O}(n\log (n/\epsilon))$ steps, the Markov chain is mixed,
 implying that the distribution of resulting colors is $\epsilon$ close to the uniform distribution in $L_1$ distance.
-\todo[inline,color=red!80!green!25]{Use $q = 2\alpha\Delta$ everywhere.}
+\todo[inline,color=red!80!green!25]{State the result at some point.}
 
 
 
@@ -98,8 +106,16 @@ If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left(
 %Starting for a maximum distance of $n$, the distance decreases to $1$ after at most $3\ln n$ epochs,
 %and it takes a further $3\ln\left( \frac{1}{\epsilon} \right)$ to reduce the distance to $\epsilon$.
 %\end{proof}
-\todo[inline,color=red!80!green!25]{Distributed Algo + Parnas-Ron \cite{parnas_ron} and how we do better.}
-\todo[inline,color=red!80!green!25]{Similar to LCA for MIS}
+\subsubsection{Naive Reduction from Distributed Algorithms}
+\label{sec:naive_reduction_from_distributed_algorithms}
+Using the technique of Parnas and Ron \cite{parnas_ron},
+one can use a distributed algorithm for a graph problem to construct a Local Computation Algorithm for the same problem.
+Specifically, given a $k$-round distributed algorithm on a network of degree at most $\Delta$,
+we can simulate the behaviour of a single node $v$ by simulating the full algorithm on the $k$-neighborhood of $v$.
+The simulation only requires us to probe this $k$-neighborhood, which contains $\mathcal O(\Delta^k)$ nodes.
+However, the aforementioned distributed algorithm for Glauber Dynamics used $\mathcal O(\log n)$ rounds,
+implying a probe complexity of $\Delta^{\mathcal O(\log n)}$, which is super-linear.
+\textcolor{Maroon}{We will show how to reduce the probe complexity by appropriately pruning the $k$-neighborhood.}
 
 
 
@@ -112,7 +128,9 @@ We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
 The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
 where $\vec C^t_v$ is the color proposed by $v$ in the $t^{th}$ epoch.
-Note that these values are fully independent and as such any $\vec C^t_v$ can be sampled trivially.
+Since each of these $\vec C^t_v$ values are independent uniform samples from $[q]$,
+instances of our algorithm will be able to access them in a consistent manner using the public random bits $\vec R$.
+
 We also use $\vec X^t$ to denote the final vector of vertex colors at the end of the $t^{th}$ epoch.
 Finally, we define indicator variables $\bm \chi^t_v$ to indicate whether the color $\vec C^t_v$ proposed by vertex $v$
 was accepted at the $t^{th}$ epoch: $\bm \chi^t_v = \ONE$ if and only if for all neighbors $w\in \Gamma(v)$,
@@ -120,17 +138,30 @@ we satisfy the condition $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \
 (i.e. the proposed color does not conflict with any neighboring proposal or any neighbor's color from the preceding epoch).
 So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
-While the proposals $\vec C^t_v$ are easy \textcolor{Maroon}{to sample}, it is much less clear how we can determine the $\bm \chi^t_v$ values.
-Note that we can compute $\vec X^t_v$ quite easily if we know the values $\bm\chi^i_v$ for all $i\le t$.
+While the proposals $\vec C^t_v$ can simply be read off the public random tape $\vec R$,
+it is not clear how we can determine the $\bm \chi^t_v$ values efficiently.
+Computing $\vec X^t_v$ is quite simple if we know the values $\bm\chi^i_v$ for all $i\le t$.
 So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm\chi^t_v$.
 
 
 \subsubsection{Local Access to an Initial Valid Coloring}
 \label{sec:local_access_to_an_initial_valid_coloring}
 One caveat that we have not addressed is how we should initialize the Markov Chain.
-The starting state can be any valid coloring of $G$.
-One way to
-\todo[inline,color=red!80!green!25]{How to initialize? \cite{coloring_initialize}}
+The starting state can be any valid coloring of $G$, but we have to be able to access the initial colors of requisite vertices in sublinear time.
+One option is to simply assume that we have oracle access to an arbitrary valid coloring.
+We can also invoke a result from \cite{coloring_initialize} that provides a \emph{Local Computation Algorithm} for $(\Delta+1)$-coloring of a graph.
+Specifically, they provide local access to the color of any vertex using $\mathcal O(\Delta^{\mathcal O(1)}\log n)$ queries to the underlying graph,
+such that the returned colors are consistent with some valid coloring.
+Integrating their routine into our algorithm incurs a multiplicative $\poly(\Delta)$ overhead for each query.
+
+Another option is to (uniformly) randomly intialize the colors of the vertex independently of its neighbors.
+Although the initial coloring may be invalid, one can show that with high probability, the final coloring after running the Markov Chain is valid.
+The intuitive reasoning is that each vertex attempts to recolor itself $\mathcal O(\log n)$ times,
+and each attempt suceeds with constant probabiltity at least $1 - 1/\alpha$ (Lemma~\ref{lem:color_reject_probability}).
+Furthermore, we can union bound to claim that \emph{all} the vertices get re-colored at least once with high probability.
+After a vertex is re-colored once, it can no longer be in conflict with any of its neighbor's colors,
+and therefore we obtain a final coloring that is valid.
+For the sake of simplicity, we will assume that our algorithm can access the initial colors of any vertex $v$ through a public $\vec C^0_v$.
 
 \subsubsection{Naive Coloring Implementations}%
 \label{sec:naive_coloring_implementations}
@@ -156,12 +187,15 @@ However, we want a sub-linear time algorithm for $q = \mathcal O(\Delta)$.
 \label{sec:jumping_back_to_past_epochs}
 The expected number of neighbors that need to be checked recursively can always be $t\Delta/q$ in the worst case.
 The crucial observation is that even though these recursive calls seem unavoidable,
-we can aim to reduce the size of the recursive sub-problem and thus bound the number of levels of recursion.
-\textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
+we can aim to reduce the size of the recursive sub-problem, and thus bound the number of levels of recursion.
+%\textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
+
+Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
+We iterate through all neighbors $w$ of $v$, checking for conflicts.
+The condition $c\not=\vec C^t_w$ can be checked by reading $\vec C^t_w$ off the public random tape.
+If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
 
 \todo[inline,color=red!80!green!25]{High Level algorithm.}
-%\begin{wrapfigure}[19]{r}{0.58\textwidth}
-%\vspace{-2.0em}
 \begin{figure}[htpb]
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -169,15 +203,16 @@ we can aim to reduce the size of the recursive sub-problem and thus bound the nu
     \label{alg:coloring}
     \begin{algorithmic}[1]
         \Procedure{Accepted}{$v, t$}
-            \State {$c\gets\vec C^t_v$} \Comment{\textcolor{Maroon}{Sample the color.}}
-            \For{$w \gets \Gamma(v)$}
+            \State {$c\gets\vec C^t_v$} \Comment{Find the current proposal using the public random bits}
+            \For{$w \gets \Gamma(v)$} \Comment{Iterate through the neighbors, checking for conflicts}
                 \If {$\vec C_w^t = c$} \Comment{Check for conflict with neighbor's current proposal}
                     \State \Return $\ZERO$
                 \EndIf
-                \For{$t' \gets [t, t-1, t-2, \cdots, 1]$} \label{alg:line:iterate_backwards}
+                \For{$t' \gets [t, t-1, t-2, \cdots, 1, 0]$} \label{alg:line:iterate_backwards}
+                \Comment{Check for conflict with neighbor's prior state}
                     \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)} \label{alg:line:check_accepted}
                         \Comment{Potential conflict with neighbor's color}
-                        \State $overwritten\gets \FALSE$ \Comment{Check if color $c$ was overwritten by a future proposal}
+                        \State $overwritten\gets \FALSE$ \Comment{Check if color $c$ is overwritten by a future proposal}
                         \For{$\widetilde t \gets [t'+1, t'+2, \cdots, t-1]$} \label{alg:line:check_overwritten}
                             \If {\func{Accepted}($w, \widetilde t$)} \label{alg:line:check_overwritten_recursive}
                                 \State $overwritten\gets \TRUE$
@@ -196,12 +231,6 @@ we can aim to reduce the size of the recursive sub-problem and thus bound the nu
     \end{algorithmic}
 \end{framed}
 \end{figure}
-%\end{wrapfigure}
-Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
-We iterate through all neighbors $w$ of $v$, checking for conflicts.
-The condition $c\not=\vec C^t_w$ is can easily be checked by sampling $\vec C^t_w$.
-If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
-
 To achieve this, we iterate through all the epochs in reverse order (line~\ref{alg:line:iterate_backwards})
 to check whether the color $c$ was ever proposed for vertex $w$.
 If not, we can ignore $w$, and otherwise let's say that the most recent proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
@@ -219,8 +248,6 @@ implying that color $c$ \emph{survived} as the color of neighbor $w$, i.e. $\vec
 This leads to a conflict with $v$'s current proposal for color $c$ (line~\ref{alg:line:conflict}) and hence $\bm\chi^t_v = \ZERO$.
 If we exhaust all the neighbors and don't find any conflicts (line~\ref{alg:line:no_conflict}) then $\bm\chi^t_v = \ONE$.
 
-\todo[inline,color=red!80!green!25]{Picture?}
-
 Now we analyze the runtime of $\func{Accepted}$ by constructing and solving a recurrence relation.
 We will use the following lemma to evaluate the expectation of products of relevant random variables.
 
@@ -230,7 +257,7 @@ The probability that any given proposal is rejected $\mathbb P[\bm\chi^t_v=\ZERO
 Moreover, this upper bound holds even if we condition on all the values in $\vec C$ except $\vec C^t_v$.
 \end{lemma}
 \begin{proof}
-A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{\vec C^t_w, X^{t-1}_w | w\in\Gamma(v)\}$.
+A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{\vec C^t_w, \vec X^{t-1}_w | w\in\Gamma(v)\}$.
 Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/\alpha$.
 \end{proof}
 
@@ -242,13 +269,13 @@ while computing a single $\bm \chi_v^t$.
 
 \begin{definition}
 \label{def:blah}
-We define $R^t_{t'}$ to be a random variable indicating the number of calls to \func{Accepted} that are required,
+We define $W^t_{t'}$ to be a random variable indicating the number of calls to \func{Accepted} that are required,
 to check whether a color $c$ assigned at epoch $t'$ was overwritten at some epoch before $t$.
 \end{definition}
 Using $\mathcal B(p)$ to denote the Bernoulli random variable with bias $p$, we obtain an expression for $R^t_{t'}$.
 \begin{align}
 \label{eq:color_overwrite}
-R^t_{t'} = \Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
+W^t_{t'} \le \Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
 + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots
 + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]
 \end{align}
@@ -260,31 +287,35 @@ This gives us the $\mathcal B(1/\alpha)\cdot T_{t'+2}$ term in the expression.
 In general, $\func{Accepted}(v, t'+i)$ is only invoked if the preceding $i-1$ calls to \func{Accepted} all returned $\ZERO$.
 This event happens with probability at most $1/\alpha^{i-1}$.
 
+Next, we prove our main lemma that bounds the number of recursive calls to \func{Accepted}.
+
 \begin{lemma}
 \label{lem:coloring_recurrence}
 Given graph $G$ and $q=2\alpha\Delta$ colors, for $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$
 while computing a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
 \end{lemma}
 \begin{proof}
-We start with the recurrence for the expected number of probes to $\{\bm\chi^{t'}\}_{t'\in[t]}$
-(equivalently calls to $\func{Accepted}$) used by the algorithm.
+We start by constructing a recurrence for the expected number of calls to $\func{Accepted}$ used by the algorithm.
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
 (in reality, only the last occurence matters, but we are looking for an upper bound).
-If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is one recursive call to $T_{t'}$.
-Regardless of what happens, let's say the algorithm queries $T_{t'+1}, T_{t'+2}, \cdots, T_{t-1}$ until an $\func{Accepted}$ proposal is found.
-Adding an extra $T_{t'}$ term to Equation~\ref{eq:color_overwrite} and summing up over all neighbors and epochs we get the following:
+If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is a recursive call to $\func{Accepted}(w,t')$,
+which in turn results in $T_{t'}$ recursive calls to \func{Accepted}.
+If we find that $\bm\chi^{t'}_w = \ONE$ (i.e. $w$ was colored to $c$ at epoch $t'$),
+we will need to proceed to check whether the color was subsequently overwritten, which requires an additional $W^t_{t'}$ calls to \func{Accepted}.
+Adding an extra $T_{t'}$ term (corresponding to $\func{Accepted}(w,t')$) to Equation~\ref{eq:color_overwrite},
+and summing up over all neighbors and epochs, we obtain the following:
 \begin{align}
 T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
-\Biggl[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
-+ \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots\\
-&\hspace{23em}
-\cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]\\
+\left[ T_{t'} + W^t_{t'} \right] \\
+&\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathcal B\left( \frac 1q\right)
+\left[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3}
++ \cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \right]\\
 &\le \Delta\cdot\mathcal B\left( \frac{1}{q}\right) \Biggl[
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} +
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \mathcal B\left(\frac1\alpha\right) + \mathcal B\left(\frac1{\alpha^2}\right) + \cdots\right)
 \Biggr]
 \end{align}
-In the second step, we just group all the terms from the same epoch together.
+In the last step, we just group together all the terms corresponding to the same epoch.
 Using Lemma~\ref{lem:color_reject_probability} and the fact that $\mathbb P[C^{t'}_w = c]$ is independent of all other events,
 we can write a recurrence for the expected number of probes.
 \begin{align}
@@ -319,23 +350,17 @@ Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected numbe
 \begin{theorem}
 \label{thm:coloring_generator_main}
 Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
-we can sample the color of any given node from a distribution of color assignments that is $\frac{1}{n}$-close (in $L_1$ distance)
+we can sample the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
 to the uniform distribution over all colorings of the graph, in a consistent manner,
-using only $\mathcal O(n^{6.12/\alpha}\Delta\log n)$ time and random bits.
+using only $\mathcal O(n^{3.06/\alpha}\epsilon^{-\mathcal O(1/\alpha)}\Delta\log (n/\epsilon))$ time and random bits.
 %This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
 \end{theorem}
 \begin{proof}
-Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(1/n) \le 6\ln n$.
+Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(\epsilon) \le 3(\ln n + \ln 1/\epsilon)$.
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
-the number of calls to $\func{Accepted}$ is $\mathcal O(n^{6.12/\alpha})$.
+the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^{-3.06/\alpha})$.
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially samples $\mathcal O(t\Delta)$ color proposals,
 while iterating through all the neighbors of $v$ in all $t$ epochs.
-Since $t \le 6\ln n$, this implies that the algorithm uses $\mathcal O(n^{6.12/\alpha}\Delta\log n)$ time and random bits,
-which is sublinear for $\alpha > 6.12$.
+Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
+$\mathcal O(n^{3.06/\alpha}\epsilon^{-\mathcal O(1/\alpha)}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
 \end{proof}
-
-One final observation is that the value returned (sampled value of $\bm\chi^t_v$) by \func{Accepted} only depends on the sampled values of $C^t_v$,
-which in turn depends only on the random bits used by the algorithm.
-This implies that unlike the prior implementations, this one does not need to store any state in memory.
-Importantly, multiple independent instances of the algorithm that have access to the same random bits,
-will invariably answer queries in a manner consistent with each other i.e. they will sample exactly the same coloring.
