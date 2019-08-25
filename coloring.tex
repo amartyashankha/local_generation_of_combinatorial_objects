@@ -302,10 +302,11 @@ If such a $t'$ is found (this happens with probability $1/q$ independently for e
 which in turn results in $T_{t'}$ recursive calls to \func{Accepted}.
 If we find that $\bm\chi^{t'}_w = \ONE$ (i.e. $w$ was colored to $c$ at epoch $t'$),
 we will need to proceed to check whether the color was subsequently overwritten, which requires an additional $W^t_{t'}$ calls to \func{Accepted}.
-Adding an extra $T_{t'}$ term (corresponding to $\func{Accepted}(w,t')$) to Equation~\ref{eq:color_overwrite},
-and summing up over all neighbors and epochs, we obtain the following:
+%Adding an extra $T_{t'}$ term (corresponding to $\func{Accepted}(w,t')$) to Equation~\ref{eq:color_overwrite},
+%and summing up over all neighbors and epochs, we obtain the following:
+Summing up over all neighbors and epochs, we obtain the following bound:
 \begin{align}
-T_{t} &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
+T_{t} &= \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
 \left[ T_{t'} + W^t_{t'} \right] \\
 &\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathcal B\left( \frac 1q\right)
 \left[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3}

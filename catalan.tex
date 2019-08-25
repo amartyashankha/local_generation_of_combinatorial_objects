@@ -403,8 +403,8 @@ We will refer to $h$ as the \emph{``mandatory boundary''} in this interval;
 i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
 Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps and a boundary that is $k-1$ units below $y_i$.
-\todo[inline,color=red!80!green!25]{Picture?}
-\begin{wrapfigure}[16]{R}{0.496\textwidth}
+
+\begin{wrapfigure}[16]{r}{0.496\textwidth}
 \vspace{-3.0em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -432,7 +432,6 @@ Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ d
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
-
 Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper} \le y_i$),
 we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as:
 \[
