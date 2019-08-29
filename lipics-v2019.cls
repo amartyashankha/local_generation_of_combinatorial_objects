@@ -349,7 +349,7 @@
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\z@}%
                                        {3.25ex \@plus1ex \@minus .2ex}%
                                        {-1em}%
-                                      {\sffamily\normalsize\bfseries}}
+                                      {\sffamily\large\bfseries}}
 \setlength\leftmargini  \parindent
 \setlength\leftmarginii {1.2em}
 \setlength\leftmarginiii{1.2em}

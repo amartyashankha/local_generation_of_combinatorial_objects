@@ -3,12 +3,10 @@
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
-Such an \emph{implementation} would emulate the random object by answering appropriate queries in a consistent manner.
-Specifically, all responses to queries must be consistent with an instance of the random object sampled from the true distribution (or close to it).
-This paradigm is useful when the algorithm is sub-linear and thus, sampling the entire object up front would ruin its efficiency.
-For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg} only uses $\mathcal O(\log^2 n)$ probes.
-\textcolor{Maroon}{Using our implementation, one can execute this algorithm on a random small world instance
-in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.}
+Such an \emph{implementation} would ideally emulate the random object by answering appropriate queries in a way that is consistent with
+a specific instance of the random object sampled from the true distribution.
+This paradigm is useful when we wish to simulate a sub-linear algorithm on a random object,
+since sampling the entire object up front would ruin its efficiency.
 
 The problem of sampling partial information about huge random objects was pioneered in \cite{huge,huge_old,huge_journal}.
 Further work in \cite{sparse,reut} considers the generation of different random graph models.
@@ -28,8 +26,17 @@ and this can be answered trivially by flipping a coin with bias $p$.
 In the context of random graph colorings, we define a new model for generating random objects which have huge description size (the underlying graph).
 In this setting, our algorithms are unable to read the entire description,
 but can still answer queries to a valid sampled object, using a sub-linear number of local probes.}
-\todo[inline,color=red!80!green!25]{Applications could include parallel sampling.}
 \todo[inline,color=red!80!green!25]{We are the first to do \func{Random-Neighbor}}
+
+
+\paragraph*{Applications}
+\label{par:applications}
+For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg}
+only uses $\mathcal O(\log^2 n)$ probes to the underlying network.
+\textcolor{Maroon}{Using our implementation, one can execute this algorithm on a random small world instance
+in $\mathcal O(\poly(\log n))$ time without incurring the $\mathcal O(n)$ prior-sampling overhead.}
+\todo[inline,color=red!80!green!25]{Applications could include parallel sampling.}
+
 
 
 
