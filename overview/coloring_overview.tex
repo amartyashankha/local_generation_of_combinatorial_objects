@@ -30,11 +30,12 @@ Naively sampling the colors of all these neighbors would result in $\Delta$ recu
 and stepping \emph{backwards} through the epochs to find the last accepted proposal.
 Naively, this leads to a bound of $\Delta^t$ on the number of recursive invocations.
 
-We can improve this somewhat by only considering neighbors $w$ of $v$ who had any proposal for the same color $c$.
+We can improve this by only considering neighbors $w$ of $v$ who had any proposal for the same color $c$.
 In this case the expected number of recursive calls is bounded by $t\Delta/q$
 ($t\Delta$ proposals to consider and each one is $c$ with probability $1/q$).
 So, if $q > t\Delta = \mathcal O(\Delta\log n)$, this allows us to bound the total number of resulting invocations.
 The improvement to $q\ge 9\Delta$ comes from the observation that for $w\in\Gamma(v)$ such that $w$ proposed color $c$ at epoch $t'$,
 the recursive call for $w$ can jump to epoch $t'$ and then step \emph{forwards} through the epochs to find the first accepted proposal.
 We show that this dramatically reduces the sub-problem size (given by $t'$) in each recursion,
-thus allowing us to bound the runtime by $\mathcal O\left(t\Delta n^{6.12\Delta/q}\right)$ which is sub-linear for $q \ge 9\Delta$.
+thus allowing us to bound the runtime by $\mathcal O\left(t\Delta (n/\epsilon)^{6.12\Delta/q}\right)$,
+where the overall coloring is sampled from a distribution that is $\epsilon$-close to uniform.

@@ -26,8 +26,8 @@ provides an oracle that returns the value $F_i(X)$ for $X\thicksim \mathsf X$ an
 In particular, we allow queries to be made adversarially and non-deterministically.
 The adversary has full knowledge of the algorithm's behavior and its past random bits.
 
-\subsection{\textcolor{Maroon}{Memory-less Sampling from Distributions with Huge Description Size}}
-\label{sec:memory_less_sampling_from_distributions_with_huge_description_size}
+\paragraph*{Memory-less Sampling from Distributions with Huge Description Size}
+\label{par:memory_less_sampling_from_distributions_with_huge_description_size}
 We also consider distributions whose description size is too large to be read by a sublinear algorithm.
 In all the problems we have considered so far as well as the ones studied in prior work \cite{huge,sparse,reut}, the description size
 of the random object is small (typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters).
@@ -52,12 +52,8 @@ This model also has the feature of being memory-less, since independent queries 
 must agree on a single valid coloring, without having to write to memory or communicate in any other way.
 We can contrast this definition with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
 which also allow query access to \emph{some} valid solution and can read the input through local probes.
-An additional difficulty in our setting is that we also have to make sure that we return a solution from the correct distribution.
+An additional difficulty in our setting is that we also have to make sure that we a uniformly random solution (as opposed to an arbitrary one).
 Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
-
-\todo[inline,color=red!80!green!25]{Talk about memory}
-
-\todo[inline,color=red!80!green!25]{Talk about LCA type model and public source of randomness.}
 
 
 
@@ -76,7 +72,7 @@ If the algorithm is given cumulative distribution function (CDF) queries to $\{p
 then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
 to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance.
 
-When only given access to queries to the probability dsitribution function of $\{p_d\}$, sampling can be more challenging.
+When only given access to queries to the probability distribution function of $\{p_d\}$, sampling can be more challenging.
 The approach that we use in this work is to construct an auxiliary distribution $\{q_d\}$ with the following two properties:
 First, $\{ q_d\}$ has an efficiently computable CDF.
 Second, $q_d$ approximates $p_d$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_d\}$.

@@ -105,24 +105,26 @@ For $r$ communities, this yields an implementation with $ \mathcal{O}(r\cdot \po
 \subsection{Directed Graphs}
 \label{sec:directed_graphs}
 Lastly, we consider Kleinberg's Small World model (\cite{kleinberg, klein}) in Section~\ref{sec:small_world}.
-While Small-World models are proposed to capture properties of observed data such as small shortest-path 
-distances and large clustering coefficients \cite{watts1998collective}, 
+While small world models are proposed to capture properties of observed data such as small shortest-path
+distances and large clustering coefficients \cite{watts1998collective},
 this important special case of Kleinberg's model, defined on two-dimensional grids, demonstrates underlying geographical structures of networks.
+\todo[inline,color=red!80!green!25]{More on importance. Better description.}
 
 In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$.
-Define the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,
-and the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$.
+Defining the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,
+the probability that each directed edge $(u,v)$ exists is $c/(\func{dist}(u,v))^{2}$.
 A common choice for $c$ is given by normalizing the distribution such that the expected out-degree of each vertex is 1 ($c = \Theta(1/\log n)$).
 We can also support a range of values of $c=\log^{\pm\Theta(1)}n$.
 Since the degree of each vertex in this model is $\mathcal O(\log n)$ with high probability, we implement \func{All-Neighbor} queries,
 which in turn can emulate \func{Vertex-Pair}, \func{Next-Neighbor} and \func{Random-Neighbor} queries.
 In contrast to our previous cases, this model imposes an underlying two-dimensional structure of the vertex set,
 which governs the distance function as well as complicates the individual edge probabilities.
+%Providing local access for directed graphs is simpler because the out-neighbors of vertices may be chosen independently at each vertex.
 
-We design generators for the aforementioned case of the Small-World model, supporting each \func{all-neighbors} query,
-listing all neighbors from closest to furthest away from the queried vertex, using $\poly(\log n)$ resources per query.
-Providing local access for directed graphs is simpler because the out-neighbors of vertices may be chosen independently at each vertex.
-So, the main challenge is to sample for the next (closest) neighbor, when the probabilities are a function of the Manhattan distance on the lattice.
-Rather than sampling for a neighbor directly, we sample the next smallest distance with a neighbor,
-employing the rejection sampling technique that allows efficient sampling through an approximate distribution that have closed-form description,
-then as a second step, sample for all neighbors for each chosen distance.
+We implement \func{All-Neighbors} queries in the small world model by listing all neighbors from closest to furthest away from the queried vertex,
+using $\poly(\log n)$ resources per query.
+The main challenge is to sample for the next closest neighbor, when the probabilities are a function of the Manhattan distance on the lattice.
+Rather than sampling for a neighbor directly, we partition the nodes based on their distance from $v$ (there are $\Theta(d)$ vertices at distance $d$).
+We first choose the next smallest distance partition with a neighbor using rejection sampling techniques
+(Lemma~\ref{lem:rejection_sampling}) on the appropriate distribution.
+In the second step, we generate all the neighbors within that partition using \emph{skip-sampling}.

@@ -1,21 +1,31 @@
 \subsection{Random Catalan Objects}
 \label{sec:overview_catalan_objects}
-Consider a one dimensional random walk on the line with $n$ up and $n$ down steps, starting from the origin,
-with a constraint that the height is always non-negative.
-We implement two queries, $\func{Height}$ and \func{First-Return}, where $\func{Height}(t)$ which returns the position of the walk at time $t$,
-and \func{First-Return}$(t)$ returns the first time when the random walk returns to the same position as it was at time $t$.
+Many important combinatorial objects can be interpreted as Catalan objects.
+One such interpretation is a Dyck path; a one dimensional random walk on the line with $n$ up and $n$ down steps, starting from the origin,
+with the constraint that the height is always non-negative.
+We implement $\func{Height}(t)$, which returns the position of the walk at time $t$,
+and \func{First-Return}$(t)$, which returns the first time when the random walk returns to the same position as it was at time $t$.
+These queries are natural for several types of Catalan objects.
+As noted previously, we can use standard bijections to translate the Dyck path query implementations into
+natural queries for \emph{bracketed expressions} and \emph{ordered rooted trees}.
+Specifically, \func{Height} values in Dyck paths are equivalent to \emph{depth} in bracket expressions and trees.
+The \func{First-Return} queries are more involved, and are equivalent to finding the \emph{matching bracket} in bracket expressions,
+and alternately to finding the \emph{next child} of a node in an ordered rooted tree (see Section~\ref{sec:bijections_to_other_catalan_objects}).
 
-Over the course of the execution, our algorithm will sample the height of the walk at many different positions $\{ x_1, x_2,\cdots, x_m\}$
+Over the course of the execution, our algorithm will sample the height of a random Dyck path at many different positions $\{ x_1, x_2,\cdots, x_m\}$
 (with $x_i<x_{i+1}$), both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.
 These sampled positions divide the sequence into contiguous \emph{intervals} $[x_i,x_{i+1}]$,
 where the height of the endpoints $y_i, y_{i+1}$ have been sampled, but none of the intermediate heights are known.
 The important observation is that, since the beginning and ending heights are known,
 the section of the path within an \emph{interval} is completely independent of all other \emph{intervals}.
 So, each interval $[x_i,x_{i+1}]$ along with the corresponding heights $y_i,y_{i+1}$,
-represents a generalized Dyck problem with $U$ up steps, $D$ down steps, and the constraint that the path never goes below $0$.
+represents a generalized Dyck problem with $U$ up steps, $D$ down steps,
+and the constraint that the path never dips more than $y_i$ units below the starting height.
 
 \paragraph*{$\func{Height}$ Queries}
 \label{par:height_queries}
+General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval} containing $x$,
+and repeatedly sampling the height of the midpoint, until the height of $x$ is sampled.
 We start by implementing a subroutine that given an \emph{interval} $[x_i,x_{i+1}]$ of length of length $2B$ with $2U$ up and $2D$ down steps,
 samples the number of up steps $U'=U+d$ to the first half of the \emph{interval}
 (we parameterize $U'$ with $d$ in order to make the analysis cleaner).
@@ -23,32 +33,36 @@ Note that this is equivalent to answering the query $\func{Height}(x_i+B)$.
 This is done by sampling the parameter $d$ from a distribution $\{ p_d\}$ with $p_d = S_{left}(d)\cdot S_{right}(d)/S_{total}$,
 where $S_{left}(d)$ (respectively $S_{right}(d)$) is the number of possible paths in the left (resp. right) half of the \emph{interval} when
 $U+d$ up steps and $D-d$ down steps are assigned to the first half, and $S_{total}$ is the number of possible paths in the original $2B$-interval.
-General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval},
-and sampling the height of the midpoint, until the height of $x$ is sampled.
 
-The problem of sampling the number of up steps in the first half of the \emph{interval} was solved for the case where the sequence is fully random
-in \cite{huge}.
+The problem of sampling the number of up steps in the first half of the \emph{interval} was solved for the unconstrained case
+(where the sequence is just a random permutation of up and down steps) in \cite{huge}.
 Adding the non-negativity constraint introduces further difficulties as the distribution over $d$ has a CDF that is difficult to compute.
 We construct a different distribution $\{q_d\}$ that approximates $\{p_d\}$ pointwise to a factor of $\log n$ and has an efficiently computable CDF.
-This allows us to sample from $\{q_d\}$ and leverage the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}) to obtain samples from $\{p_d\}$.
+This allows us to sample from $\{q_d\}$ and leverage rejection sampling techniques
+(see Lemma~\ref{lem:rejection_sampling}) to obtain samples from $\{p_d\}$.
 
 \paragraph*{$\func{First-Return}$ Queries}
 \label{par:_first-return_queries}
-$\func{First-Return}$ queries present an additional challenge because we don't know which \emph{interval} contains the first return.
-Since there could be up to $\Theta(n)$ intervals, is it inefficient to iterate through all of them.
-To circumvent this problem, we allow each interval to sample its own boundary constraint $k>0$ instead of using the global non-negativity constraint.
+Recall that \func{First-Return}$(x)$ is only defined if the first step after position $x$ is upwards (i.e. $\func{Height}(x+1) > \func{Height}(x)$).
+$\func{First-Return}(x)$ queries are challenging because we first need to find the \emph{interval} containing the first return to $\func{Height}(x)$.
+Since there could be up to $\Theta(n)$ intervals, it is inefficient to iterate through all of them.
+To circumvent this problem, we allow each interval to sample and maintain its own boundary constraint $k>0$
+instead of using the global non-negativity constraint.
 A boundary constraint of $k$ implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k$ or lower.
 Additionally, we maintain an invariant that states that this boundary $x_i-k$ coincides with $\min(x_i,x_{i+1})$.
 If this constraint is satisfied, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest sampled position $x_i>x$
 whose sampled height $y_i \le \func{Height}(x)$, and considering the interval $[x_{i-1},x_i]$ preceding $x_i$.
 
-Every time the $\func{Height}$ algorithm creates new intervals by sub-dividing an existing one, this invariant is potentially broken.
+Every time the $\func{Height}$ algorithm creates new intervals by sub-dividing an existing one, the invariant is potentially broken.
 We re-establish it by sampling a ``mandatory boundary''
 (a boundary constraint with the additional restriction that some position within the interval $[x_i,x_{i+1}]$ \emph{must} touch the boundary),
 %(a $y$-coordinate that must be achieved within the interval $[x_i,x_{i+1}]$ but not exceeded),
-and then sampling a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = y$.
-The first step of sampling the mandatory boundary is performed by binary searching on the possible boundary locations.
-To find a position that touches this boundary, we parameterize the position with $d$ and find the distribution $\{p_d\}$ associated with these events.
-We then define a piecewise continuous PDF $\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$.
-We then use this to construct $q_d = \int_d^{d+1}\hat q(\delta)$, where the CDF of $q_d$ is efficently computable using integration,
-and use rejection sampling (Lemma~\ref{lem:rejection_sampling}) again to sample indirectly from $\{p_d\}$.
+and then sampling a position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = y$ (see Figure~\ref{fig:dyck_invariant_preserve}).
+The first step of sampling the \emph{mandatory boundary} is performed by binary searching on the possible boundary locations using an appropriate CDF.
+To find a position that touches this boundary, we parameterize the position with $d$,
+and find the distribution $\{p_d\}$ associated with the various possible positions.
+Since we cannot directly sample from this complicated distribution,
+we define a \emph{piecewise continuous} PDF $\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$.
+We then use this to define discrete distribution $\{q_d\}$ where $q_d = \int_d^{d+1}\hat q(\delta)$,
+where we can efficiently compute the CDF of $\{q_d\}$ by integrating the piecewise continuous $\hat q(\delta)$.
+This allows us to use the rejection sampling technique (Lemma~\ref{lem:rejection_sampling}) to indirectly obtain a sample from $\{p_d\}$.
