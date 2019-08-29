@@ -87,10 +87,7 @@ Thus at this point, we have sampled all neighbors in $\Gamma_D^v$. We can then u
 Sampling each neighbor takes $O(\log n)$ time and one random $N$-bit word; the resources spent sampling the distances is also bounded by that of the neighbors.
 As there are $O(\log n)$ neighbors with high probability, we obtain the following theorem.
 
-\begin{restatable}{theorem}{res:swm-thm}\label{thm-swm}
-There exists an algorithm that generates a random graph from Kleinberg's Small World model, where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
-using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
-\end{restatable}
+\DirectedGrand*
 
 \subsection{Generator for $c \neq 1$}
 

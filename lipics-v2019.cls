@@ -345,7 +345,7 @@
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
                                     {-3.25ex \@plus-1ex \@minus-.2ex}%
                                     {1.5ex \@plus .2ex}%
-                                    {\sffamily\large\bfseries\raggedright}}
+                                    {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\z@}%
                                        {3.25ex \@plus1ex \@minus .2ex}%
                                        {-1em}%

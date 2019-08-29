@@ -1,31 +1,11 @@
 \subsection{Random Coloring of a Graph}
 \label{sec:overview_random_coloring_of_a_graph}
-\todo[inline,color=red!80!green!25]{This should probably be reduced}
-Finally, we introduce a new model for implementating huge random objects
+Finally, we introduce a new model (Definition~\ref{def:local_access_LCA}) for implementing huge random objects
 where the distribution is specified as a uniformly random solution to a huge combinatorial problem.
-In all the problems we have considered so far as well as the ones studied in prior work \cite{huge,sparse,reut}, the description size
-of the random object is small (typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters).
-In this new setting, we will implement local query access to random $q$-colorings of a given huge graph $G$ of size $n$ with maximum degree $\Delta$.
-The distribution in this case is defined by the graph structure which has size $\mathcal O(n\Delta)$.
-We present the following definition for local access implementations in this setting.
-
-\begin{definition}
-\label{def:local_access_LCA}
-Given a combinatorial problem on graphs,
-a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
-provides an oracle $\mathcal A$ with the following properties.
-$\mathcal A$ has query access to a graph $G$, and a tape of public random bits $\vec R$.
-Assuming that the solution set of the combinatorial problem on $G$ is $\mathbb X$,
-$\mathcal A$ upon being queried with $F_i$, returns the value $F_i(X)$ for a specific solution $X\in\mathbb X$ where the choice of $X$
-depends only on $\vec R$, and the distribution of $X$ (over $\vec R$) is $\epsilon$-close to the uniform distribution over $\mathbb X$.
-Two different instances of $\mathcal A$ with the same graph oracle and the same random bits,
-must agree on the choice of $X$ that is consistent with all answered queries regardless of what queries were actually asked.
-\end{definition}
-
-We can contrast this definition with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
-which also allow query access to \emph{some} valid solution and can read the input through local probes.
-An additional difficulty in our setting is that we also have to make sure that we return a solution from the correct distribution.
-Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
+In this new setting, we will implement local query access to random $q$-colorings of a given huge graph $G$ of size $n$ with maximum degree $\Delta$,
+by implementing a query $\func{Color}(v)$, which returns the color of a \emph{single vertex} $v$.
+Since the size of $G$ is $\mathcal O(n\Delta)$, and $\func{Color}(v)$ has to run in sub-linear time $o(n)$,
+it is not even possible to read the entire input description during its execution.
 
 
 \paragraph*{$\func{Color}$ queries}

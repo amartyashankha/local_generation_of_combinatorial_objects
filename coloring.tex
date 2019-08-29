@@ -348,14 +348,7 @@ Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected numbe
 %Instead of looking through all the epochs in order, we can use the coloring generator \todo{where?} to find the locations directly.
 %\end{corollary}
 
-\begin{theorem}
-\label{thm:coloring_generator_main}
-Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
-we can sample the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
-to the uniform distribution over all colorings of the graph, in a consistent manner,
-using only $\mathcal O(n^{3.06/\alpha}\epsilon^{-\mathcal O(1/\alpha)}\Delta\log (n/\epsilon))$ time and random bits.
-%This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
-\end{theorem}
+\ColoringGrand*
 \begin{proof}
 Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(\epsilon) \le 3(\ln n + \ln 1/\epsilon)$.
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that

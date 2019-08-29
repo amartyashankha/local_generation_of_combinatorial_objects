@@ -215,13 +215,7 @@ We finally extend our algorithm to support other query types as follows.
 
 We summarize the results so far with through the following theorem.
 
-\begin{restatable}{theorem}{res:grand}
-\label{thm:grand}
-Given a random graph model defined by the probabilty matrix $\{ p_{uv}\}$ and assuming that we can compute the the quantities
-$\prod_{u=a}^b (1-p_{vu})$ and $\sum_{u=a}^b p_{vu}$ in polylogarithmic time,
-there exists a local-access implementation for this random graph model that supports \func{Random-Neighbor},
-\func{Vertex-Pair} and \func{Next-Neighbor} queries using polylogarithmic running time, additional space, and random words per query.
-\end{restatable}
+\UndirectedGrand*
 
 We have also been implicitly assuming perfect-precision arithmetic and we relax this assumption in Section~\ref{sec:remove-perfect}.
 In the following Section~\ref{sec:applications}, we show applications of Theorem~\ref{thm:grand} to the $G(n,p)$ model,
