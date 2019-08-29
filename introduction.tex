@@ -31,11 +31,10 @@ we also introduce and implement a new \func{Random-Neighbor} query for undirecte
 
 \todo[inline,color=red!80!green!25]{True Distribution}
 
-\textcolor{Maroon}{
 In the context of random colorings of an input graph,
-we define a new model for generating random objects which have huge description size (the underlying graph).
+we define a new model for generating random objects which have huge description size (the underlying graph $G$).
 In this setting, our algorithms are unable to read the entire description,
-but can still answer queries to a valid sampled object, using a sub-linear number of local probes to the input graph.}
+but can still answer queries to a valid sampled object, using a sub-linear number of local probes to the input graph $G$.
 
 
 
@@ -46,16 +45,17 @@ but can still answer queries to a valid sampled object, using a sub-linear numbe
 Random graphs are one of the most well studied types of random object.
 We consider the problem of implementing local access to a number of fundamental random graph models.
 We implement some natural queries including \func{Vertex-Pair}, \func{Next-Neighbor},
-and a newly introduced \func{Random-neighbor} query\footref{foot:graph_queries}.
+and a newly introduced \func{Random-neighbor} query\footref{foot:graph_queries}, using polylogarithmic resources.
+Our results on random graphs are summarized in Table~\ref{table:graph_results}.
 
 \subparagraph*{Undirected Random Graphs with Independent Edge Probabilities:}
 \label{par:undirected_random_graphs_with_independent_edge_probabilities}
 We implement queries to both the adjacency matrix and adjacency list representation
 for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
 where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
-We implement \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}\footref{foot:graph_queries} queries.
 Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
-our implementations support all three types of queries using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
+our implementations support \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}\footref{foot:graph_queries} queries,
+using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
 Note that in this setting, $\func{Vertex-Pair}$ queries are trivial by themselves,
 since the existence of an edge depends on an independent random variable.
 \textcolor{Maroon}{However, maintaining all three types of queries simultaneously is much harder.}
@@ -105,6 +105,7 @@ using $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graph
 There exists an algorithm that generates a random graph from Kleinberg's Small World model, where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
 using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
+\todo[inline,color=red!80!green!25]{Is this the correct thm?}
 
 
 
@@ -204,7 +205,7 @@ For additional related work, see Section~\ref{sec:additional_related_work}.
 
 
 
-\subsection*{Applications}
+\subsection{Applications}
 \label{sec:applications}
 For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg}
 only uses $\mathcal O(\log^2 n)$ probes to the underlying network.

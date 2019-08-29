@@ -1,8 +1,8 @@
 \subsection{Undirected Graphs}
 \label{sec:undirected_graphs}
-In Section~\ref{sec:undirected}, we implement queries to both the adjacency matrix and adjacency list representation
-for the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
-where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
+We consider the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
+(where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$),
+from which the results can be applied to Erdos-Renyi random graphs and the Stochastic Block Model.
 Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
 In this model, \func{Vertex-Pair} queries by themselves can be implemented trivially,
 since the existence of any edge $(u,v)$ is an independent Bernoulli random variable,
@@ -11,24 +11,26 @@ Inspired by \cite{reut}, we provide an implementation of $\func{next-neighbor}$ 
 which return the neighbors of any given vertex one by one in lexicographic order.
 Finally, we introduce a new query: \func{Random-Neighbor} that returns a uniformly random neighbor of any given vertex.
 This would be useful for any algorithm that performs random walks.
-$\func{Random-Neighbor}$ queries present particularly interesting challenges that are outlined below.
+$\func{Random-Neighbor}$ queries in non-sparse graphs present particularly interesting challenges that are outlined below.
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
-The next neighbor of a vertex can be found trivially by generating consecutive entries of the adjacency matrix,
-but for small edge probabilities $p_{uv} = o(1)$ this implementation is inefficient, and uses $\Omega (1/p)$ time.
-As in \cite{reut}, we speed this up by sampling the number of ``non-neighbors'' preceding the next neighbor.
+In Erdos-Renyi graphs, the (lexicographically) next neighbor of a vertex can be recovered by generating consecutive entries
+of the adjacency matrix until a neighbor is found, which takes roughly $\Omega(1/p_{uv})$ time.
+For small edge probabilities $p_{uv} = o(1)$, this implementation is inefficient, and we show how to improve the runtime to $\mathcal O(\poly(\log n))$.
+Our main technique is to sample the number of ``non-neighbors'' preceding the next neighbor.
 To do this, we assume that we can estimate the ``skip'' probabilities $F(v,a,b)=\prod^{b}_{u=a} (1-p_{vu})$,
 where $F(v,a,b)$ is the probability that $v$ has no neighbors in the range $[a,b]$.
-We later show that it is possible to compute this quantity efficiently for the $G(n,p)$ and Stochastic block models.
+We later show how to compute this quantity efficiently for $G(n,p)$ and the Stochastic Block Model.
 
-A main difficulty as compared to \cite{reut}, arises from the fact that our graph is undirected,
+This strategy of \emph{skip-sampling} is also used in \cite{reut}.
+However, in our work, the main difficulty arises from the fact that our graph is undirected,
 and thus we must ``inform'' all (potentially $\Theta(n)$) non-neighbors once we decide on the query vertex's next neighbor.
-More concretely, if $u'$ is sampled as the next neighbor of $v$ after its previous neighbor $u$,
+Concretely, if $u'$ is sampled as the next neighbor of $v$ after its previous neighbor $u$,
 we must maintain consistency in subsequent steps by ensuring that none of the vertices in the range $(u,u')$ return $v$ as a neighbor.
 This update will become even more complicated as we handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
 
-In Section~\ref{sec:ER-rand}, we present a very simple randomized implementation (Algorithm~\ref{alg:oblivious-coin-toss})
+In Section~\ref{sec:ER-rand}, we present a randomized implementation (Algorithm~\ref{alg:oblivious-coin-toss})
 that supports \func{Next-Neighbor} queries efficiently, albeit the analysis of its performance is rather complicated.
 We remark that this approach may be extended to support \func{Vertex-Pair} queries with superior performance
 (given that we do not to support \func{Random-Neighbor} queries) and to provide deterministic resource usage guarantee
