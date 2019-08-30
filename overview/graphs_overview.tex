@@ -2,7 +2,7 @@
 \label{sec:undirected_graphs}
 We consider the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
 (where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$),
-from which the results can be applied to Erdos-Renyi random graphs and the Stochastic Block Model.
+from which the results can be applied to Erd\"os-R\'enyi random graphs and the Stochastic Block Model.
 Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
 In this model, \func{Vertex-Pair} queries by themselves can be implemented trivially,
 since the existence of any edge $(u,v)$ is an independent Bernoulli random variable,
@@ -15,7 +15,7 @@ $\func{Random-Neighbor}$ queries in non-sparse graphs present particularly inter
 
 \paragraph*{\func{Next-Neighbor} Queries}
 \label{par:next_neighbor_queries}
-In Erdos-Renyi graphs, the (lexicographically) next neighbor of a vertex can be recovered by generating consecutive entries
+In Erd\"os-R\'enyi graphs, the (lexicographically) next neighbor of a vertex can be recovered by generating consecutive entries
 of the adjacency matrix until a neighbor is found, which takes roughly $\Omega(1/p_{uv})$ time.
 For small edge probabilities $p_{uv} = o(1)$, this implementation is inefficient, and we show how to improve the runtime to $\mathcal O(\poly(\log n))$.
 Our main technique is to sample the number of ``non-neighbors'' preceding the next neighbor.

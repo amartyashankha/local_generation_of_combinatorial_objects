@@ -11,7 +11,7 @@ since sampling the entire object up front would ruin its efficiency.
 In this work, we focus on generating huge random objects in a number of new settings,
 including basic random graph models that were not previously considered, Catalan objects, and random colorings of graphs.
 One emerging theme that we develop further in this work is to provide access to random objects through more complex yet natural queries.
-For example, consider an implementation for Erdos-Renyi $G(n,p)$ random graphs,
+For example, consider an implementation for Erd\"os-R\'enyi $G(n,p)$ random graphs,
 where the simplest query \func{Vertex-Pair}$(u,v)$ would ask about the existence of edge $(u,v)$,
 which can be answered trivially by flipping a coin with bias $p$ (thus revealing a single entry in the adjacency matrix).
 \textcolor{Purple}{Since this might be inefficient for many applications involving non-dense graphs,}
@@ -87,8 +87,8 @@ there exists an implementation for this model that supports local access through
 and \func{Next-Neighbor} queries using $\mathcal O(\log^{\mathcal O(1)} n)$ running time, additional space, and random bits per query.
 \end{restatable}
 
-Next, we show that these assumptions can be realized in Erdos-Renyi $G(n,p)$ random graphs, and the Stochastic Block Model.
-The Stochastic Block Model presents some additional challenges for assigning community labels to the vertices.
+Next, we show that these assumptions can be realized in Erd\"os-R\'enyi $G(n,p)$ random graphs, and the Stochastic Block Model.
+SBM presents additional challenges for assigning community labels to the vertices.
 \todo[inline,color=red!80!green!25]{Separate thms for ER and SBM?}
 
 
