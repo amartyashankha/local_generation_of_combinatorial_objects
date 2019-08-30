@@ -356,6 +356,6 @@ the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially samples $\mathcal O(t\Delta)$ color proposals,
 while iterating through all the neighbors of $v$ in all $t$ epochs.
 Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
-$\mathcal O(n^{3.06/\alpha}\epsilon^{-\mathcal O(1/\alpha)}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
+$\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
 \end{proof}
 \todo[inline,color=red!80!green!25]{$1/n^c$ close sampling}

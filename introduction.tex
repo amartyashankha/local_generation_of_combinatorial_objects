@@ -175,9 +175,8 @@ will respond to queries in a manner consistent with each other; they will sample
 \label{thm:coloring_generator_main}
 Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
 we can sample the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
-to the uniform distribution over all colorings of the graph, in a consistent manner,
-using only $\mathcal O(n^{3.06/\alpha}\epsilon^{-\mathcal O(1/\alpha)}\Delta\log (n/\epsilon))$ time and public random bits per query.
-%This is sublinear for $\alpha > 6.12$ and the sampled coloring is $1/n$-close to the uniform distribution in $L_1$ distance.
+to the uniform distribution over all valid colorings of the graph, in a consistent manner,
+using only $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time, probes, and public random bits per query.
 \end{restatable}
 
 
