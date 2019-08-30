@@ -137,17 +137,19 @@ If the interval in question has odd length, \textcolor{Maroon}{we sample one ste
     \label{fig:dyck_height_sampling}
 \end{figure}
 
-\todo[inline,color=red!80!green!25]{What if U and D are not even?}
 Our general recursive step is as follows.
 We consider an interval of length $2B$ comprising of $2U$ up-steps and $2D$ down-steps where the sum of any prefix cannot be less than $k-1$
-i.e. the path within this interval should be sampled from $\mathsf C_k(2U,2D)$ (the factors of two makes the analysis cleaner).
-Without loss of generality, we assume that $D\le U$; if this were not the case, we could simply flip the interval, and swap the up and down steps.
-This ensures that the overall path in the interval is non-decreasing in height.
+i.e. the path within this interval should be sampled from $\mathsf C_k(2U,2D)$.
+In order to make the analysis simpler, we have assumed that the number of up and down steps are both even.
+The case of sampling according to $\mathsf C_k(2U+1, 2D+1)$ works similarly with slightly different formulae.
+Without loss of generality, we assume that $D\le U$; if this were not the case, we could simply flip the interval,
+swap the up and down steps, and modify the prefix constraint to $k'=k+2U-2D$ (Figure~\ref{fig:dyck_height_sampling}).
+This ensures that the overall path in the interval is non-decreasing in height, which will simpify our analysis.
 
-We sample the height of the path $B = U+D$ steps into the interval at the midpoint (see Figure~\ref{fig:dyck_height_sampling}).
-This is equivalent to sampling the number of up or down steps that get assigned to the first half of the interval.
+We determine the height of the path $B = U+D$ steps into the interval at the midpoint (see Figure~\ref{fig:dyck_height_sampling}).
+This is equivalent to finding the number of up or down steps that get assigned to the first half of the interval.
 We parameterize the possibilities by $d$ and define $p_d$ to be the probability that exactly $U+d$ up-steps and $D-d$ down steps
-get assigned to the first half, and therefore the second half gets exactly $U-d$ up steps and $D+d$ down steps.
+get assigned to the first half (with the remaining $U-d$ up steps and $D+d$ down steps being assigned to the second half).
 \begin{align}
 \label{eq:height_sampling_probability}
 p_d = \frac{S_{left}(d)\cdot S_{right}(d)}{S_{total}(d)}
@@ -278,16 +280,17 @@ This gives us the height of the Dyck path at the midpoint of the two given point
 
 \begin{theorem}
 \label{thm:dyck_midpoint_sampling}
-Given two positions $a$ and $b$ (and the associated heights) in a Dyck path of length $2n$,
-with the guarantee that no position between $a$ and $b$ has been sampled yet,
-there is an algorithm that returns the height of the path at the midpoint of $a$ and $b$ (or next to the midpoint if $b-a$ is odd).
+Given an interval $[x_i,x_{i+1}]$ (and the associated endpoint heights $y_i, y_{i+1}$) in a Dyck path of length $2n$,
+with the guarantee that no position between $x_i$ and $x_{i+1}$ has been sampled yet,
+there is an algorithm that returns the height of the path at the midpoint of $x_i$ and $x_{i+1}$ (or next to the midpoint if $x_{i+1}-x_i$ is odd).
 Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
 \end{theorem}
 \begin{proof}
-If $b-a$ is even, we can set $B = (b-a)/2$.
-Otherwise, we first sample a single step from $a$ to $a+1$, and then set $B = (b-a-1)/2$.
+If $x_{i+1}-x_i$ is even, we can set $B = (x_{i+1}-x_i)/2$.
+Otherwise, we first sample a single step from $x_i$ to $x_i+1$, and then set $B = (x_{i+1}-x_i-1)/2$.
 Since there are only two possibilities for a single step, we can explicitly approximate the probabilities, and then sample accordingly.
-This allows us to apply the rejection sampling from Lemma~\ref{lem:rejection_sampling} using $\{ q_d\}$ to obtain samples from $\{ p_d\}$ as defined above.
+This allows us to apply the rejection sampling from Lemma~\ref{lem:rejection_sampling}
+using $\{ q_d\}$ to obtain samples from $\{ p_d\}$ as defined above.
 %Now, if $B > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
 %to obtain a $\mathcal O(poly(\log n))$ algorithm.
 %Otherwise, we sample each step induividually.
