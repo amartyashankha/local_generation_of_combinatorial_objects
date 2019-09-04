@@ -1,56 +1,76 @@
 \section{Model and Overview of our Techniques}
 \label{sec:overview_of_our_techniques}
-We begin by formalizing our model of \emph{local-access implementations}, inspired by \cite{reut}.
+We begin by formalizing our model of \emph{local-access implementations}, inspired by \cite{reut},
+but we add some aspects that were not addressed in earlier models.
+
+\begin{definition}
+\label{def:parametrized_random_object}
+A \textbf{random object family} maps parameters $\Pi$ to a distribution $\mathsf X^{\Pi}$ over the set $\mathbb X^{\Pi}$.
+\end{definition}
 
 \begin{definition}
 \label{def:local_access}
-Given a distribution $\mathsf  X$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
-of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X\rightarrow \{0,1\}$,
-\textcolor{Maroon}{provides an oracle with an internal state $\mathcal S$ (where $\mathcal S$ is initally empty)}.
-Given a query $F_i$, the oracle returns the value $F_i(X)$ for $X\thicksim \mathsf X$, and updates it's internal state $\mathcal S$,
-while satisfying the following:
-%For clarity, we assume that the generator is invoked until its entire graph $G$ is exposed.
-%The local-access generator for a probability distribution $\mathsf{D}$ of the desired random graph model must satisfy the following properties:
+Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ parameterized by $\Pi$, a \emph{local access implementation}
+%Given a distribution $\mathsf X^{\Pi}$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
+of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X^{\Pi}\rightarrow \{0,1\}$,
+\textcolor{Maroon}{provides an oracle $\mathcal M$ with an internal state $\mathcal S$ (memory for storing partially generated random object)}.
+Given the parameters $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
+and updates it's internal state $\mathcal S$, while satisfying the following:
 \begin{itemize}
     \item \textbf{Consistency:}
-    All the values $F_i(X)$ returned by the local-access implementation throughout the entire execution
-    must be consistent with a single $X\in \mathbb X$.
+    There must be a single $X\in \mathbb X^{\Pi}$, such that for all queries $F_i$ presented to the oracle,
+    the returned value $\mathcal M(\Pi,F_i)$ equals the true value $F_i(X)$.
+    %must be consistent with a single $X\in \mathbb X^{\Pi}$.
     \item \textbf{Distribution equivalence:}
-    The random object $X\in \mathbb X$ consistent with the responses $\{ F_i(X)\}$ must be sampled from some distribution $\mathsf{X}'$
-    that is $\epsilon$-close to the desired distribution $\mathsf{X}$ in $L_1$-distance.
-    In this work we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
+    The random object $X\in \mathbb X^{\Pi}$ consistent with the responses $\{ F_i(X)\}$ must be sampled from some distribution $\hat{\mathsf{X}}^{\Pi}$
+    that is $\epsilon$-close to the desired distribution $\mathsf{X}^{\Pi}$ in $L_1$-distance.
+    In this work, we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
     \item \textbf{Performance:}
-    The computation time, random bits, and additional space (increase in size of internal state $\mathcal S$)
-    required to answer a single query must be $\poly(\log |X|)$ with high probability, without any initialization overhead.
+    The computation time, and random bits required to answer a single query must be $o(|X|)$ with high probability,
+    without any initialization overhead.
 \end{itemize}
-\end{definition}
-
 In particular, we allow queries to be made adversarially and non-deterministically.
 The adversary has full knowledge of the algorithm's behavior and its past random bits.
+\end{definition}
+
+In prior work \cite{reut, huge, sparse} as well as some of our results, the input parameters $\Pi$ are of small size (typically $\mathcal O(\log n)$),
+and the oracle $\mathcal M$ can read all of $\Pi$.
+For example, in $G(n,p)$ random graphs, $\Pi = (n, p)$.
 
 
-\paragraph*{Distributions with Huge Description Size}
+\subparagraph*{Distributions with Huge Description Size:}
 \label{par:distributions_with_huge_description_size}
-We also consider distributions whose description size is too large to be read by a sublinear algorithm.
-In all the problems we have considered so far as well as the ones studied in prior work \cite{huge,sparse,reut}, the description size
-of the random object is small (typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters).
-For instance, the $G(n, p)$ model is described using two parameters $n$ and $p$.
-However, we wish to implement local access to the uniform distribution over all valid colorings of a given input graph $G$.
-Here, the description of the distribution is given by the underlying graph $G$, which is too large to be read by a sublinear time algorithm.
-In this setting, we can modify Definition~\ref{def:local_access}, such that the oracle is allowed to read the ``huge'' description through local probes.
-For instance, in the case of random colorings, the oracle can read the underlying graph $G$ using neighborhood probes.
+We initiate the study of \textbf{random object families} where the parameters $\Pi$ are too large to be read by a sub-linear time algorithm.
+%In all the problems considered in prior work \cite{huge,sparse,reut}, the description size
+%of the random object is small, typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters.
+%For instance, the $G(n, p)$ model is described using two parameters $n$ and $p$.
+%However, if one wishes to implement local access to the uniform distribution over all valid colorings of a given input graph $G$,
+In this setting, the oracle from Definition~\ref{def:local_access} cannot read all of $\Pi$, and instead accesses it through local probes.
+For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over all valid colorings of $G$.
+Here, the parameter $\Pi$ includes the entire underlying graph $G$, which is too large to be read by a sublinear time algorithm.
+In this case, the oracle can query the underlying graph $G$ using neighborhood probes.
 The number of such probes used to answer a single query must also be sub-linear in the input size.
 
 
-\paragraph*{Memory-less Sampling from Distributions with Huge Description Size}
-\label{par:memory_less_sampling_from_distributions_with_huge_description_size}
-In addition to the above generalization of Definition~\ref{def:local_access}, we also consider ``memory-less'' oracle implementations,
-where the oracle does not have any internal state, and instead has access to a source of common randomness.
-An important implication of being memory-less is that the responses to each query is oblivious of the order of queries being asked.
-In fact, the lack of internal state implies that independent implementations that use the same common randomness and the same input description
+\paragraph*{Supporting Independent Query Oracles: Memory-less Implementations}
+\label{par:supporting_independent_query_oracles_memory_less_implementations}
+The model in Definition~\ref{def:local_access} only supports sequential queries,
+since the response to a future query may depend on the changes in internal state caused by past queries.
+In some applications, we may want to have multiple independent query oracles whose responses are all consistent with each other.
+One way to achieve this is to restrict our attention to \emph{memory-less} implementations; ones without any internal state.
+An important implication of being memory-less is that the responses to each query is oblivious to the order of queries being asked.
+In fact, the lack of internal state implies that independent implementations that use the same random bits and the same input parameters
 must respond to queries in the same way.
-So, we can have multiple (and even simultaneous) copies of the implementation,
-that are all consistent with a single random object drawn from the distribution, without having to write to memory or communicate in any other way.
+Thus, instead of using the internal state to maintain consistency, memory-less implementations are given access to a source of public random bits.
+
+%In addition to the above generalization of Definition~\ref{def:local_access}, we also consider ``memory-less'' oracle implementations,
+%where the oracle does not have any internal state, and instead has access to a source of common randomness.
+%An important implication of being memory-less is that the responses to each query is oblivious of the order of queries being asked.
+%In fact, the lack of internal state implies that independent implementations that use the same common randomness and the same input description
+%must respond to queries in the same way.
+%So, we can have multiple (and even simultaneous) copies of the implementation,
+%that are all consistent with a single random object drawn from the distribution,
+%without having to write to shared memory or communicate in any other way.
 
 For the problem of sampling a random graph coloring,
 we present an implementation that is memory-less and also accesses the input description through local probes,
@@ -58,23 +78,24 @@ as elaborated in the following model:
 
 \begin{definition}
 \label{def:local_access_LCA}
-Given a combinatorial problem defined on a large input,
+Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ parameterized by input $\Pi$,
 a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
-provides an oracle $\mathcal A$ with the following properties.
-$\mathcal A$ has query access to an input $\mathcal I$, and a tape of public random bits $\vec R$.
-Assuming that the solution set of the combinatorial problem on $\mathcal I$ is $\mathbb X(\mathcal I)$,
-$\mathcal A$ upon being queried with $F_i$, returns the value $F_i(X)$ for a specific solution $X\in\mathbb X(\mathcal I)$,
-where the choice of $X$ depends only on $\vec R$,
-and the distribution of $X$ (over $\vec R$) is $\epsilon$-close to the uniform distribution over $\mathbb X(\mathcal I)$.
-Two different instances of $\mathcal A$ with the same input oracle and the same random bits,
+provides an oracle $\mathcal M$ with the following properties.
+$\mathcal M$ has query access to the input parameters $\Pi$, and a tape of public random bits $\vec R$.
+Upon being queried with $\Pi$ and $F_i$, the oracle returns the value $\mathcal M(\Pi,\vec R,F_i)$,
+which must equal $F_i(X)$ for a specific $X\in\mathbb X^{\Pi}$, where the choice of $X$ depends only on $\vec R$,
+and the distribution of $X$ (over $\vec R$) is $\frac1{n^c}$-close to the distribution over $\mathbb X^{\Pi}$, for any given constant $c$.
+Thus, different instances of $\mathcal M$ with the same parameters $\Pi$ and the same random bits $\vec R$,
 must agree on the choice of $X$ that is consistent with all answered queries regardless of the order and content of queries that were actually asked.
 \end{definition}
 
-We can contrast this definition with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
-which also allows query access to \emph{some} valid solution and by reading the input through local probes.
-The additional challenge in our setting is that we also have to make sure that we find a uniformly random solution (rather than an arbitrary one).
+We can contrast Definition~\ref{def:local_access_LCA} with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
+which also allows query access to \emph{some} valid solution by reading the input through local probes.
+The additional challenge in our setting is that we also have to make sure that we return a uniformly random solution, rather than an arbitrary one.
 %Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
-\todo[inline,color=red!80!green!25]{memoryless or large description by itself?}
+
+We also note that the memory-less property may be achieved for small description size \textbf{random object families}.
+For instance, our implementation for the directed small world model admits such a memory-less implementation using public random bits.
 
 
 

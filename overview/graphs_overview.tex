@@ -39,10 +39,8 @@ and also to provide deterministic resource usage guarantee (Section~\ref{sec:ER-
 
 \paragraph*{\func{Random-Neighbor} Queries}
 \label{par:random_neighbor_queries}
-\todo[inline,color=red!80!green!25]{Low degree: Next Neighbor => Random Neighbor}
 We implement \func{Random-Neighbor} queries (Section~\ref{sec:blocks}) using $\poly(\log n)$ resources.
-The ability to do so is surprising since:
-\textcolor{Maroon}{
+The ability to do so is surprising since: \textcolor{Maroon}{
 (1) Sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} implementations, because this quantity alone
 imposes dependence on the existence of \emph{all} of its potential incident edges and consequently on the rest of the graph (since it is undirected).}
 Therefore, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
@@ -107,8 +105,7 @@ For $r$ communities, this yields an implementation with $ \mathcal{O}(r\cdot \po
 Lastly, we consider Kleinberg's Small World model (\cite{kleinberg, klein}) in Section~\ref{sec:small_world}.
 While small world models are proposed to capture properties of observed data such as small shortest-path
 distances and large clustering coefficients \cite{watts1998collective},
-this important special case of Kleinberg's model, defined on two-dimensional grids, demonstrates underlying geographical structures of networks.
-\todo[inline,color=red!80!green!25]{More on importance. Better description.}
+this important special case of Kleinberg's model, defined on two-dimensional grids, demonstrates the underlying geographical structures of networks.
 
 In this model, each vertex is identified via its 2D coordinate $v = (v_x, v_y) \in [\sqrt{n}]^2$.
 Defining the Manhattan distance as $\func{dist}(u,v)=|u_x-v_x|+|u_y-v_y|$,

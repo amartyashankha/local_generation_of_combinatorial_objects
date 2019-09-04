@@ -25,7 +25,7 @@ and a constraint that the path never dips more than $y_i$ units below the starti
 \paragraph*{$\func{Height}$ Queries}
 \label{par:height_queries}
 General $\func{Height}(x)$ queries can then be answered by recursively halving the \emph{interval} containing $x$,
-and repeatedly sampling the height of the midpoint, until the height of position $x$ is sampled.
+by repeatedly sampling the height at the midpoint, until the height of position $x$ is sampled.
 We start by implementing a subroutine that given an \emph{interval} $[x_i,x_{i+1}]$ of length $2B$, containing $2U$ up and $2D$ down steps,
 determines the number of up steps $U'=U+d$ assigned to the first half of the \emph{interval}
 (we parameterize $U'$ with $d$ in order to make the analysis cleaner).
@@ -43,27 +43,32 @@ This allows us to sample from $\{q_d\}$ and leverage rejection sampling techniqu
 
 \paragraph*{$\func{First-Return}$ Queries}
 \label{par:_first-return_queries}
-Recall that \func{First-Return}$(x)$ is only defined if the first step after position $x$ is upwards (i.e. $\func{Height}(x+1) > \func{Height}(x)$).
-$\func{First-Return}(x)$ queries are challenging because we first need to find the \emph{interval} containing the first return to $\func{Height}(x)$.
+\todo[inline,color=red!80!green!25]{Why is first ret defined this way}
+Recall that \func{First-Return}$(x)$ is only defined if the first step after position $x$ is upwards\footnote{
+%The up and down steps in a Dyck path correspond directly to opening and closing braces in a well bracketed expression.
+%The \func{First-Return} query returns the matching closing bracket for oprning bracket at position $x$ bracket.
+%If the first step is down however, the symbol at position $x$ is actually a closing bracket itself
+} (i.e. $\func{Height}(x+1) > \func{Height}(x)$).
+\func{First-Return} queries are challenging because we first need to find the \emph{interval} containing the first return to $\func{Height}(x)$.
 Since there could be up to $\Theta(n)$ intervals, it is inefficient to iterate through all of them.
 To circumvent this problem, we allow each interval $[x_i,x_{i+1}]$ to sample and maintain its own boundary constraint $k_i$
 instead of using the global non-negativity constraint.
 A boundary constraint of $k_i$ implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k_i$ or lower.
-Additionally, we maintain an invariant that states that this boundary $x_i-k$ coincides with $\min(x_i,x_{i+1})$.
-If this constraint is satisfied, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest known position $x_i>x$
+Additionally, we maintain a crucial invariant that states that this boundary is achieved by the endpoint of lower height $\min(y_i,y_{i+1})$.
+If this invariant holds, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest known position $x_i>x$
 whose sampled height $y_i \le \func{Height}(x)$, and considering the interval $[x_{i-1},x_i]$ preceding $x_i$.
-We use an interval tree over $2n$ positions to update and query for the known heights.
+We use an interval tree to update and query for the known heights.
 
 Unfortunately, every $\func{Height}$ query creates new intervals by sub-dividing existing ones, potentially breaking the invariant.
-We re-establish the invariant for $[x_i,x_{i+1}]$ by sampling a ``mandatory boundary'' $h$
+We re-establish the invariant for $[x_i,x_{i+1}]$ by generating a ``mandatory boundary'' $h$
 (a boundary constraint with the added restriction that some position within the interval \emph{must} touch the boundary),
 %(a $y$-coordinate that must be achieved within the interval $[x_i,x_{i+1}]$ but not exceeded),
-and then sampling a position $x\in [x_i,x_{i+1}]$ such that $\func{Height}(x) = h$ (Figure~\ref{fig:dyck_invariant_preserve}).
-This results in \emph{sub-intervals} $[x_i,x]$ and $[x,x_{i+1}]$, both of which have a boundary constraint coinciding with $h$.
+and then sampling a position $x_{mid}\in [x_i,x_{i+1}]$ such that $\func{Height}(x_{mid}) = h$ (Figure~\ref{fig:dyck_invariant_preserve}).
+This creates new intervals $[x_i,x_{mid}]$ and $[x_{mid},x_{i+1}]$, both of which have a boundary constraint at $h$.
 
 The first step of sampling the \emph{mandatory boundary} is performed
 by binary searching on the possible boundary locations using an appropriate CDF (Section~\ref{sec:sampling_the_lowest_achievable_height}).
-To find a position that touches this boundary, we parameterize the position with $d$,
+To find an intermediate position touching this boundary, we parameterize the position with $d$,
 and find the distribution $\{p_d\}$ associated with the various possibilities.
 Since we cannot directly sample from this complicated distribution, we define a \emph{piecewise continuous} probability distribution
 $\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$ (Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).

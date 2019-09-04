@@ -23,17 +23,9 @@ This Markov chain is a special case of the one presented in \cite{ghaffari_fisch
 and mixes in $\mathcal O(\log n)$ epochs when $q\ge 9\Delta$.
 %While we do not have the same restrictions as the distributed computation setting,
 %we choose to use this chain so as to avoid long analysis of mixing times.
-In order to implement the query $\func{Color}(v)$, it suffices to implement a query $\func{Accepted}(v,t)$
+In order to implement the query $\func{Color}(v)$, it suffices to implement $\func{Accepted}(v,t)$
 that indicates whether the proposal for $v$ was accepted in the $t^{th}$ epoch.
-The answer to this question depends on the prior colors of the potentially $\Delta$ neighbors of $v$.
-Our general strategy will be to recursively invoke $\func{Accepted}$ on the neighbors in order to check for conflicts.
-One requirement for this strategy is the ability to access a \emph{valid initial coloring} (the initial state of the Markov Chain)
-through local probes, in addition to local probes to the underlying graph structure.
-This assumption can be removed by using a result of \cite{coloring_initialize},
-that presents an LCA for $\Delta+1$ graph coloring using $\Delta^{\mathcal O(1)}\log n$ graph probes.
-Alternately, we can assign random initial colors to the vertices, which may result in an \emph{invalid} final coloring.
-However, the Markov Chain will transform the initial invalid coloring into a valid one with high probability.
-
+This depends on the prior colors of the potentially $\Delta$ neighbors of $v$.
 Determining the prior colors of all the neighbors $w$ using recursive calls would result in
 $\Delta$ invocations of $\func{Accepted}(w, t-1)$ (at the preceding epoch $t-1$).
 Naively, this gives a bound of $\Delta^t$ on the number of invocations.
@@ -52,3 +44,10 @@ This strategy dramatically reduces the recursive sub-problem size (given by the 
 and furthermore we show that we do not have to step through too many future epochs in order to check whether $c$ was overwritten.
 This allows us to bound the runtime by $\widetilde{\mathcal O}\left(t\Delta (n/\epsilon)^{6.12\Delta/q}\right)$,
 where the overall coloring is sampled from a distribution that is $\epsilon$-close to uniform (see Definition~\ref{def:local_access_LCA}).
+
+One requirement for our strategy is the ability to access a \emph{valid initial coloring} (the initial state of the Markov Chain)
+through local probes, in addition to local probes to the underlying graph structure.
+This assumption can be removed by using a result of \cite{coloring_initialize},
+that presents an LCA for $\Delta+1$ graph coloring using $\Delta^{\mathcal O(1)}\log n$ graph probes.
+Alternately, we can assign random initial colors to the vertices, which may result in an \emph{invalid} final coloring.
+However, the Markov Chain will transform the initial invalid coloring into a valid one with high probability.

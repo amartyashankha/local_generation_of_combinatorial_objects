@@ -1,5 +1,5 @@
 \section{Introduction}
-\todo[inline,color=red!80!green!25]{Random objects are important because . . .}
+\todo[inline,color=red!80!green!25]{Remove Authors}
 \todo[inline,color=red!80!green!25]{SW result in new model?}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
@@ -11,11 +11,10 @@ since sampling the entire object up front would ruin its efficiency.
 
 In this work, we focus on generating huge random objects in a number of new settings,
 including basic random graph models that were not previously considered, Catalan objects, and random colorings of graphs.
-One emerging theme that we develop further in this work is to provide access to random objects through more complex yet natural queries.
+One emerging theme that we develop further is to provide access to random objects through more complex yet natural queries.
 For example, consider an implementation for Erd\"os-R\'enyi $G(n,p)$ random graphs,
 where the simplest query \func{Vertex-Pair}$(u,v)$ would ask about the existence of edge $(u,v)$,
 which can be answered trivially by flipping a coin with bias $p$ (thus revealing a single entry in the adjacency matrix).
-\textcolor{Purple}{Since this might be inefficient for many applications involving non-dense graphs,}
 However, many applications involving non-dense graphs would benefit from \emph{adjacency list} access,
 which we provide through \func{Next-Neighbor} and \func{Random-Neighbor} queries\footnote{
 \label{foot:graph_queries}
@@ -29,11 +28,12 @@ Further work in \cite{sparse,reut} considers the generation of different random 
 \cite{reut} introduced the study of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
 In addition to supporting \func{Vertex-Pair} and \func{Next-Neighbor},
 we also introduce and implement a new \func{Random-Neighbor} query for undirected graphs with independent edge probabilities.
+\todo[inline,color=red!80!green!25]{Catalan?}
 
-In the context of random colorings of an input graph,
+In the context of random colorings of an input graph $G$,
 we define a new model for generating random objects which have huge description size (the underlying graph $G$).
 In this setting, our algorithms are unable to read the entire description,
-but can still answer queries to a valid sampled object, using a sub-linear number of local probes to the input graph $G$.
+but can still answer relevant queries to a valid sampled object, using a sub-linear number of local probes to the input graph $G$.
 
 
 
@@ -42,9 +42,9 @@ but can still answer queries to a valid sampled object, using a sub-linear numbe
 \paragraph*{Random Graphs (Section~\ref{sec:undirected} and Section~\ref{sec:small_world})}%
 \label{par:random_graphs}
 Random graphs are one of the most well studied types of random object.
-We consider the problem of implementing local access to a number of fundamental random graph models.
-We implement some natural queries including \func{Vertex-Pair}, \func{Next-Neighbor},
-and a newly introduced \func{Random-neighbor} query\footref{foot:graph_queries}, using polylogarithmic resources.
+We consider the problem of implementing local access to a number of fundamental random graph models,
+through some natural queries including \func{Vertex-Pair}, \func{Next-Neighbor},
+and a newly introduced \func{Random-neighbor} query\footref{foot:graph_queries}, using polylogarithmic resources per query.
 Our results on random graphs are summarized in Table~\ref{table:graph_results}.
 
 \subparagraph*{Undirected Random Graphs with Independent Edge Probabilities:}
@@ -52,7 +52,7 @@ Our results on random graphs are summarized in Table~\ref{table:graph_results}.
 We implement the aforementioned queries for the generic class of \emph{undirected graphs} with \emph{independent edge probabilities}
 $\left\{ p_{uv} \right\}_{u,v\in V}$, where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
 Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
-our implementations support \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor}\footref{foot:graph_queries} queries,
+our implementations support \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries\footref{foot:graph_queries},
 using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
 Note that in this setting, $\func{Vertex-Pair}$ queries are trivial by themselves,
 since the existence of an edge depends on an independent random variable.
@@ -94,19 +94,20 @@ SBM presents additional challenges for assigning community labels to the vertice
 
 
 
-\subparagraph*{Directed Random Graphs (The Small World Model):}
+\subparagraph*{Directed Random Graphs - The Small World Model (Section~\ref{sec:small_world}):}
 \label{par:directed_random_graphs}
-We also consider local-access implementations for directed graphs in Kleinberg's Small World model,
+We also consider local-access implementations for directed graphs through Kleinberg's Small World model,
 where the probabilities are based on distances in a 2-dimensional grid.
 Building on our previous sampling procedure, we implement \func{All-Neighbors} queries for the Small World model,
 using $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graphs are sparse, the other queries follow directly).
+\todo[inline,color=red!80!green!25]{Why is Kleinberg important?}
 
-\begin{restatable}{theorem}{DirectedGrand}\label{thm-swm}
-There exists an algorithm that generates a random graph from Kleinberg's Small World model,
-where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
-using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
+\begin{restatable}{theorem}{DirectedGrand}\label{DirectedGrand}
+There exists an algorithm that implements \func{All-Neighbors} queries for a random graph from Kleinberg's Small World model,
+where probability of including each directed non-grid edge $(u,v)$ in the graph is $c/(\func{dist}(u,v))^2$,
+where $c = \mathcal O(\poly(\log n))$, and $\func{dist}$ denotes the Manhattan distance,
+using $O(\log^2 n)$ time and random words per query with high probability.
 \end{restatable}
-\todo[inline,color=red!80!green!25]{Is this the correct thm?}
 
 
 
@@ -116,15 +117,15 @@ using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query
 Catalan objects capture a well studied combinatorial property and admit numerous interpretations that include
 well bracketed expressions, rooted trees, Dyck languages etc.
 In this paper, we focus on the Dyck path interpretation and implement local queries to a uniformly random instance of a Dyck path,
-and then use these to obtain implementations of random bracketed expressions and rooted trees.
+and then show how to use these to obtain implementations of random bracketed expressions and rooted trees.
 
 A Dyck path is defined as a sequence of $n$ upward $(+1)$ steps, and $n$ downward $(-1)$ steps,
 with the added constraint that the sum of any prefix of the sequence is non-negative.
-A random Dyck path may be viewed as a constrained one dimensional balanced random walk.
+A \emph{random} Dyck path may be viewed as a constrained one dimensional balanced random walk.
 One obvious query of interest is $\func{Height}(t)$ which returns the position of the walk after $t$ steps
 (equivalently, sum of the first $t$ elements of the sequence).
 We also introduce and support \func{First-Return} queries, where $\func{First-Return}(t)$ returns
-the first time when the random walk returns to the same position as it was at time $t$.
+the first time when the random walk returns to the same \emph{height} as it was at time $t$.
 \func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions presented in \cite{huge}.
 The added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.
 However, we are able to support both queries using $\mathcal O(\poly(\log n))$ resources.
@@ -142,7 +143,7 @@ a uniformly random Dyck path of length $2n$ by implementing the following querie
 \end{restatable}
 
 Dyck paths have natural bijections to other Catalan objects such as bracketed expressions, random rooted trees and binary trees.
-Thus, we can use our Dyck Path implementation to obtain useful implementations of other random Catalan objects.
+Thus, we can use our Dyck Path implementation to obtain implementations of other random Catalan objects.
 For instance, $\func{Height}$ queries correspond to $\func{Depth}$ queries on rooted trees and bracketed expressions
 (Section~\ref{sec:bijections_to_other_catalan_objects}).
 We also support more involved queries that are widely used; for example, finding the children of a node in a random tree
@@ -164,7 +165,7 @@ In this model, we implement query access to random $q$-colorings of a given huge
 A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates and accepting the ones that do not create a conflict (Glauber dynamics).
 This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
 Moreover, unlike the previously considered random objects, this one has no succinct representation, and we can only uncover the proper distribution
-by probing the graph (in the manner of \emph{local computation algorithms} \cite{LCA, LCA_space_efficient}).
+by probing the underlying graph (in the manner of \emph{local computation algorithms} \cite{LCA, LCA_space_efficient}).
 Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
 We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 9\Delta$.
 
@@ -187,18 +188,17 @@ using only $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time,
 \subsection{Related Work}
 \label{sec:related_work}
 The problem of computing local information of huge random objects was pioneered in \cite{huge_old,huge}.
-Further work of \cite{sparse} considers the generation of sparse random $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
-with $p = O(\poly(\log n)/n)$, which answers $\poly(\log n)$ \func{All-Neighbors} queries, listing the neighbors of queried vertices.
+Further work of \cite{sparse} considers the generation of sparse $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
+with $p = O(\poly(\log n)/n)$, by implementing \func{All-Neighbors} queries.
 While these implementations use polylogarithmic resources over their entire execution,
 they generate graphs that are  only guaranteed to \emph{appear random} to algorithms that inspect a \emph{limited portion} of the generated graph.
 
 In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
 Unlike prior work, their implementation allows for an arbitrary number of queries.
-This result is particularly interesting --  although the graphs in this model are generated via a sequential process,
+Although the graphs in this model are generated via a sequential process,
 the oracle is able to locally generate arbitrary portions of it and answer queries in polylogarithmic time.
 Though preferential attachment graphs are sparse, they contain vertices of high degree,
 thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
-
 For additional related work, see Section~\ref{sec:additional_related_work}.
 \todo[inline,color=red!80!green!25]{Computing large numbers (only poly). Maybe present a list of challenges including this.}
 
@@ -206,9 +206,9 @@ For additional related work, see Section~\ref{sec:additional_related_work}.
 
 \subsection{Applications}
 \label{sec:applications}
-One motivation for implementing local access to huge random objects is so that we can simulate sublinear time algorithms on them.
+One motivation for implementing local access to huge random objects is so that we can simulate sub-linear time algorithms on them.
 The standard paradigm of generating the entire (input) object a priori is wasteful,
-because the algorithm in question only reads a small fraction of the generated input.
+because sub-linear algorithms only inspect a small fraction of the generated input.
 For example, the greedy routing algorithm on Kleinberg's small world networks \cite{kleinberg}
 only uses $\mathcal O(\log^2 n)$ probes to the underlying network.
 Using our implementation, one can execute this algorithm on a random small world instance in $\mathcal O(\poly(\log n))$ time,
