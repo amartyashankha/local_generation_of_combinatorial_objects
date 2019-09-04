@@ -1,5 +1,6 @@
 \section{Introduction}
 \todo[inline,color=red!80!green!25]{Random objects are important because . . .}
+\todo[inline,color=red!80!green!25]{SW result in new model?}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
@@ -89,7 +90,7 @@ and \func{Next-Neighbor} queries using $\mathcal O(\log^{\mathcal O(1)} n)$ runn
 
 Next, we show that these assumptions can be realized in Erd\"os-R\'enyi $G(n,p)$ random graphs, and the Stochastic Block Model.
 SBM presents additional challenges for assigning community labels to the vertices.
-\todo[inline,color=red!80!green!25]{Separate thms for ER and SBM?}
+\todo[inline,color=red!80!green!25]{Separate thms or bullets for ER and SBM?}
 
 
 
@@ -101,7 +102,8 @@ Building on our previous sampling procedure, we implement \func{All-Neighbors} q
 using $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graphs are sparse, the other queries follow directly).
 
 \begin{restatable}{theorem}{DirectedGrand}\label{thm-swm}
-There exists an algorithm that generates a random graph from Kleinberg's Small World model, where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
+There exists an algorithm that generates a random graph from Kleinberg's Small World model,
+where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
 using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
 \todo[inline,color=red!80!green!25]{Is this the correct thm?}
