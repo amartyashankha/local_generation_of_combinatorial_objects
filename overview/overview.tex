@@ -2,11 +2,14 @@
 \label{sec:overview_of_our_techniques}
 We begin by formalizing our model of \emph{local-access implementations}, inspired by \cite{reut},
 but we add some aspects that were not addressed in earlier models.
+First, we define families of random objects.
 
 \begin{definition}
 \label{def:parametrized_random_object}
-A \textbf{random object family} maps parameters $\Pi$ to a distribution $\mathsf X^{\Pi}$ over the set $\mathbb X^{\Pi}$.
+A \textbf{random object family} maps a description $\Pi$ to a distribution $\mathsf X^{\Pi}$ over the set $\mathbb X^{\Pi}$.
 \end{definition}
+For example, the \emph{family} of Erdos-Renyi graphs maps $\Pi = (n, p)$ to a distribution over all $n$-vertex graphs,
+where the probability assosiated with any graph containing $m$ edges is exactly $p^m\cdot (1-p)^{\binom{n}{2}-m}$.
 
 \begin{definition}
 \label{def:local_access}
@@ -14,7 +17,7 @@ Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ p
 %Given a distribution $\mathsf X^{\Pi}$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
 of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X^{\Pi}\rightarrow \{0,1\}$,
 \textcolor{Maroon}{provides an oracle $\mathcal M$ with an internal state $\mathcal S$ (memory for storing partially generated random object)}.
-Given the parameters $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
+Given the description $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
 and updates it's internal state $\mathcal S$, while satisfying the following:
 \begin{itemize}
     \item \textbf{Consistency:}
@@ -33,22 +36,21 @@ In particular, we allow queries to be made adversarially and non-deterministical
 The adversary has full knowledge of the algorithm's behavior and its past random bits.
 \end{definition}
 
-In prior work \cite{reut, huge, sparse} as well as some of our results, the input parameters $\Pi$ are of small size (typically $\mathcal O(\log n)$),
-and the oracle $\mathcal M$ can read all of $\Pi$.
-For example, in $G(n,p)$ random graphs, $\Pi = (n, p)$.
+In prior work \cite{reut, huge, sparse} as well as some of our results, the input description $\Pi$ is of small size (typically $\mathcal O(\log n)$),
+and the oracle $\mathcal M$ can read all of $\Pi$ (for example, $\Pi = (n, p)$ in $G(n,p)$).
 
 
 \subparagraph*{Distributions with Huge Description Size:}
 \label{par:distributions_with_huge_description_size}
-We initiate the study of \textbf{random object families} where the parameters $\Pi$ are too large to be read by a sub-linear time algorithm.
+We initiate the study of \textbf{random object families} where the description $\Pi$ is too large to be read by a sub-linear time algorithm.
 %In all the problems considered in prior work \cite{huge,sparse,reut}, the description size
 %of the random object is small, typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters.
 %For instance, the $G(n, p)$ model is described using two parameters $n$ and $p$.
 %However, if one wishes to implement local access to the uniform distribution over all valid colorings of a given input graph $G$,
 In this setting, the oracle from Definition~\ref{def:local_access} cannot read the entire input $\Pi$, and instead accesses it through local probes.
 For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over valid colorings of $G$.
-Here, the parameter $\Pi$ includes the entire graph $G$, which is too large to be read by a sublinear time algorithm.
-In this case, the oracle can query the underlying graph $G$ using neighborhood probes.
+Here, the description $\Pi$ includes the entire graph $G$, which is too large to be read by a sublinear time algorithm.
+In this case, the oracle can query the underlying graph using neighborhood probes.
 The number of such probes used to answer a single query must also be sub-linear in the input size.
 
 
@@ -59,9 +61,9 @@ since the response to a future query may depend on the changes in internal state
 In some applications, we may want to have multiple independent query oracles whose responses are all consistent with each other.
 One way to achieve this is to restrict our attention to \emph{memory-less} implementations; ones without any internal state.
 An important implication of being memory-less is that the responses to each query is oblivious to the order of queries being asked.
-In fact, the lack of internal state implies that independent implementations that use the same random bits and the same input parameters
+In fact, the lack of internal state implies that independent implementations that use the same random bits and the same input description
 must respond to queries in the same way.
-Thus, instead of using the internal state to maintain consistency, memory-less implementations are given access to a source of public random bits.
+Thus, instead of using the internal state to maintain consistency, memory-less implementations are given access to a public random oracle.
 
 %In addition to the above generalization of Definition~\ref{def:local_access}, we also consider ``memory-less'' oracle implementations,
 %where the oracle does not have any internal state, and instead has access to a source of common randomness.
@@ -81,11 +83,11 @@ as elaborated in the following model:
 Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ parameterized by input $\Pi$,
 a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
 provides an oracle $\mathcal M$ with the following properties.
-$\mathcal M$ has query access to the input parameters $\Pi$, and a tape of public random bits $\vec R$.
+$\mathcal M$ has query access to the input description $\Pi$, and a tape of public random bits $\vec R$.
 Upon being queried with $\Pi$ and $F_i$, the oracle returns the value $\mathcal M(\Pi,\vec R,F_i)$,
 which must equal $F_i(X)$ for a specific $X\in\mathbb X^{\Pi}$, where the choice of $X$ depends only on $\vec R$,
 and the distribution of $X$ (over $\vec R$) is $\frac1{n^c}$-close to the distribution over $\mathbb X^{\Pi}$, for any given constant $c$.
-Thus, different instances of $\mathcal M$ with the same parameters $\Pi$ and the same random bits $\vec R$,
+Thus, different instances of $\mathcal M$ with the same description $\Pi$ and the same random bits $\vec R$,
 must agree on the choice of $X$ that is consistent with all answered queries regardless of the order and content of queries that were actually asked.
 \end{definition}
 
