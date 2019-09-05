@@ -51,32 +51,39 @@ we will not explicitly discuss the \func{Direction} queries in what follows.}
 The $\func{Height}$ query is natural for Dyck paths, but the $\func{First-Return}$ query is important in exploring other Catalan objects.
 For instance, consider a random well bracketed expression; equivalently an uniform distribution over the Dyck language.
 One can construct a trivial bijection between Dyck paths and words in this language
-by replacing up and down steps with opening and closing brackets respectively.
+by replacing up and down steps with opening and closing brackets respectively (Figure~\ref{fig:dyck_bijection}).
 The $\func{Height}$ query corresponds to asking for the nesting depth at a certain position in the word,
-and $\func{First-Return}(x)$ returns the position of the matched closing bracket for position $x$.
+and $\func{First-Return}(x)$ returns the position after the matched closing bracket for the step $(x\rightarrow x+1)$.
 
 \label{sec:bijections_to_other_catalan_objects}
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{images/dyck_tree_bijection.pdf}
-    \caption{Bijection between Dyck paths and ordered rooted trees.
-    For example, successive $\func{First-Return}$ queries on the yellow node would reveal its three children in order from left to right.}
-    \label{fig:dyck_tree_bijection}
+    \caption{Bijections from Dyck paths to bracketed expressions and ordered rooted trees.
+    Green dashed arrows show successive $\func{First-Return}$ queries on the yellow node.
+    Using bijections, this is equivalent to revealing three child sub-trees in order from left to right for the corresponding tree node,
+    and also to finding matching brackets in bracketed expressions.
+    \func{First-Return} is not defined for the red boxed nodes in either forward or reverse direction,
+    since this position corresponds to a leaf node in the tree, or to a terminal nesting level in the bracket expression.}
+    \label{fig:dyck_bijection}
 \end{figure}
-There is also a natural bijection between Dyck paths and ordered rooted trees (Figure~\ref{fig:dyck_tree_bijection}),
+There is also a natural bijection between Dyck paths and ordered rooted trees (Figure~\ref{fig:dyck_bijection}),
 by considering the Dyck path to be a transcript of a DFS traversal on the tree.
 Starting with the root, for each ``up-step'' we move to a new child of the current node, and for each ``down-step'', we backtrack towards the root.
 Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
 A similar argument shows a bijection to the set of all ordered binary trees.
-Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 
-We only consider \func{First-Return}$(x)$ when the step from $x$ to $x+1$ is upwards i.e. when $\func{Height}(x+1) = \func{Height}(x) + 1$.
-We can also implement a \func{Reverse-First-Return}$(x)$ query that returns the first return in the reversed Dyck path,
-when $\func{Height}(x-1) = \func{Height}(x) + 1$.
+By definition, \func{First-Return}$(x)$ is meaningful only when the step from $x$ to $x+1$ is upwards,
+i.e. when $\func{Height}(x+1) = \func{Height}(x) + 1$.
+We can also implement a \func{Reverse-First-Return} query, which is just a standard \func{First-Return} query on the reversed Dyck path
+(consider the reversal of the green dashed arrows in Figure~\ref{fig:dyck_bijection}).
+The reversal implies that \func{Reverse-First-Return}$(x)$ is only meaningful when $\func{Height}(x-1) = \func{Height}(x) + 1$.
 As we shall show later (Section~\ref{sec:reverse_first_return_queries}),
 this query can also be implemented in a symmetric manner to \func{First-Return}.
-Otherwise, the height at $x$ is larger than both the heights at $x-1$ and $x+1$, the $\func{First-Return}$ query has no meaningful value.
-This pattern corresponds to consecutive opening and closing braces in bracketed expressions and to a leaf node in rooted trees.
+In the case where the height at $x$ is larger than both the heights at $x-1$ and $x+1$ (boxed nodes in Figure~\ref{fig:dyck_bijection}),
+there is no meaningful ``first return'' from the context of the bijections.
+Specifically, these nodes correspond to leaf nodes in rooted trees, or to a terminal nesting level in the bracket expression.
+Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 \todo[inline,color=red!80!green!25]{Finish}
 
 
@@ -691,9 +698,8 @@ containing $\func{First-Return}(x_i)$.
 \end{figure}
 \begin{restatable}{lemma}{FirstReturnInterval}
 \label{lem:first_return_interval}
-For any position $x_i$, assuming that Invariant~\ref{inv:boundary_invariant} holds,
-the interval $(x_{k-1},x_{k}]$ containing $\func{First-Return}(x_i)$ is obtained
-by setting $k$ to be either the smallest index $f>i$ such that $y_f\le y_i$ or setting $k-1=i$.
+Assuming that Invariant~\ref{inv:boundary_invariant} holds, the interval $(x_{j-1},x_{j}]$ containing $\func{First-Return}(x_i)$
+is obtained by setting $j$ to be either the smallest index $f>i$ such that $y_f\le y_i$ or setting $j-1=i$.
 \end{restatable}
 \begin{proof}
 We assume the contrary i.e. there exists some $k\not=f$ and $k\not=i+1$ such that the correct interval is $(x_{k-1},x_k]$.
@@ -783,6 +789,25 @@ thus obtaining the following implementation
 \CatalanGrand*
 
 
-\subsection{\func{Reverse-First-Return} Queries}
+\subsubsection{\func{Reverse-First-Return} Queries}
 \label{sec:reverse_first_return_queries}
-\todo[inline,color=red!80!green!25]{Write this}
+For the sake of completeness, we also sketch how to implement a \func{Reverse-First-Return} query,
+which is just a standard \func{First-Return} query on the reversed Dyck path.
+This type of query was motivated in Section~\ref{sec:bijections_to_other_catalan_objects},
+and can be applied to positions $x$ where $\func{Height}(x-1) = \func{Height}(x)+1$.
+
+Note that Invariant~\ref{inv:boundary_invariant} remains unchanged as it is symmetric to reversal of the Dyck path.
+Specifically, the invariant on a particular interval does not change if we swap the endpoints of the interval.
+First, we can find the correct interval containing $\func{Reverse-First-Return}(x)$, by using an analog of Lemma~\ref{lem:first_return_interval}.
+\begin{restatable}{lemma}{ReverseFirstReturnInterval}
+\label{lem:reverse_first_return_interval}
+Assuming Invariant~\ref{inv:boundary_invariant}, the interval $[x_{j},x_{j+1})$ containing $\func{Reverse-First-Return}(x_i)$
+is obtained by setting $j$ to be either the largest index $f<i$ such that $y_f\le y_i$ or setting $j+1=i$.
+\end{restatable}
+Since the range tree defined in Section~\ref{sec:finding_the_correct_interval} allows us to query the minimum in arbitrary contiguous ranges,
+we can also use it to find the appropriate $f$ for Lemma~\ref{lem:reverse_first_return_interval} through binary search.
+Once we have found an interval that is known to contain the \func{Reverse-First-Return},
+we can follow the strategy from the proof of Theorem~\ref{thm:dyck_first_return_sampling};
+recursively sub-dividing the relevant interval and finding the newly created sub-interval that contains the return,
+until we converge on the correct return position.
+\todo[inline,color=red!80!green!25]{Edit this}
