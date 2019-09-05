@@ -1,7 +1,7 @@
 \section{Introduction}
 \todo[inline,color=red!80!green!25]{Remove Authors}
 \todo[inline,color=red!80!green!25]{SW result in new model?}
-Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
+Consider an algorithm performing a computation on a \emph{huge random object} (for example a huge random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
 Such an \emph{implementation} would ideally emulate the random object by answering appropriate queries,
@@ -28,12 +28,11 @@ Further work in \cite{sparse,reut} considers the generation of different random 
 \cite{reut} introduced the study of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
 In addition to supporting \func{Vertex-Pair} and \func{Next-Neighbor},
 we also introduce and implement a new \func{Random-Neighbor} query for undirected graphs with independent edge probabilities.
-\todo[inline,color=red!80!green!25]{Catalan?}
 
-In the context of random colorings of an input graph $G$,
+To support the generation of a richer class of combinatorial objects, such as random colorings of an input graph $G$,
 we define a new model for generating random objects which have huge description size (the underlying graph $G$).
-In this setting, our algorithms are unable to read the entire description,
-but can still answer relevant queries to a valid sampled object, using a sub-linear number of local probes to the input graph $G$.
+In this setting, our algorithms are unable to read the full input,
+but can still answer queries to a valid sampled object using a sub-linear number of local probes to the input description.
 
 
 
@@ -122,13 +121,13 @@ and then show how to use these to obtain implementations of random bracketed exp
 A Dyck path is defined as a sequence of $n$ upward $(+1)$ steps, and $n$ downward $(-1)$ steps,
 with the added constraint that the sum of any prefix of the sequence is non-negative.
 A \emph{random} Dyck path may be viewed as a constrained one dimensional balanced random walk.
-One obvious query of interest is $\func{Height}(t)$ which returns the position of the walk after $t$ steps
+A natural query on Dyck paths is $\func{Height}(t)$ which returns the position of the walk after $t$ steps
 (equivalently, sum of the first $t$ elements of the sequence).
 We also introduce and support \func{First-Return} queries, where $\func{First-Return}(t)$ returns
 the first time when the random walk returns to the same \emph{height} as it was at time $t$.
 \func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions presented in \cite{huge}.
 The added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.
-However, we are able to support both queries using $\mathcal O(\poly(\log n))$ resources.
+In this work, we show how to overcome these challenges to support both queries using $\mathcal O(\poly(\log n))$ resources..
 
 \begin{restatable}{theorem}{CatalanGrand}
 \label{thm:catalan_main}
