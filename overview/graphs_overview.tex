@@ -31,9 +31,9 @@ we must maintain consistency in subsequent steps by ensuring that none of the ve
 This update will become even more complicated as we handle \func{Random-Neighbor} queries, where we may generate non-neighbors at random locations.
 
 In Section~\ref{sec:ER-rand}, we present a randomized implementation (Algorithm~\ref{alg:oblivious-coin-toss})
-that supports \func{Next-Neighbor} queries efficiently, albeit the analysis of its performance is rather complicated.
+that supports \func{Next-Neighbor} queries efficiently, but has a complicated performance analysis.
 We remark that this approach may be extended to support \func{Vertex-Pair} queries (Section~\ref{sec:reroll-cont}) with superior performance
-(given that we do not to support \func{Random-Neighbor} queries),
+(if we do not support \func{Random-Neighbor} queries),
 and also to provide deterministic resource usage guarantee (Section~\ref{sec:ER-det}).
 
 

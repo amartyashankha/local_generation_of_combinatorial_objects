@@ -8,8 +8,9 @@ First, we define families of random objects.
 \label{def:parametrized_random_object}
 A \textbf{random object family} maps a description $\Pi$ to a distribution $\mathsf X^{\Pi}$ over the set $\mathbb X^{\Pi}$.
 \end{definition}
-For example, the \emph{family} of Erdos-Renyi graphs maps $\Pi = (n, p)$ to a distribution over all $n$-vertex graphs,
-where the probability assosiated with any graph containing $m$ edges is exactly $p^m\cdot (1-p)^{\binom{n}{2}-m}$.
+For example, the \emph{family} of Erdos-Renyi graphs maps $\Pi = (n, p)$ to a distribution over $\mathbb X^{\Pi}$,
+which is the set of all possible $n$-vertex graphs,
+where the probability assigned to any graph containing $m$ edges in the distribution $\mathsf X^{\Pi}$ is exactly $p^m\cdot (1-p)^{\binom{n}{2}-m}$.
 
 \begin{definition}
 \label{def:local_access}
@@ -36,10 +37,13 @@ In particular, we allow queries to be made adversarially and non-deterministical
 The adversary has full knowledge of the algorithm's behavior and its past random bits.
 \end{definition}
 
+For example, in the $G(n,p)$ family with description $\Pi = (n, p)$,
+we can define \func{Vertex-Pair} query functions $\{ F_{(u,v)}\}_{u,v\in [n]}$.
+So, given a graph $G\in \mathbb X^{\Pi}$, the query $F_{(u,v)}(G) = 1$ if and only if $(u,v)\in G$.
+
 In prior work \cite{reut, huge, sparse} as well as some of our results, the input description $\Pi$ is of small size (typically $\mathcal O(\log n)$),
 and the oracle $\mathcal M$ can read all of $\Pi$ (for example, $\Pi = (n, p)$ in $G(n,p)$).
 
-\todo[inline,color=red!80!green!25]{$\Pi$ could include SBM communities.}
 \subparagraph*{Distributions with Huge Description Size:}
 \label{par:distributions_with_huge_description_size}
 We initiate the study of \textbf{random object families} where the description $\Pi$ is too large to be read by a sub-linear time algorithm.
@@ -92,10 +96,9 @@ must agree on the choice of $X$ that is consistent with all answered queries reg
 \end{definition}
 
 We can contrast Definition~\ref{def:local_access_LCA} with the one for \emph{Local Computation Algorithms} \cite{LCA, LCA_space_efficient}
-which also allows query access to \emph{some} valid solution by reading the input through local probes.
+which also allow query access to \emph{some} valid solution by reading the input through local probes.
 The additional challenge in our setting is that we also have to make sure that we return a uniformly random solution, rather than an arbitrary one.
 %Similarly to LCAs, we can have multiple independent instances of our algorithm answering different queries, but remaining consistent with one another.
-
 We also note that the memory-less property may be achieved for small description size \textbf{random object families}.
 For instance, our implementation for the directed small world model admits such a memory-less implementation using public random bits.
 
