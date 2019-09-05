@@ -109,13 +109,13 @@ If $q\ge 9\Delta$, then the chain is mixed after $\tau_{mix}(\epsilon) = 3\left(
 \subsubsection{Naive Reduction from Distributed Algorithms}
 \label{sec:naive_reduction_from_distributed_algorithms}
 Using the technique of Parnas and Ron \cite{parnas_ron},
-one can use a distributed algorithm for a graph problem to construct a Local Computation Algorithm for the same problem.
-Specifically, given a $k$-round distributed algorithm on a network of degree at most $\Delta$,
-we can simulate the behaviour of a single node $v$ by simulating the full algorithm on the $k$-neighborhood of $v$.
+one can modify a distributed algorithm for a graph problem to construct a Local Computation Algorithm for the same problem.
+Specifically, given a $k$-round distributed algorithm on a network of max degree $\Delta$,
+we can simulate the behaviour and outcome of a single node $v$ by simulating the full algorithm on the $k$-neighborhood of $v$.
 The simulation only requires us to probe this $k$-neighborhood, which contains $\mathcal O(\Delta^k)$ nodes.
 However, the aforementioned distributed algorithm for Glauber Dynamics used $\mathcal O(\log n)$ rounds,
 implying a probe complexity of $\Delta^{\mathcal O(\log n)}$, which is super-linear.
-\textcolor{Maroon}{We will show how to reduce the probe complexity by appropriately pruning the $k$-neighborhood.}
+We show how to reduce the probe complexity by appropriately pruning the $k$-neighborhood.
 
 
 
@@ -234,7 +234,8 @@ If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w
 \end{figure}
 To achieve this, we iterate through all the epochs in reverse order (line~\ref{alg:line:iterate_backwards})
 to check whether the color $c$ was ever proposed for vertex $w$.
-If not, we can ignore $w$, and otherwise let's say that the most recent proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
+If not, we can ignore $w$.
+Otherwise let's say that the most recent proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
 Now, we directly ``jump'' to the $(t')^{th}$ epoch and recursively check if this proposal was accepted (line~\ref{alg:line:check_accepted}).
 If the proposal $\vec C^{t'}_w$ was not accepted, we keep iterating back in time until we find the next most recent epoch
 when $c$ was proposed by $w$, or until we run out of epochs.
