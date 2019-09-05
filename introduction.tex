@@ -19,7 +19,6 @@ which we provide through \func{Next-Neighbor} and \func{Random-Neighbor} queries
 \func{Vertex-Pair}$(u,v)$ returns whether $u$ and $v$ are adjacent, \func{Next-Neighbor}$(v)$ returns a new neighbor of $v$ each time
 it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a uniform random neighbor of $v$ (if $v$ is not isolated).}
 
-\todo[inline,color=red!80!green!25]{Is related work necessary here?}
 The problem of sampling partial information about huge random objects was pioneered in \cite{huge,huge_old,huge_journal},
 through the implementation of \emph{indistinguishable} pseudorandom objects of exponential size.
 Further work in \cite{sparse,reut} considers the generation of different random graph models.
@@ -85,9 +84,8 @@ there exists an implementation for this model that supports local access through
 and \func{Next-Neighbor} queries using $\mathcal O(\log^{\mathcal O(1)} n)$ running time, additional space, and random bits per query.
 \end{restatable}
 
-Next, we show that these assumptions can be realized in Erd\"os-R\'enyi $G(n,p)$ random graphs, and the Stochastic Block Model.
-SBM presents additional challenges for assigning community labels to the vertices.
-\todo[inline,color=red!80!green!25]{Separate thms or bullets for ER and SBM?}
+Next, we show that these assumptions can be realized in Erd\"os-R\'enyi random graphs, and the Stochastic Block Model.
+SBM presents additional challenges for assigning community labels to vertices.
 
 
 
@@ -120,13 +118,13 @@ A Dyck path is defined as a sequence of $n$ upward $(+1)$ steps, and $n$ downwar
 with the added constraint that the sum of any prefix of the sequence is non-negative.
 A \emph{random} Dyck path may be viewed as a constrained one dimensional balanced random walk.
 A natural query on Dyck paths is $\func{Height}(t)$ which returns the position of the walk after $t$ steps
-(equivalently, sum of the first $t$ elements of the sequence).
+(equivalently, sum of the first $t$ sequence elements).
 We also introduce and support \func{First-Return} queries, where $\func{First-Return}(t)$ returns
-the first time when the random walk returns to the same \emph{height} as it was at time $t$.
-\func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions presented in \cite{huge}.
-The added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.
-In this work, we show how to overcome these challenges to support both queries using $\mathcal O(\poly(\log n))$ resources..
-\todo[inline,color=red!80!green!25]{First Return nuances}
+the first time when the random walk returns to the same \emph{height} as it was at time $t$, as long as $\func{Height}(t+1)=\func{Height}(t)+1$
+(see Section~\ref{sec:bijections_to_other_catalan_objects} for an explanation).
+\func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions in \cite{huge}.
+However, the added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.
+In this work, we show how to overcome these challenges to support both queries using $\mathcal O(\poly(\log n))$ resources.
 
 \begin{restatable}{theorem}{CatalanGrand}
 \label{thm:catalan_main}
@@ -198,7 +196,6 @@ the oracle is able to locally generate arbitrary portions of it and answer queri
 Though preferential attachment graphs are sparse, they contain vertices of high degree,
 thus \cite{reut} provides access to the adjacency list through \func{Next-Neighbor} queries.
 For additional related work, see Section~\ref{sec:additional_related_work}.
-\todo[inline,color=red!80!green!25]{Computing large numbers (only poly). Maybe present a list of challenges including this.}
 
 
 

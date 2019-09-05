@@ -43,20 +43,17 @@ This allows us to sample from $\{q_d\}$ and leverage rejection sampling techniqu
 
 \paragraph*{$\func{First-Return}$ Queries}
 \label{par:_first-return_queries}
-\todo[inline,color=red!80!green!25]{Why is first ret defined this way}
-Recall that \func{First-Return}$(x)$ is only defined if the first step after position $x$ is upwards\footnote{
-%The up and down steps in a Dyck path correspond directly to opening and closing braces in a well bracketed expression.
-%The \func{First-Return} query returns the matching closing bracket for oprning bracket at position $x$ bracket.
-%If the first step is down however, the symbol at position $x$ is actually a closing bracket itself
-} (i.e. $\func{Height}(x+1) > \func{Height}(x)$).
-\func{First-Return} queries are challenging because we first need to find the \emph{interval} containing the first return to $\func{Height}(x)$.
+Note that \func{First-Return}$(x)$ is only of interest when the first step after position $x$ is upwards (i.e. $\func{Height}(x+1)>\func{Height}(x)$),
+since this situation is important for complex queries to random bracketed expressions and random rooted trees.
+Section~\ref{sec:bijections_to_other_catalan_objects} details the rationale for this definition based on bijections between these objects.
+\func{First-Return} queries are challenging because we need to find the \emph{interval} containing the first return to $\func{Height}(x)$.
 Since there could be up to $\Theta(n)$ intervals, it is inefficient to iterate through all of them.
 To circumvent this problem, we allow each interval $[x_i,x_{i+1}]$ to sample and maintain its own boundary constraint $k_i$
 instead of using the global non-negativity constraint.
-A boundary constraint of $k_i$ implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k_i$ or lower.
-Additionally, we maintain a crucial invariant that states that this boundary is achieved by the endpoint of lower height $\min(y_i,y_{i+1})$.
-If this invariant holds, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest known position $x_i>x$
-whose sampled height $y_i \le \func{Height}(x)$, and considering the interval $[x_{i-1},x_i]$ preceding $x_i$.
+This implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k_i$ or lower.
+Additionally, we maintain a crucial invariant that states that this boundary is achieved by the endpoint of lower height i.e. $\min(y_i,y_{i+1})$.
+If the invariant holds, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest detrmined position $x_j>x$
+whose sampled height $y_j \le \func{Height}(x)$, and considering the interval $[x_{j-1},x_j]$ preceding $x_j$.
 We use an interval tree to update and query for the known heights.
 
 Unfortunately, every $\func{Height}$ query creates new intervals by sub-dividing existing ones, potentially breaking the invariant.

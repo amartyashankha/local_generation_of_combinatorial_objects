@@ -16,9 +16,9 @@ where the probability assosiated with any graph containing $m$ edges is exactly 
 Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ parameterized by $\Pi$, a \emph{local access implementation}
 %Given a distribution $\mathsf X^{\Pi}$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
 of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X^{\Pi}\rightarrow \{0,1\}$,
-\textcolor{Maroon}{provides an oracle $\mathcal M$ with an internal state $\mathcal S$ (memory for storing partially generated random object)}.
-Given the description $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
-and updates it's internal state $\mathcal S$, while satisfying the following:
+provides an oracle $\mathcal M$ with an internal state for storing partially generated random object.
+Given a description $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
+and updates it's internal state, while satisfying the following:
 \begin{itemize}
     \item \textbf{Consistency:}
     There must be a single $X\in \mathbb X^{\Pi}$, such that for all queries $F_i$ presented to the oracle,
@@ -29,7 +29,7 @@ and updates it's internal state $\mathcal S$, while satisfying the following:
     that is $\epsilon$-close to the desired distribution $\mathsf{X}^{\Pi}$ in $L_1$-distance.
     In this work, we focus on supporting $\epsilon = n^{-c}$ for any desired constant $c>0$.
     \item \textbf{Performance:}
-    The computation time, and random bits required to answer a single query must be $o(|X|)$ with high probability,
+    The computation time, and random bits required to answer a single query must be sub-linear in $|X|$ with high probability,
     without any initialization overhead.
 \end{itemize}
 In particular, we allow queries to be made adversarially and non-deterministically.
@@ -39,7 +39,7 @@ The adversary has full knowledge of the algorithm's behavior and its past random
 In prior work \cite{reut, huge, sparse} as well as some of our results, the input description $\Pi$ is of small size (typically $\mathcal O(\log n)$),
 and the oracle $\mathcal M$ can read all of $\Pi$ (for example, $\Pi = (n, p)$ in $G(n,p)$).
 
-
+\todo[inline,color=red!80!green!25]{$\Pi$ could include SBM communities.}
 \subparagraph*{Distributions with Huge Description Size:}
 \label{par:distributions_with_huge_description_size}
 We initiate the study of \textbf{random object families} where the description $\Pi$ is too large to be read by a sub-linear time algorithm.

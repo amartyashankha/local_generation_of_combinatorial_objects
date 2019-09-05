@@ -41,10 +41,10 @@ and also to provide deterministic resource usage guarantee (Section~\ref{sec:ER-
 \label{par:random_neighbor_queries}
 We implement \func{Random-Neighbor} queries (Section~\ref{sec:blocks}) using $\poly(\log n)$ resources.
 The ability to do so is surprising since: \textcolor{Maroon}{
-(1) Sampling the degree of the query vertex, we suspect, is not viable for \emph{sub-linear} implementations, because this quantity alone
+(1) Sampling the degree of vertex, may not be viable for \emph{sub-linear} implementations, because this quantity alone
 imposes dependence on the existence of \emph{all} of its potential incident edges and consequently on the rest of the graph (since it is undirected).}
-Therefore, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
-without resorting to ``knowing'' its degree.
+Thus, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
+without resorting to \emph{determining} its degree.
 (2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries
 affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner.\footnote{
 \label{conditional} Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
@@ -80,11 +80,13 @@ In this model, the vertex set is partitioned into $r$ \emph{communities} $\left\
 The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{ij}$.
 As communities in the observed data are generally unknown a priori,
 and significant research has been devoted to designing efficient algorithms for community detection and recovery, these studies generally consider
-the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms (see e.g., \cite{mossel2015reconstruction}).
-Thus, we aim to construct implementations where the community assignment of vertices are independently sampled from some given distribution\footnote{
-Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$
-are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}.
-The difficulty here is to obtain a uniformly sampled assignment of vertices to communities on-the-fly.
+the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms \cite{mossel2015reconstruction}.
+Thus, we construct implementations where the community assignments are sampled from some given distribution,
+or from a collection of specified community sizes.
+%\footnote{
+%Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$
+%are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}.
+The main difficulty here is to obtain a uniformly sampled assignment of vertices to communities on-the-fly.
 
 Our approach is, as before, to sample for the next neighbor or a random neighbor directly,
 although our result does not simply follow closed-form formulas,
