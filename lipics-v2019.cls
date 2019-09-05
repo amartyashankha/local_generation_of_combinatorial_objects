@@ -310,7 +310,7 @@
     {\LARGE\sffamily\bfseries\mathversion{bold}\@title \par}%
     \vskip 1em
     \ifx\@author\orig@author
-      %\textcolor{red}{Author: Please provide author information}%
+      \textcolor{red}{Author: Please provide author information}%
     \else
       {\def\thefootnote{\@arabic\c@footnote}%
        \setcounter{footnote}{0}%
@@ -583,7 +583,7 @@
 \def\authorrunning#1{%
   \gdef\@authorrunning{\markright{\if!#1!\textcolor{red}{Author: Please fill in the \string\authorrunning\space macro}\else#1\fi}}}
 \titlerunning{\@title}
-%\authorrunning{\textcolor{red}{Author: Please use the \string\authorrunning\space macro}}
+\authorrunning{\textcolor{red}{Author: Please use the \string\authorrunning\space macro}}
 \def\EventLongTitle#1{\gdef\@EventLongTitle{#1}}
 \EventLongTitle{}
 \def\EventShortTitle#1{\gdef\@EventShortTitle{#1}}

@@ -53,7 +53,7 @@ For instance, consider a random well bracketed expression; equivalently an unifo
 One can construct a trivial bijection between Dyck paths and words in this language
 by replacing up and down steps with opening and closing brackets respectively.
 The $\func{Height}$ query corresponds to asking for the nesting depth at a certain position in the word,
-and $\func{First-Return}(i)$ returns the position of the matching bracket for position $i$.
+and $\func{First-Return}(x)$ returns the position of the matched closing bracket for position $x$.
 
 \label{sec:bijections_to_other_catalan_objects}
 \begin{figure}[htbp]
@@ -69,6 +69,15 @@ Starting with the root, for each ``up-step'' we move to a new child of the curre
 Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
 A similar argument shows a bijection to the set of all ordered binary trees.
 Moving forwards, we will focus on Dyck paths for the sake of simplicity.
+
+We only consider \func{First-Return}$(x)$ when the step from $x$ to $x+1$ is upwards i.e. when $\func{Height}(x+1) = \func{Height}(x) + 1$.
+We can also implement a \func{Reverse-First-Return}$(x)$ query that returns the first return in the reversed Dyck path,
+when $\func{Height}(x-1) = \func{Height}(x) + 1$.
+As we shall show later (Section~\ref{sec:reverse_first_return_queries}),
+this query can also be implemented in a symmetric manner to \func{First-Return}.
+Otherwise, the height at $x$ is larger than both the heights at $x-1$ and $x+1$, the $\func{First-Return}$ query has no meaningful value.
+This pattern corresponds to consecutive opening and closing braces in bracketed expressions and to a leaf node in rooted trees.
+\todo[inline,color=red!80!green!25]{Finish}
 
 
 
@@ -772,3 +781,8 @@ Of course, in this scenario, the boundary is never far away, and therefore we sh
 This allows us to combine the results from Theorem~\ref{thm:dyck_height_sampling} and Theorem~\ref{thm:dyck_first_return_sampling},
 thus obtaining the following implementation
 \CatalanGrand*
+
+
+\subsection{\func{Reverse-First-Return} Queries}
+\label{sec:reverse_first_return_queries}
+\todo[inline,color=red!80!green!25]{Write this}
