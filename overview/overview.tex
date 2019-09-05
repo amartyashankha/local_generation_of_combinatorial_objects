@@ -45,9 +45,9 @@ We initiate the study of \textbf{random object families} where the parameters $\
 %of the random object is small, typically $\mathcal O(\log n)$ to represent the size of the instance and a constant number of parameters.
 %For instance, the $G(n, p)$ model is described using two parameters $n$ and $p$.
 %However, if one wishes to implement local access to the uniform distribution over all valid colorings of a given input graph $G$,
-In this setting, the oracle from Definition~\ref{def:local_access} cannot read all of $\Pi$, and instead accesses it through local probes.
-For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over all valid colorings of $G$.
-Here, the parameter $\Pi$ includes the entire underlying graph $G$, which is too large to be read by a sublinear time algorithm.
+In this setting, the oracle from Definition~\ref{def:local_access} cannot read the entire input $\Pi$, and instead accesses it through local probes.
+For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over valid colorings of $G$.
+Here, the parameter $\Pi$ includes the entire graph $G$, which is too large to be read by a sublinear time algorithm.
 In this case, the oracle can query the underlying graph $G$ using neighborhood probes.
 The number of such probes used to answer a single query must also be sub-linear in the input size.
 
