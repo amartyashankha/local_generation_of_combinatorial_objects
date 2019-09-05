@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{936.62459501bp}%
+    \setlength{\unitlength}{823.76597753bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,12 +50,12 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.21862385)%
+  \begin{picture}(1,0.29205345)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
-    \put(0.10526402,0.36406391){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{0.29847573\unitlength}\raggedright \end{minipage}}}%
+    \put(0.03730887,0.45050799){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{0.33936788\unitlength}\raggedright \end{minipage}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{dyck_tree_bijection.pdf}}%
-    \put(-1.7256735,1.01140516){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{1.63428194\unitlength}\raggedright \end{minipage}}}%
+    \put(-2.04447305,1.1865371){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\begin{minipage}{1.85818388\unitlength}\raggedright \end{minipage}}}%
     \put(0,0){\includegraphics[width=\unitlength,page=2]{dyck_tree_bijection.pdf}}%
   \end{picture}%
 \endgroup%

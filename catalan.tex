@@ -58,20 +58,27 @@ and $\func{First-Return}(x)$ returns the position after the matched closing brac
 \label{sec:bijections_to_other_catalan_objects}
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/dyck_tree_bijection.pdf}
+    \includegraphics[width=\textwidth]{images/dyck_tree_bijection.pdf}
     \caption{Bijections from Dyck paths to bracketed expressions and ordered rooted trees.
-    Green dashed arrows show successive $\func{First-Return}$ queries on the yellow node.
-    Using bijections, this is equivalent to revealing three child sub-trees in order from left to right for the corresponding tree node,
+    Note that the color coded \emph{positions} on the path correspond to tree nodes, and the path itself is a DFS traversal of the tree.
+    The bijection to bracketed expressions proceeds by directly replacing up and down steps with opening and closing backets respectively
+    (we color the brackets with the \emph{higher} endpoint of the corresponding step).
+    Green dashed arrows show successive $\func{First-Return}$ queries on the path.
+    Using the bijection, this is equivalent to revealing three child sub-trees in order from left to right for the corresponding tree node,
     and also to finding matching brackets in bracketed expressions.
     \func{First-Return} is not defined for the red boxed nodes in either forward or reverse direction,
     since this position corresponds to a leaf node in the tree, or to a terminal nesting level in the bracket expression.}
     \label{fig:dyck_bijection}
 \end{figure}
 There is also a natural bijection between Dyck paths and ordered rooted trees (Figure~\ref{fig:dyck_bijection}),
-by considering the Dyck path to be a transcript of a DFS traversal on the tree.
+by viewing the Dyck path as a transcript of the tree's DFS traversal.
 Starting with the root, for each ``up-step'' we move to a new child of the current node, and for each ``down-step'', we backtrack towards the root.
-Here, the $\func{Height}$ query returns the depth of a node and the $\func{First-Return}$ query can be used to find the \emph{next child} of a node.
-A similar argument shows a bijection to the set of all ordered binary trees.
+Thus, the $\func{Height}$ query returns the depth of a node.
+Also, since the Dyck path is a DFS transcript of the tree, a $\func{First-Return}$ query on the path
+can be used to find successive children of a tree node (each return produces the \emph{next child}).
+For instance, in Figure~\ref{fig:dyck_bijection}, we can invoke \func{First-Return} thrice
+starting at the first \emph{yellow path position} to reveal the corresponding three children of the \emph{yellow tree node}.
+%A similar argument shows a bijection to the set of all ordered binary trees.
 
 By definition, \func{First-Return}$(x)$ is meaningful only when the step from $x$ to $x+1$ is upwards,
 i.e. when $\func{Height}(x+1) = \func{Height}(x) + 1$.
@@ -141,7 +148,8 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
 (where the heights of the endpoitns are $y_i$ and $y_{i+1}$).
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
-If the interval in question has odd length, \textcolor{Maroon}{we sample one step on the boundary}, and proceed with a shortened even length interval.
+If the interval in question has odd length, \textcolor{Maroon}{we sample one step on the boundary}, \todo{Fix}
+and proceed with a shortened even length interval.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_height_sampling.pdf}
