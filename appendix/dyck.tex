@@ -133,8 +133,8 @@ The probability $p_d$ can be written as an arithmetic expression involving sums 
 Given a $1\pm1/n^c$ multiplicative approximation to $l_a = \ln a$ and $l_a = \ln b$, we wish to approximate $\ln(ab)$ and $\ln(a+b)$.
 The former is trivial since $\ln(ab) = l_a + l_b$.
 For the latter, we assume $a>b$ and use the identity $\ln(a+b) = \ln a + \ln(1+b/a)$ to note that it suffices to approximate $\ln(1+b/a)$.
-We define $\tilde l_a = l_a\cdot(1\pm \mathcal O(1/n^c))$ and $\tilde l_b = l_b\cdot(1\pm \mathcal O(1/n^c))$.
-In case $\tilde l_b-\tilde l_a < -c\ln n\implies b/a < 1/n^c$,
+We define $\widetilde l_a = l_a\cdot(1\pm \mathcal O(1/n^c))$ and $\widetilde l_b = l_b\cdot(1\pm \mathcal O(1/n^c))$.
+In case $\widetilde l_b-\widetilde l_a < -c\ln n\implies b/a < 1/n^c$,
 we approximate $\ln(a+b)$ by $\ln a$ since $\ln(1+b/a) = \mathcal O(1/n^c)$ in this case.
 
 Otherwise, we notice that $\max(a,b) = \mathcal O\left((n!)^2\right)\implies \max(l_a, l_b) = o(n^3)\implies l_a-l_b = o(n^3)$.
@@ -145,7 +145,7 @@ Hence, the claim $\max(a,b) = \mathcal O\left((n!)^2\right)$ follows from the fa
 the numerators/denominators of the relevant binomial coefficient in Equation~\ref{eq:catalan_trapezoid} are at most $n!$.
 Using this fact, we obtain the following:
 \[
-1+e^{\tilde l_b-\tilde l_a} = 1+\frac ba\cdot \mathlarger e^{\mathcal O\left( \frac{l_b-l_a}{n^c}\right)}
+1+e^{\widetilde l_b-\widetilde l_a} = 1+\frac ba\cdot \mathlarger e^{\mathcal O\left( \frac{l_b-l_a}{n^c}\right)}
 = 1+\frac ba\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-3}} \right)\right)
 = \left( 1+\frac ba\right)\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-3}} \right)\right)
 \]
@@ -154,7 +154,7 @@ Since there are only a constant number of such arithmetic operations in the expr
 we can set $c$ to be a high enough constant when approximating the factorials,
 cewhich allows us to obtain the desired $1\pm1/n^3$ multiplicative approximation to $\ln p_d$.
 If $\ln p_d < -3\ln n$, we approximate $p_d = 0$.
-Otherwise, we can exponentiate the approximation to obtain $\tilde p_d=p_d\cdot e^{-\mathcal O(\ln n/n^3)} = p_d\left( 1\pm\mathcal O(1/n^2)\right)$.
+Otherwise, we can exponentiate the approximation to obtain $\widetilde p_d=p_d\cdot e^{-\mathcal O(\ln n/n^3)} = p_d\left( 1\pm\mathcal O(1/n^2)\right)$.
 \end{proof}
 
 

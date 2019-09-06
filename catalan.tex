@@ -270,7 +270,7 @@ First, we consider the case where $k\cdot k'\le 2U+1$.
 In this case, we use loose bounds for $S_{left} < \binom{B}{D-d}$ and $S_{right} < \binom{B}{U-d}$.
 These are true because $\binom{B}{D-d}$ and $\binom{B}{U-d}$ are the total number of \emph{unconstrained} paths
 in the left and right half respectively, and adding the boundary constraint can only reduce the number of paths.
-We also prove the following lemma in Section~\ref{sec:dyck_appendix} to bound the value of $S_{total}$.
+We also prove the following lemma in Section~\ref{sec:appendix_implementing_height_queries} to bound the value of $S_{total}$.
 \begin{restatable}{lemma}{DTotalFarBoundary}
 \label{lem:DTotalFarBoundary}
 When $kk' > 2U + 1$, $S_{total} > \frac 12\cdot \binom{2B}{2D}$.
@@ -758,24 +758,23 @@ the additional space required for each $\func{Height}$ or $\func{First-Return}$ 
 \begin{theorem}
 \label{thm:dyck_first_return_sampling}
 There is an algorithm using $\mathcal O(\log^{\mathcal O(1)} n)$ resources per query that provides access to a random Dyck path of length $2n$,
-by answering queries of the form \func{First-Return}$(x_i)$ with the correctly sampled position $x'$;
-where $x'>x_i$ is the position where the Dyck path first returns to $\func{Height}(x_i)$ after position $x_i$.
+by answering queries of the form \func{First-Return}$(x_i)$ with the correctly sampled smallest position $x'>x_i$,
+where the Dyck path first returns to $\func{Height}(x_i)$.
 \end{theorem}
 \begin{proof}
-In order to make the presentation simpler, we ensure that the next determined position after $x_i$ is $x_i+1$ (i.e. $x_{i+1} = x_i + 1$).
-This can be done by invoking $\func{Height}(x_i+1)$, if it has not been determined already.
+In order to make the presentation simpler, we ensure that the next determined position after $x_i$ is $x_i+1$ (in other words $x_{i+1} = x_i + 1$).
+This can be done by invoking $\func{Height}(x_i+1)$, if needed.
 If $\func{Height}(x_i+1) = y_{i+1} < y_i$, we can terminate because $\func{First-Return}(x_i)$ is not defined.
 Otherwise, we notice that in this setting, the first return cannot lie in the adjacent interval $[x_i,x_{i+1}] = [x_i, x_i+1]$.
 
-Hence, we proceed to finding the smallest value $f$ such that $y_f < y_i$, by using the range tree data structure described above.
-Since $\func{Height}(x_{f-1}) \ge y_i > \func{Height}(x_f)$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $y_i$.
-We sample a point in the middle\todo{middle?} of this interval and fix the boundary invariant by sampling another point,
-essentially breaking it up into $\mathcal O(1)$ sub-intervals each at most half the size of the original.
-Based on the new samples, we again find the (newly created) sub-interval containing the first return in $\mathcal O(1)$ time.
-We repeat up to $\mathcal O(\log n)$ times, performing binary search to find the position of the first return.
-%\todo{Remove Threshold}
-%We repeat up to $\mathcal O(\log n)$ times until the current interval size drops below the threshold $\mathcal T$.
-%Then we spend $\widetilde{\mathcal O}(\mathcal T)$ time to brute force sample this interval and find the first return position (if it wasn't revealed in previous steps).
+Hence, we proceed to finding the smallest value $f$ such that $y_f \le y_i$, by using the range tree data structure described above.
+Since $\func{Height}(x_{f-1}) > y_i \le \func{Height}(x_f)$ by definition,
+the interval $(x_{f-1},x_f]$ must contain at least one position at height $y_i$.
+We determine the height at the midpoint of this interval,
+and then fix the potential violation of Invariant~\ref{inv:boundary_invariant} by finding another point along with its height.
+This essentially breaks up the interval $[x_{f-1},x_f]$ into $\mathcal O(1)$ sub-intervals, each at most half the size of the original.
+Based on the newly revealed heights, we again find the (newly created) sub-interval containing the first return in $\mathcal O(1)$ time.
+We repeat up to $\mathcal O(\log n)$ times, reducing the size of the intervals in consideration, until the position of the first return is revealed.
 \end{proof}
 
 \subsubsection{Maintaining \func{Height} Queries under Invariant~\ref{inv:boundary_invariant}}
