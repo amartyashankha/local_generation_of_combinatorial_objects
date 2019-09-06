@@ -30,20 +30,20 @@ The prefix constraint implies that the $y$-coordinate of any point on the walk i
 The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) is the $n^{th}$ Catalan number $C_n=\frac{1}{n+1}\cdot{2n\choose n}$.
 Many important combinatorial objects occur in Catalan families of which these are an example.
 
-\textcolor{Maroon}{We will approach the problem of partially sampling Catalan objects through Dyck paths.}
+We will approach the problem of partially sampling Catalan objects through Dyck paths.
 This, in turn, will allow us to sample other random Catalan objects such as rooted trees, and bracketed expressions.
 Specifically, we will want to answer the following queries:
 \begin{itemize}
-    \item \textcolor{Maroon}{\func{Direction}$(i)$: Returns the value of the $i^{th}$ step in the Dyck path (whether the step is up or down).}
-    \item \func{Height}$(i)$: Returns the position of the path after $i$ steps.
-    \item \func{First-Return}$(i)$: Returns an index $j>i$ such that $\func{Height}(j)=\func{Height}(i)$, and for any other $k$ between $i$ and $j$,
-    $\func{Height}(k)$ is strictly greater than $\func{Height}(i)$.
-    \textcolor{Maroon}{
-    While it may not be clear why this kind of query is important, it will be useful for querying bracketed expressions and random trees.
-    We defer this discussion to Section~\ref{sec:bijections_to_other_catalan_objects}.}
+    \item \func{Direction}$(t)$: Returns the value of the $t^{th}$ step in the Dyck path (whether the step is up or down).
+    \item \func{Height}$(t)$: Returns the $y$-position of the path after $t$ steps
+    (the number of up steps minus the number of down steps among the first $t$ steps).
+    Since a $\func{Direction}(t)$ query can be simulated using the queries $\func{Height}(t)$ and $\func{Height}(t-1)$,
+    we will not explicitly discuss the \func{Direction} queries in what follows.
+    \item \func{First-Return}$(t)$: If the $(t+1)^{th}$ step is upwards i.e. $\func{Height}(t+1) = \func{Height}(t)+1$,
+    it returns the smallest index $t'>t$ such that $\func{Height}(t')=\func{Height}(t)$.
+    While it may not be clear why this query is important, it will be useful for querying bracketed expressions and random trees.
+    (see Section~\ref{sec:bijections_to_other_catalan_objects}).
 \end{itemize}
-\textcolor{Maroon}{Since a $\func{Direction}(i)$ query can be simulated using the queries $\func{Height}(i)$ and $\func{Height}(i-1)$,
-we will not explicitly discuss the \func{Direction} queries in what follows.}
 
 
 
@@ -83,15 +83,16 @@ starting at the first \emph{yellow path position} to reveal the corresponding th
 By definition, \func{First-Return}$(x)$ is meaningful only when the step from $x$ to $x+1$ is upwards,
 i.e. when $\func{Height}(x+1) = \func{Height}(x) + 1$.
 We can also implement a \func{Reverse-First-Return} query, which is just a standard \func{First-Return} query on the reversed Dyck path
-(consider the reversal of the green dashed arrows in Figure~\ref{fig:dyck_bijection}).
+(consider a reversal of the green dashed arrows in Figure~\ref{fig:dyck_bijection}).
 The reversal implies that \func{Reverse-First-Return}$(x)$ is only meaningful when $\func{Height}(x-1) = \func{Height}(x) + 1$.
-As we shall show later (Section~\ref{sec:reverse_first_return_queries}),
-this query can also be implemented in a symmetric manner to \func{First-Return}.
+In terms of bijections, \func{Reverse-First-Return} is equivalent to finding a matching opening bracket in bracketed expressions,
+and a \func{Previous-Child} query in rooted trees.
+We show how to implement this query in Section~\ref{sec:reverse_first_return_queries}.
 In the case where the height at $x$ is larger than both the heights at $x-1$ and $x+1$ (boxed nodes in Figure~\ref{fig:dyck_bijection}),
 there is no meaningful ``first return'' from the context of the bijections.
 Specifically, these nodes correspond to leaf nodes in rooted trees, or to a terminal nesting level in the bracket expression.
+
 Moving forwards, we will focus on Dyck paths for the sake of simplicity.
-\todo[inline,color=red!80!green!25]{Finish}
 
 
 
