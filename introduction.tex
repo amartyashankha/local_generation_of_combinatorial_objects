@@ -21,13 +21,13 @@ it is invoked (until none is left), and \func{Random-Neighbor}$(v)$ returns a un
 
 The problem of sampling partial information about huge random objects was pioneered in \cite{huge,huge_old,huge_journal},
 through the implementation of \emph{indistinguishable} pseudorandom objects of exponential size.
-Further work in \cite{sparse,reut} considers the generation of different random graph models.
+Further work in \cite{sparse,reut} considers the implementation of different random graph models.
 \cite{reut} introduced the study of $\func{Next-Neighbor}$ queries which provide efficient access to the adjacency list representation.
 In addition to supporting \func{Vertex-Pair} and \func{Next-Neighbor},
 we also introduce and implement a new \func{Random-Neighbor} query for undirected graphs with independent edge probabilities.
 
-To support the generation of a richer class of combinatorial objects, such as random colorings of an input graph $G$,
-we define a new model for generating random objects which have huge description size (the underlying graph $G$).
+To support the implementation of a richer class of combinatorial objects, such as random colorings of an input graph $G$,
+we define a new model for implementing random objects which have huge description size (the underlying graph $G$).
 In this setting, our algorithms are unable to read the full input,
 but can still answer queries to a valid sampled object using a sub-linear number of local probes to the input description.
 
@@ -171,7 +171,7 @@ Consequently, multiple independent instances of the algorithm having access to t
 will respond to queries in a manner consistent with each other; they will sample exactly the same coloring, regardless of the queries asked.
 
 \begin{restatable}{theorem}{ColoringGrand}
-\label{thm:coloring_generator_main}
+\label{thm:coloring_grand}
 Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
 we can sample the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
 to the uniform distribution over all valid colorings of the graph, in a consistent manner,
@@ -184,12 +184,12 @@ using only $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time,
 \subsection{Related Work}
 \label{sec:related_work}
 The problem of computing local information of huge random objects was pioneered in \cite{huge_old,huge}.
-Further work of \cite{sparse} considers the generation of sparse $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
+Further work of \cite{sparse} considers the implementation of sparse $G(n,p)$ graphs from the Erd\"{o}s-R\'{e}nyi model \cite{er},
 with $p = O(\poly(\log n)/n)$, by implementing \func{All-Neighbors} queries.
 While these implementations use polylogarithmic resources over their entire execution,
-they generate graphs that are  only guaranteed to \emph{appear random} to algorithms that inspect a \emph{limited portion} of the generated graph.
+they generate graphs that are only guaranteed to \emph{appear random} to algorithms that inspect a \emph{limited portion} of the generated graph.
 
-In \cite{reut}, the authors construct an oracle for the generation of recursive trees, and BA preferential attachment graphs.
+In \cite{reut}, the authors construct an oracle for the implementation of recursive trees, and BA preferential attachment graphs.
 Unlike prior work, their implementation allows for an arbitrary number of queries.
 Although the graphs in this model are generated via a sequential process,
 the oracle is able to locally generate arbitrary portions of it and answer queries in polylogarithmic time.
@@ -209,7 +209,7 @@ only uses $\mathcal O(\log^2 n)$ probes to the underlying network.
 Using our implementation, one can execute this algorithm on a random small world instance in $\mathcal O(\poly(\log n))$ time,
 without incurring the $\mathcal O(n)$ prior-sampling overhead, by generating only those parts of the graph that are accessed by the routing algorithm.
 
-Implementations of local access generators may also be used to design parallel generators for random objects.
+Local access implementations may also be used to design parallel generators for random objects.
 The model from Definition~\ref{def:local_access_LCA} is particularly suited to parallelization,
 since different processors/machines can generate parts of the random object independently,
 by using a \emph{read-only} shared memory containing the public random bits.

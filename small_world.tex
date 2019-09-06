@@ -1,4 +1,4 @@
-\section{Local-Access Generators for Random Directed Graphs}
+\section{Local-Access Implementations for Random Directed Graphs}
 \label{sec:small_world}
 
 In this section, we consider Kleinberg's Small-World model \cite{kleinberg, klein}
@@ -8,7 +8,7 @@ We begin with the case where $c = 1$, then generalize to different values of $c 
 We aim to support $\func{All-Neighbors}$ queries using $\poly(\log n)$ resources. 
 This returns the entire list of out-neighbors of $v$.
 
-\subsection{Generator for $c=1$}
+\subsection{Implementation for $c=1$}
 
 %Let $X_{uv}$ denote the Bernoulli indicator variable for the event that that $(u,v)$ exists; all $X_{uv}$'s are independent, and unlike the undirected case, $X_{uv}$ and $X_{vu}$ are different random variables. Moreover, 
 Observe that since the graphs we consider here are directed, the answers to the $\func{All-Neighbor}$ queries are all independent: each vertex may determine its out-neighbors independently.
@@ -17,15 +17,15 @@ Hence, the expected degree of $v$ is at most $\sum_{k=1}^{2(\sqrt{n}-1)}O(1/k) =
 It is straightforward to verify that this bound holds with high probability (use Hoeffding's inequality).
 Since the degree of $v$ is small, in this model we can afford to perform \func{All-Neighbors} queries instead of \func{Next-Neighbor} queries using an additional $\poly(\log n)$ resources.
 
-Nonetheless, internally in our generator, we sample for our neighbors one-by-one similarly to how we process \func{Next-Neighbor} queries.
+Nonetheless, internally in our implementation, we sample for our neighbors one-by-one similarly to how we process \func{Next-Neighbor} queries.
 We perform our sampling in two phases.
 In the first phase, we sample a distance $d$, such that the next neighbor closest to $v$ is at distance $d$.
 We maintain $\LAST[v]$ to be the last sampled distance.
 In the second phase, we sample all neighbors of $v$ at distance $d$, under the assumption that there must be at least one such neighbor.
 For simplicity, we sample these neighbors as if there are \emph{full} $4d$ vertices at distance $d$ from $v$:
 some sampled neighbors may lie outside our $\sqrt n\times\sqrt n$ grid, which are simply discarded.
-As the running time of our generator is proportional to the number of generated neighbors,
-then by the bound on the number of neighbors, this assumption does not asymptotically worsen the performance of the generator.
+As the running time of our implementation is proportional to the number of implementation neighbors,
+then by the bound on the number of neighbors, this assumption does not asymptotically worsen the performance of the implementation.
 
 \subsubsection{Phase 1: Sample the distance $D$}
 Let $a = \LAST[v] + 1$, and let $\mathsf{D}(a)$ to denote the probability distribution of the distance where the next closest neighbor of $v$ is located, or $\bot$ if there is no neighbor at distance at most $2(\sqrt{n}-1)$.
@@ -87,13 +87,13 @@ Thus at this point, we have sampled all neighbors in $\Gamma_D^v$. We can then u
 Sampling each neighbor takes $O(\log n)$ time and one random $N$-bit word; the resources spent sampling the distances is also bounded by that of the neighbors.
 As there are $O(\log n)$ neighbors with high probability, we obtain the following theorem.
 
-\begin{theorem}\label{thm-swm}
+\begin{theorem}\label{thm-swm} \todo{Fix this thm}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model,
 where probability of including each directed edge $(u,v)$ in the graph is $1/(\func{dist}(u,v))^2$ where $\func{dist}$ denote the Manhattan distance,
 using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{theorem}
 
-\subsection{Generator for $c \neq 1$}
+\subsection{Implementation for $c \neq 1$}
 
 Observe that to support different values of $c$ in the probability function $c/(\func{dist}(u,v))^2$, we do not have a closed-form formula for computing the CDF for Phase 1, whereas the process for Phase 2 remains unchanged. To handle the change in the probability distribution Phase 1, we consider the following, more general problem. Suppose that we have a process $P$ that, one-by-one, provide occurrences of successes from the sequence of independent Bernoulli trials with success probabilities $\langle p_1, p_2, \ldots \rangle$. We show how to construct a process $\mathcal{P}^c$ that provide occurrences of successes from Bernoulli trials with success probabilities $\langle c\cdot p_1, c\cdot p_2, \ldots\rangle$ (truncated down to $1$ as needed). For our application, we assume that $c$ is given in $N$-bit precision, there are $O(n)$ Bernoulli trials, and we aim for an error of $\frac{1}{\poly(n)}$ in the $L_1$-distance.
 
@@ -105,7 +105,7 @@ Given a process $\mathcal{P}$ outputting the indices of successful Bernoulli tri
 using one additional $N$-bit word overhead for each answer of $\mathcal{P}$.
 \end{restatable}
 \begin{proof}
-Consider the following rejection sampling process to generating the Bernoulli trials.
+Consider the following rejection sampling process to \textcolor{Maroon}{simulate}\todo{fix me} the Bernoulli trials.
 In addition to each Bernoulli variable $X_i$ with bias $p_i$, we sample another coin-flip $C_i$ with bias $c$.
 Set $Y_i = X_i \cdot C_i$, then $\mathbb P[Y_i = 1] = \mathbb P[X_i = 1]\cdot\mathbb P[C_i] = c\cdot p_i$, as desired.
 That is, we keep a success of a Bernoulli trial with probability $c$, or reject it with probability $1-c$.
@@ -115,7 +115,7 @@ The new process $\mathcal{P}^c$ then only needs to handle the $C_i$'s. Namely, f
 As a result, $\mathcal{P}^c$ can generate the indices of successful Bernoulli trials using only one random $N$-bit word overhead for each answer from $\mathcal{P}$.
 \end{proof}
 Applying this reduction to the distance sampling in Phase 1, we obtain the following corollary.
-\begin{restatable}{corollary}{res:small-c-corol}
+\begin{restatable}{corollary}{res:small-c-corol}\todo{fix me}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c<1$,
 using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
@@ -137,7 +137,7 @@ By applying the following form of Bernoulli's inequality, we have
 = 1-\frac{k\cdot c\cdot p_{i}}{1+k\cdot c\cdot p_{i}-p_{i}}
 \leq 1-\frac{k\cdot c\cdot p_{i}}{1+(k-1)} = 1-c\cdot p_{i}
 \end{align*}
-That is, the probability that at least one of the generators report an index $i$ is $1-(1-p_{i})^{k\cdot c} \geq c\cdot p_i$, as required.
+That is, the probability that at least one of the implementations report an index $i$ is $1-(1-p_{i})^{k\cdot c} \geq c\cdot p_i$, as required.
 Then, the process $\mathcal{P}^c$ simply reports $i$ with probability $(c\cdot p_i) / (1-(1-p_{i})^{k\cdot c})$ or discard $i$ otherwise.
 Again, we only require $N$-bit of precision for each computation, and thus one random $N$-bit word suffices.
 \end{proof}
@@ -146,7 +146,7 @@ In Phase 1, we may apply this reduction only when the condition $c \cdot p_i \le
 For lower value of $p_i = 1/D^2$, namely for distance $D < \sqrt{c/(1-1/k)} = O(\sqrt{c})$, we may afford to sample the Bernoulli trials one-by-one as $c$ is $\poly(\log n)$.
 We also note that the degree of each vertex is clearly bounded by $O(\log n)$ with high probability, as its expectation is scaled up by at most a factor of $c$.
 Thus, we obtain the following corollary.
-\begin{restatable}{corollary}{res:large-c-corol}
+\begin{restatable}{corollary}{res:large-c-corol}\todo{Fix me}
 There exists an algorithm that generates a random graph from Kleinberg's Small World model with edge probabilities $c/(\func{dist}(u,v))^2$ where $c = \poly(\log n)$,
 using $O(\log^2 n)$ time and random $N$-bit words per \func{All-Neighbors} query with high probability.
 \end{restatable}
