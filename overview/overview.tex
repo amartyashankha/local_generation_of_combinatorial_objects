@@ -113,21 +113,20 @@ For instance, our implementation for the directed small world model admits such 
 
 \subsection{Basic Tools for Efficient Sampling}
 \label{sec:basic_tools_for_efficient_sampling}
-In this section, we describe the main techniques used to sample from a distribution $\{ p_i\}$,
-which differ based on the type of access to $\{p_i\}$ provided to the algorithm.
-If the algorithm is given cumulative distribution function (CDF) queries to $\{p_i\}$,
+In this section, we describe the main techniques used to sample from a distribution $\{ p_i\}_{i\in [n]}$,
+which differs based on the type of access to $\{p_i\}$ provided to the algorithm.
+If the algorithm is given cumulative distribution function (CDF) access to $\{p_i\}$,
 then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
 to a distribution that is at most $n^{-c}$ far from $\{p_i\}$ in $L_1$ distance.
 
-When only given access to queries to the probability distribution function of $\{p_i\}$, sampling can be more challenging.
-The approach that we use in this work is to construct an auxiliary distribution $\{q_i\}$ with the following two properties:
-First, $\{ q_i\}$ has an efficiently computable CDF.
-Second, $q_i$ approximates $p_i$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_i\}$.
-the following Lemma from \cite{huge} formalizes this concept. %, and shows that if we can provide such a $\{ q_i\}$,
-%we can quickly sample according to a distribution that is close to $\{ p_i\}$.
+Sampling can be more challenging when when we can only access the probability distribution function (PDF) of $\{p_i\}$,
+The approach that we use in this work is to construct an auxiliary distribution $\{q_i\}$ such that:
+(1) $\{ q_i\}$ has an efficiently computable CDF, and
+(2) $q_i$ approximates $p_i$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_i\}$.
+The following Lemma inspired by \cite{huge} formalizes this concept.
 \begin{lemma}
-\label{lem:rejection_sampling} (From \cite{huge})
-Let $\{p_i\}$ and $\{q_i\}$ be distributions on $[n]$ satisfying the following conditions:
+\label{lem:rejection_sampling}
+Let $\{p_i\}_{i\in [n]}$ and $\{q_i\}_{i\in [n]}$ be distributions on $[n]$ satisfying the following conditions:
 \begin{enumerate}
     \item There is a $\log^{\mathcal O(1)}n$ time algorithm to approximate $p_i$ and $q_i$
     up to a multiplicative $\left(1\pm \frac{1}{n^c}\right)$ factor.
