@@ -102,10 +102,14 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
         \Procedure{Next-Neighbor}{$v$}
             \State{$u \gets \LAST[v]$}
             \State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
-            \While{$u = w_v$ or $\LAST[u] < v$}
+            %\While{$u = w_v$ or $\LAST[u] < v$}
+                %\State{\textbf{sample} $F\sim\mathsf{F}(v,u,w_v)$}
+                %\State{$u \gets F$}
+            %\EndWhile
+            \Repeat
                 \State{\textbf{sample} $F\sim\mathsf{F}(v,u,w_v)$}
                 \State{$u \gets F$}
-            \EndWhile
+            \Until{$u = w_v$ or $\LAST[u] < v$}
             \If{$u \neq w_v$}
                 \State{$P_v \gets P_v \cap \{u\}$}
                 \State{$P_u \gets P_u \cap \{v\}$}
