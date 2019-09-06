@@ -1,15 +1,32 @@
 \section{Open Problems}%
 \label{sec:open_problems}
-\todo[inline,color=red!80!green!25]{Revise}
-There are many interesting directions to pursue in this area. We give a few examples.
+\todo[inline,color=red!80!green!25]{Citations}
+There are many interesting directions to pursue in this area.
+Below, we provide a few examples of random objects that may admit local access implementations.
+
+\subparagraph*{Small Description Size}
+\label{par:small_description_size}
 \begin{itemize}
     \item Provide a local access implementation of degree queries for undirected random graphs, even for $G(n,p)$.
+    How about $i^{th}$ neighbor queries?
+    \item For simple models such as $G(n,p)$, provide a local access implementation of a \func{Random-Triangle}$(v)$ query,
+    that returns a uniformly random triangle containing vertex $v$.
+    \item Provide a memory-less local access implementation of basic queries for undirected random graphs.
+    \item Given an ordered graph such as a lattice, provide an implementation to locally access a random perfect matching.
+    Interesting special cases of this problem include random domino and lozenge tilings.
+\end{itemize}
+
+\subparagraph*{Huge Description Size}
+\label{par:huge_description_size}
+\begin{itemize}
     \item Provide a faster local access implementation for sampling the color of a specified vertex
-          in a random $q$-coloring of a bounded degree graph $G$.
-    \item Given a graph with maximum degree $\Delta$ and $q > 9\Delta$,
-          provide a sublinear time local access implementation for sampling the color of a specified vertex in a random $q$-coloring of $G$.
-          We remark that this problem in particular should be feasible, by simulating a faster mixing Markov chain.
-          The important question is whether you can you get down to $q = 2\Delta$?
-    \item Given a graph $G$ and starting vertex $v$,
-          provide a local access implementation for sampling the location of a random walk starting at $v$ after $t$ steps.
+    in a random $q$-coloring of a bounded degree graph $G$.
+    \item Improve the local access implementation for sampling the color of a specified vertex in a random $q$-coloring of $G$,
+    by supporting smaller values of $q$ (smaller than $9\Delta$).
+    We remark that this problem in particular should be feasible, by simulating a faster mixing Markov chain.
+    The important question is whether you can you get down to $q = 2\Delta$?
+    \item Given query access to an input graph $G$ and starting vertex $v$,
+    provide a local access implementation for sampling the location of a random walk starting at $v$ after $t$ steps.
+    This may be feasible in certain restricted classes of graphs.
+    \item Given query access to an input DNF formula, provide an implementation to access the truth value of a single variable in a uniformly random satisfying assignment.
 \end{itemize}
