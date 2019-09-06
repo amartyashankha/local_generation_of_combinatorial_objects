@@ -84,7 +84,7 @@ there exists an implementation for this model that supports local access through
 and \func{Next-Neighbor} queries using $\mathcal O(\log^{\mathcal O(1)} n)$ running time, additional space, and random bits per query.
 \end{restatable}
 
-Next, we show that these assumptions can be realized in Erd\"os-R\'enyi random graphs, and the Stochastic Block Model.
+We show that these assumptions can be realized in Erd\"os-R\'enyi random graphs, and the Stochastic Block Model.
 SBM presents additional challenges for assigning community labels to vertices.
 
 
@@ -93,14 +93,14 @@ SBM presents additional challenges for assigning community labels to vertices.
 \label{par:directed_random_graphs}
 We also consider local-access implementations for directed graphs through Kleinberg's Small World model,
 where the probabilities are based on distances in a 2-dimensional grid.
+This model was introduced in \cite{kleinberg} to capture the geographical structure of real world networks,
+in addition to reproducing observed properties of short routing paths and low diameter.
 Building on our previous sampling procedure, we implement \func{All-Neighbors} queries for the Small World model,
 using $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graphs are sparse, the other queries follow directly).
-\todo[inline,color=red!80!green!25]{Why is Kleinberg important?}
-
 \begin{restatable}{theorem}{DirectedGrand}\label{DirectedGrand}
 There exists an algorithm that implements \func{All-Neighbors} queries for a random graph from Kleinberg's Small World model,
 where probability of including each directed non-grid edge $(u,v)$ in the graph is $c/(\func{dist}(u,v))^2$,
-where $c = \mathcal O(\poly(\log n))$, and $\func{dist}$ denotes the Manhattan distance,
+where $c = \mathcal O(\poly(\log n))$ and $\func{dist}$ denotes the Manhattan distance,
 using $O(\log^2 n)$ time and random words per query with high probability.
 \end{restatable}
 
