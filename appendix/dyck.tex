@@ -84,9 +84,8 @@ Since $U$ and $D$ are symmetric, the same argument applies.
 
 \begin{corollary}
 \label{cor:random_walk_deviation_bound}
-With high probability, every contiguous sub-path in the random walk (with $U$ up and $D$ down steps) satisfies the property with high probability.
-Specifically, if $U+D = 2B$, then $|B-U|$ and $|B-D|$ are upper bounded by $c\sqrt{B\log n}$ w.h.p. $1-1/n^2$
-for all contiguous sub-paths (for some constant $c$).
+With high probability, every contiguous sub-path of length $2B$ (with $U$ up and $D$ down steps such that $U+D=2B$) in the random walk
+satisfies the property that $|B-U|$ and $|B-D|$ are upper bounded by $c\sqrt{B\log n}$ w.h.p. $1-1/n^2$ (for some constant $c$).
 \end{corollary}
 \begin{proof}
 We can simply apply Lemma~\ref{lem:random_walk_deviation_bound} and union bound over all $n^2$ possible contiguous sub-paths.
@@ -117,7 +116,6 @@ $\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
 
 \subsection{Estimating the Sampling Probabilities}%
 \label{sec:computing_probabilities}
-\todo[inline,color=red!80!green!25]{Catalan Trap numbers here}
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
 Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
