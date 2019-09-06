@@ -57,7 +57,9 @@ As in \cite{reut} (and unlike many of the implementations presented in \cite{hug
 and the generated random objects are sampled from the true distribution (rather than just being indistinguishable).
 In particular, our construction yields local-access implementations for the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model (for \emph{all} values of $p$),
 and the Stochastic Block model with random community assignment.
+
 \input{graph_results_table}
+\vspace{-1.5em}
 
 While \func{Vertex-Pair} and \func{Next-Neighbor} queries %, as well as \func{All-Neighbors} queries for sparse graphs,
 have been considered in prior work \cite{reut, huge_old, sparse},
@@ -84,8 +86,21 @@ there exists an implementation for this model that supports local access through
 and \func{Next-Neighbor} queries using $\mathcal O(\log^{\mathcal O(1)} n)$ running time, additional space, and random bits per query.
 \end{restatable}
 
-We show that these assumptions can be realized in Erd\"os-R\'enyi random graphs, and the Stochastic Block Model.
+We show that these assumptions can be realized in Erd\"os-R\'enyi random graphs and the Stochastic Block Model.
 SBM presents additional challenges for assigning community labels to vertices (Section~\ref{sec:applications_to_random_graph_models}).
+
+\begin{restatable}{corollary}{ERGrand}
+There exists an algorithm that implements local access to a Erd\"{o}s-R\'{e}nyi $G(n,p)$ random graph,
+through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
+while using $\bo(\log^3 n)$ time, $\bo(\log^3 n)$ random bits, and $\bo(\log^2 n)$ additional space per query with high probability.
+\end{restatable}
+
+\begin{restatable}{corollary}{SBMGrand}\label{cor:sbm-construct}
+There exists an algorithm that implements local access to a random graph from the Stochastic Block Model with randomly-assigned communities,
+through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
+using $O(r\,\poly(\log n))$ time, random bits, and additional space per query w.h.p.
+\end{restatable}
+
 
 
 

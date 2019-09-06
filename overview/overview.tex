@@ -8,6 +8,7 @@ First, we define families of random objects.
 \label{def:parametrized_random_object}
 A \textbf{random object family} maps a description $\Pi$ to a distribution $\mathsf X^{\Pi}$ over the set $\mathbb X^{\Pi}$.
 \end{definition}
+
 For example, the \emph{family} of Erd\"{o}s-R\'{e}nyi graphs maps $\Pi = (n, p)$ to a distribution over $\mathbb X^{\Pi}$,
 which is the set of all possible $n$-vertex graphs,
 where the probability assigned to any graph containing $m$ edges in the distribution $\mathsf X^{\Pi}$ is exactly $p^m\cdot (1-p)^{\binom{n}{2}-m}$.
@@ -44,7 +45,7 @@ So, given a graph $G\in \mathbb X^{\Pi}$, the query $F_{(u,v)}(G) = 1$ if and on
 In prior work \cite{reut, huge, sparse} as well as some of our results, the input description $\Pi$ is of small size (typically $\mathcal O(\log n)$),
 and the oracle $\mathcal M$ can read all of $\Pi$ (for example, $\Pi = (n, p)$ in $G(n,p)$).
 
-\subparagraph*{Distributions with Huge Description Size:}
+\subparagraph*{{\Large Distributions with Huge Description Size:}}
 \label{par:distributions_with_huge_description_size}
 We initiate the study of \textbf{random object families} where the description $\Pi$ is too large to be read by a sub-linear time algorithm.
 %In all the problems considered in prior work \cite{huge,sparse,reut}, the description size
@@ -55,7 +56,7 @@ In this setting, the oracle from Definition~\ref{def:local_access} cannot read t
 For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over valid colorings of $G$.
 Here, the description $\Pi$ includes the entire graph $G$, which is too large to be read by a sublinear time algorithm.
 In this case, the oracle can query the underlying graph using neighborhood probes.
-The number of such probes used to answer a single query must also be sub-linear in the input size.
+The number of such probes used to answer a single query must be sub-linear in the input size.
 
 
 \paragraph*{Supporting Independent Query Oracles: Memory-less Implementations}

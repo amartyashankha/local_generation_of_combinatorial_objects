@@ -24,11 +24,8 @@ using $\poly(\log n)$ random bits, which may be of independent interest. We rema
 \subsubsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
 As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
-\begin{restatable}{corollary}{res:oblivious:corol}
-There exists an algorithm that implements local access to a Erd\"{o}s-R\'{e}nyi $G(n,p)$ random graph,
-through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
-while using $\bo(\log^3 n)$ time, $\bo(\log^3 n)$ random bits, and $\bo(\log^2 n)$ additional space per query with high probability.
-\end{restatable}
+
+\ERGrand*
 
 We remark that there exists an alternative approach that picks $F\sim\mathsf{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
 
@@ -69,11 +66,7 @@ with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that
 in any contiguous range, using $O(r\,\poly(\log n))$ time, random bits, and additional space per query.
 Further, this data structure may be implemented in such a way that requires no overhead for initialization.
 \end{restatable}
-\begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct}
-There exists an algorithm that implements local access to a random graph from the Stochastic Block Model with randomly-assigned communities,
-through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
-using $O(r\,\poly(\log n))$ time, random bits, and additional space per query w.h.p.
-\end{restatable}
+\SBMGrand*
 
 We provide the full details of the construction in Section~\ref{sec:multivariate_hypergeometric_sampling}.
 Our construction extends a similar implementation in the work of \cite{huge} which only supports $r = 2$.
