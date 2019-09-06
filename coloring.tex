@@ -190,12 +190,11 @@ The crucial observation is that even though these recursive calls seem unavoidab
 we can aim to reduce the size of the recursive sub-problem, and thus bound the number of levels of recursion.
 %\textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
 
-Algorithm~\ref{alg:coloring} shows our final procedure for sampling $\bm\chi^t_v$ where $c =\vec C^t_v$ is the color proposed by $v$ in epoch $t$.
+Algorithm~\ref{alg:coloring} shows our final procedure for generating $\bm\chi^t_v$, where $c =\vec C^t_v$ is $v$'s proposal at epoch $t$.
 We iterate through all neighbors $w$ of $v$, checking for conflicts.
 The condition $c\not=\vec C^t_w$ can be checked by reading $\vec C^t_w$ off the public random tape.
-If no conflict is seen, the next step is to check whether $c\not= \vec X^{t-1}_w$.
+If no conflict is seen, we proceed to check whether $c\not= \vec X^{t-1}_w$.
 
-\todo[inline,color=red!80!green!25]{High Level algorithm.}
 \begin{figure}[htpb]
 \begin{framed}
     \renewcommand\figurename{Algorithm}
@@ -281,11 +280,11 @@ W^t_{t'} \le \Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t
 + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots
 + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]
 \end{align}
-The aforementioned Equation~\ref{eq:color_overwrite} indicates that the call to $\func{Accepted}(v, t'+1)$
-(line~\ref{alg:line:check_overwritten_recursive}) is always invoked (resulting in $T_{t'+1}$ invocations of \func{Accepted}).
-However, the next call to $\func{Accepted}(v, t'+2)$ is invoked only if the previous one was not accepted,
-which occurs with probability at most $1/\alpha$ (Lemma~\ref{lem:color_reject_probability}).
-This gives us the $\mathcal B(1/\alpha)\cdot T_{t'+2}$ term in the expression.
+The above Equation~\ref{eq:color_overwrite} conservatively assumes that the call to $\func{Accepted}(v, t'+1)$
+in line~\ref{alg:line:check_overwritten_recursive} is always invoked (resulting in $T_{t'+1}$ invocations of \func{Accepted}).
+However, the next call to $\func{Accepted}(v, t'+2)$ occurs only if the previous one was not accepted,
+which happens with probability $\le 1/\alpha$ (Lemma~\ref{lem:color_reject_probability}).
+This produces the $\mathcal B(1/\alpha)\cdot T_{t'+2}$ term in the expression.
 In general, $\func{Accepted}(v, t'+i)$ is only invoked if the preceding $i-1$ calls to \func{Accepted} all returned $\ZERO$.
 This event happens with probability at most $1/\alpha^{i-1}$.
 
