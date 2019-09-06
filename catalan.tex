@@ -143,12 +143,12 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 
 \subsection{Implementing \func{Height} queries}
 \label{sec:implementing_height_queries}
-We implement $\func{Height}(t)$ by showing how to (efficiently) determine the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
-(where the heights of the endpoints are $y_i$ and $y_{i+1}$).
-We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
+We implement $\func{Height}(t)$ by showing how to efficiently determine the height of the path
+at the midpoint of an existing interval $[x_i, x_{i+1}]$ (with corresponding endpoint heights $y_i, y_{i+1}$),
+which results in two sub-intervals that are half the size.
+Next, we extend this strategy to determine the heights of arbitrary positions by recursively sub-dividing the relevant interval (binary search).
 If the interval in question has odd length, we sample a single step from an endpoint, and proceed with a shortened even length interval.
-Sampling a single step is easy since there are only two outcomes, and we can explicitly compute the probabilities for either outcome,
-as in Lemma~\ref{lem:probability_approximation_oracle} (see Section~\ref{sec:computing_probabilities}).
+Sampling a single step is easy since there are only two outcomes (see proof of Theorem~\ref{thm:dyck_midpoint_sampling}).
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_height_sampling.pdf}
@@ -311,7 +311,9 @@ Moreover, this algorithm only uses $\mathcal O(poly(\log n))$ resources.
 \begin{proof}
 If $x_{i+1}-x_i$ is even, we can set $B = (x_{i+1}-x_i)/2$.
 Otherwise, we first sample a single step from $x_i$ to $x_i+1$, and then set $B = (x_{i+1}-x_i-1)/2$.
-Since there are only two possibilities for a single step, we can explicitly approximate the probabilities, and then sample accordingly.
+Since there are only two possibilities for a single step, we can explicitly approximate the corresponding probabilities
+using the strategy outlined in the proof of Lemma~\ref{lem:probability_approximation_oracle} (see Section~\ref{sec:computing_probabilities}),
+and then sample accordingly.
 This allows us to apply the rejection sampling from Lemma~\ref{lem:rejection_sampling}
 using $\{ q_d\}$ to obtain samples from $\{ p_d\}$ as defined above.
 %Now, if $B > \Theta(\log^2 n)$ we can simply use the rejection sampling procedure described above
