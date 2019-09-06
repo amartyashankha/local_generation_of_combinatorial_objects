@@ -105,11 +105,11 @@ Notice that since $|U-D| \le |B-U|+|B-D|$, $|U-D| = \mathcal O(\sqrt{B\log n})$ 
 \DyckPathIrrelevantBoundary*
 \begin{proof}
 We use $\mathcal D$ and $\mathcal R$ to denote the set of all valid Dyck paths and all random sequences respectively.
-Clearly, $\mathcal D\subseteq \mathcal R$. Let $c$ be a constant satisfying Corollary~\ref{cor:random_walk_deviation_bound}.
+Clearly, $\mathcal D\subseteq \mathcal R$.
 Since the random walk/sequence distribution is uniform on $\mathcal R$, and by Corollary~\ref{cor:random_walk_deviation_bound}
 we see that at least $1-1/n^2$ fraction of the elements of $\mathcal R$ do not violate the boundary constraint.
-Therefore, $|\mathcal D|\ge (1-1/n^2)|\mathcal R|$ and so the $L_1$ distance between
-$\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
+Therefore, $|\mathcal D|\ge (1-1/n^2)|\mathcal R|$,
+and so the $L_1$ distance between the uniform distributions on $\mathcal D$ and $\mathcal R$ is $\mathcal O(1/n^2)$.
 \end{proof}
 
 

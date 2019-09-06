@@ -220,9 +220,9 @@ we can safely \emph{ignore} the constraint.  Intuitively, this is because the bo
 that we do not hit it with high probability even if we choose a random \emph{unconstrained} path.
 \begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
 \label{lem:dyck_path_irrelevant_boundary}
-Given a Dyck path sampling problem of length $B$ with $U$ up and $D$ down steps with a boundary at $k$,
+Given a Dyck path sampling problem of length $B$ with $U$ up, $D$ down steps, and a boundary at $k$,
 there exists a constant $c$ such that if $k > c \sqrt{B\log n}$, then the distribution of paths sampled without a boundary $\mathsf C_{\infty}(U,D)$
-(hypergeometric sampling) is statistically $\mathcal O(1/n^2)$-close in $L_1$ distance to the distribution of Dyck paths $\mathsf C_k(U+D)$.
+is $\mathcal O(1/n^2)$-close in $L_1$ distance to the distribution of Dyck paths $\mathsf C_k(U+D)$.
 \end{restatable}
 By Lemma~\ref{lem:dyck_path_irrelevant_boundary}, the problem of sampling from $C_k(2U,2D)$
 reduces to sampling from the hypergeometric distribution $C_{\infty}(2U,2D)$ when $k>\mathcal{O}(\sqrt{B\log n})$
