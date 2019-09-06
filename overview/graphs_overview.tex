@@ -48,8 +48,8 @@ without resorting to \emph{determining} its degree.
 (2) Even without committing to the degrees, answers to \func{Random-Neighbor} queries
 affect the conditional probabilities of the remaining adjacencies in a global and non-trivial manner.\footnote{
 \label{conditional} Consider a $G(n,p)$ graph with small $p$, say $p = 1/\sqrt n$,
-such that vertices will have $\widetilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
-After $\widetilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
+such that vertices will have $\tilde{\mathcal{O}}(\sqrt n)$ neighbors with high probability.
+After $\tilde{\mathcal{O}}(\sqrt n)$ \func{Random-Neighbor} queries, we will have uncovered all the neighbors (w.h.p.),
 so that the conditional probability of the remaining $\Theta(n)$ edges should now be close to zero.}
 
 We formulate an approach which samples many consecutive edges simultaneously,
@@ -70,29 +70,31 @@ We now consider the application of our construction above to actual random graph
 where we must realize the assumption that $\prod^{b}_{u=a} (1-p_{vu})$ and $\sum^{b}_{u=a} p_{vu}$ can be computed efficiently.
 For the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, these quantities have simple closed-form expressions.
 Thus, we obtain implementations of $\func{Vertex-Pair}$, $\func{Next-Neighbor}$, and $\func{Random-Neighbor}$ queries,
-using polylogarithmic resources (time, space and random bits) per query, for \emph{arbitrary} values of $p$,
+using polylogarithmic resources per query, for \emph{arbitrary} values of $p$,
 We remark that, while $\Omega(n+m) = \Omega(p n^2)$ time and space is clearly necessary to generate and represent a full random graph,
 our implementation supports local-access via all three types of queries, and yet can generate a full graph in $\widetilde{O}(n+m)$ time and space
-(Corollary~\ref{thm:er-optimal}), which is tight up to polylogarithmic factors.
+(Corollary~\ref{thm:er-optimal}).
 
 We also generalize our construction to implement the Stochastic Block Model.
 In this model, the vertex set is partitioned into $r$ \emph{communities} $\left\{ C_1, \ldots, C_r \right\}$.
 The probability that an edge exists between $u\in C_i$ and $v \in C_j$ is $p_{ij}$.
+A naive solution would be to simply assign communities to contiguous (by index) blocks of vertices,
+which would easily allow us to calculate the relevant sums/products of probabilities on continuous ranges of indices,
+with some additional case analysis to check when we are at a community boundary.
+However, this setup is unrealistic, and not particularly useful in the context of the Stochastic Block model.
 As communities in the observed data are generally unknown a priori,
 and significant research has been devoted to designing efficient algorithms for community detection and recovery, these studies generally consider
 the \emph{random community assignment} condition for the purpose of designing and analyzing algorithms \cite{mossel2015reconstruction}.
-Thus, we construct implementations where the community assignments are sampled from some given distribution,
-or from a collection of specified community sizes.
+Thus, we construct implementations where the community assignments are sampled from some given distribution $\mathsf R$,
+or from a collection of specified community sizes $\langle |C_1|, \ldots, |C_r|\rangle$.
 %\footnote{
 %Our algorithm also supports the alternative specification where the community sizes $\langle |C_1|, \ldots, |C_r|\rangle$
 %are given instead, where the assignment of vertices $V$ into these communities is chosen uniformly at random.}.
 The main difficulty here is to obtain a uniformly sampled assignment of vertices to communities on-the-fly.
 
-Our approach is, as before, to sample for the next neighbor or a random neighbor directly,
-although our result does not simply follow closed-form formulas,
-as the probabilities for the potential edges now depend on the communities of endpoints.
-To handle this issue, we observe that it is sufficient to efficiently count
-the number of vertices of each community in any range of contiguous vertex indices.
+Since the probabilities of potential edges now depend on the communities of their endpoints,
+we can't obtain closed form expressions for the relevant sums and products of probabilities.
+However, we observe that it suffices to efficiently count the number of vertices of each community in any range of contiguous vertex indices.
 We then design a data structure extending a construction of \cite{huge}, which maintains these counts for ranges of vertices,
 and determines the partition of their counts only on an as-needed basis.
 This extension results in an efficient technique to sample counts from the \emph{multivariate hypergeometric distribution}
