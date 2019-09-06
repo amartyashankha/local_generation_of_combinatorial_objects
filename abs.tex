@@ -36,9 +36,10 @@ Instead, our implementation accesses the description through local neighborhood 
 This new model can be compared to \emph{Local Computation Algorithms}, which also implement query access to a consistent valid solution,
 and read their input using local probes.
 Inspired by this connection, we extend our model to support implementations that are memory-less.
-This setting allows multiple independent (possibly simultaneous) instantiations to agree on the same random object without any communication.
+This setting allows multiple independent (possibly simultaneous) instantiations to agree on the same random object, without any communication.
 When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to implement queries to the color of any given node in sub-linear time,
 such that the resulting colors are consistent with a single valid coloring drawn from the uniform distribution.
+Unlike LCAs which can return an arbitrary valid solution, our model requires a uniformly random one.
 
 \end{abstract}
 
