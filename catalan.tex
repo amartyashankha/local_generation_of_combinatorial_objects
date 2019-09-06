@@ -403,8 +403,10 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
 How can one maintain such an invariant?
 After determining the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
-We re-establish the invariant by sampling an additional point on either side.
-This proceeds as follows for some violating interval $[x_i, x_{i+1}]$ (example violation in Figure~\ref{fig:dyck_boundary_invariant}):
+We re-establish the invariant by sampling an additional point on either side
+(see Section~\ref{sec:maintaining_height_queries_under_invariant} for details).
+Specifically, we use the following \emph{two step strategy} to sample the additional point for some violating interval $[x_i, x_{i+1}]$
+(example violation in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
     \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ according to
     the uniform distribution over all possible paths that respect the current boundary constraint
@@ -652,27 +654,28 @@ in $\poly(\log n)$ time for any valid $d_1, d_2\in \mathbb Z$ (the bounds must b
 \end{lemma}
 \begin{proof}
 We will compute the integral by splitting it up into $\mathcal O(\log^4 n)$ continuous pieces and then approximating the integral over each piece.
-The pieces corresponding to values of $\delta$ where $\floor\delta\in \mathcal R$
-are explicitly computed as $p_d = \int\limits_d^{d+1} \hat q(\delta)$.
-We can do this using Lemma~\ref{lem:probability_approximation_oracle} from Section~\ref{sec:computing_probabilities}.
+The pieces corresponding to values of $d\in \mathcal R$ can be explicitly computed as $\int_d^{d+1} \hat q(\delta) = p_d$
+(recall that we can compute $p_d$ using Lemma~\ref{lem:probability_approximation_oracle} from Section~\ref{sec:computing_probabilities}).
 
-Otherwise, if $\floor\delta\not\in \mathcal R$, we consider a range of values $[d_{min}, d_{max}]\subseteq [d_1, d_2+1]$,
-such that for any $d\in [d_{min}, d_{max}]$, the value of $\floor{r(\floor{d})}$ is a constant $E$.
-Recall that we can also compute a $\left( 1\pm 1/n^3\right)$ multiplicative approximation to $\ln \mathcal K = \ln 2\cdot(U + D) - \ln S_{total}$,
-by using the strategy in Lemma~\ref{lem:probability_approximation_oracle} (Section~\ref{sec:computing_probabilities}).
-Finally, we can compute $F = \int\limits_{d_{min}}^{d_{max}} f(\delta)$.
-Now, the logarithm of the integral is be written as:
+The more interesting pieces are over the range of $\delta$ where $\floor\delta\not\in \mathcal R$.
+Such a piece is given by a continuous range of values $[\delta_{min}, \delta_{max}]\subseteq [d_1, d_2+1]$,
+such that for any $\delta\in [\delta_{min}, \delta_{max}]$, the value of $\floor{r(\floor{\delta})}$ is a constant $E$.
+We begin the calculation of $\hat q(\delta) = \mathcal K\cdot f(\delta)\cdot exp(-E)$,
+by first computing a $\left( 1\pm 1/n^3\right)$ multiplicative approximation to $\ln \mathcal K = (U + D)\ln 2 - \ln S_{total}$,
+using the strategy in Lemma~\ref{lem:probability_approximation_oracle} (Section~\ref{sec:computing_probabilities}).
+Since $f(\delta)$ has a closed form integral (Equation~\ref{eq:dyck_integrable_function}),
+we can also compute $F = \int_{\delta_{min}}^{\delta_{max}} f(\delta)$.
+Using the fact that the exponent is constant over the range $[\delta_{min},\delta_{max}]$, we can write the logarithm of the integral as:
 \[
-\ln\left( \int\limits_{d_{min}}^{d_{max}} \hat q(\delta)\right) = \ln \left( \mathcal K\cdot E\cdot F\cdot\right)
-= \ln 2\cdot(U + D) - \ln S_{total} + \ln E + \ln F
+\ln\left(\ \int\limits_{d_{min}}^{d_{max}} \hat q(\delta)\right) = \ln \left( \mathcal K\cdot e^{-E}\cdot F\cdot\right)
+= (U + D)\cdot \ln 2 - \ln S_{total} + \ln F - E
 \]
 If this value is smaller than $-3\ln n$, we can safely ignore it since it contrbuted less than $1/n^3$ to the probability mass.
 On the flipside, the logarithm is guaranteed to be bounded by $\mathcal O(1)$.
-The upper bound is a result of the fact that $\int \hat q(\delta) = \Theta(\sum p_d) = \mathcal O(1)$,
+This upper bound is a result of the fact that $\int \hat q(\delta) = \mathcal O(\sum p_d) = \mathcal O(1)$,
 where both the sum and the integral are taken over the entire \emph{valid} range of $d$.
 This means that we can exponentiate to obtain the true value of the piecewise integral up to a multiplicative approximation of $(1\pm 1/n^3)$.
-Adding all the $\mathcal O(\log^4 n)$ pieces together produces the desired value of the integral.
-\todo[inline,color=red!80!green!25]{Fix issues in this proof}
+Adding the integrals of all the $\mathcal O(\log^4 n)$ pieces together produces the final desired value of the integral.
 \end{proof}
 
 
