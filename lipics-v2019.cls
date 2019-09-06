@@ -216,10 +216,10 @@
 \setlength\headheight{3mm}
 \setlength\headsep{10mm}
 \setlength\footskip{3mm}
-\setlength\textwidth{160mm}
+\setlength\textwidth{162mm}
 \setlength\textheight{230mm}
-\setlength\oddsidemargin{25mm}
-\setlength\evensidemargin{25mm}
+\setlength\oddsidemargin{24mm}
+\setlength\evensidemargin{24mm}
 \setlength\marginparwidth{20mm}
 \setlength\topmargin{13mm}
 \setlength{\skip\footins}{2\baselineskip \@plus 4\p@ \@minus 2\p@}

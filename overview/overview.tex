@@ -18,9 +18,9 @@ where the probability assigned to any graph containing $m$ edges in the distribu
 Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ parameterized by $\Pi$, a \emph{local access implementation}
 %Given a distribution $\mathsf X^{\Pi}$ over a set of huge random objects $\mathbb X$, a \emph{local access implementation}
 of a family of query functions $\langle F_1, F_2,\cdots \rangle$ where $F_i: \mathbb X^{\Pi}\rightarrow \{0,1\}$,
-provides an oracle $\mathcal M$ with an internal state for storing partially generated random object.
+provides an oracle $\mathcal M$ with an internal state for storing a partially generated random object.
 Given a description $\Pi$ and a query $F_i$, the oracle returns the value $\mathcal M(\Pi, F_i)$,
-and updates it's internal state, while satisfying the following:
+and updates its internal state, while satisfying the following:
 \begin{itemize}
     \item \textbf{Consistency:}
     There must be a single $X\in \mathbb X^{\Pi}$, such that for all queries $F_i$ presented to the oracle,
@@ -68,7 +68,7 @@ One way to achieve this is to restrict our attention to \emph{memory-less} imple
 An important implication of being memory-less is that the responses to each query is oblivious to the order of queries being asked.
 In fact, the lack of internal state implies that independent implementations that use the same random bits and the same input description
 must respond to queries in the same way.
-Thus, instead of using the internal state to maintain consistency, memory-less implementations are given access to a public random oracle.
+Thus, instead of using the internal state to maintain consistency, memory-less implementations are given access to the same public random oracle.
 
 %In addition to the above generalization of Definition~\ref{def:local_access}, we also consider ``memory-less'' oracle implementations,
 %where the oracle does not have any internal state, and instead has access to a source of common randomness.
@@ -89,7 +89,7 @@ Given a \textbf{random object family} $\{(\mathsf X^{\Pi}, \mathbb X^{\Pi})\}$ p
 a \emph{local access implementation} of a family of query functions $\langle F_1, F_2,\cdots \rangle$,
 provides an oracle $\mathcal M$ with the following properties.
 $\mathcal M$ has query access to the input description $\Pi$, and a tape of public random bits $\vec R$.
-Upon being queried with $\Pi$ and $F_i$, the oracle returns the value $\mathcal M(\Pi,\vec R,F_i)$,
+Upon being queried with $\Pi$ and $F_i$, the oracle uses sub-linear resources to return the value $\mathcal M(\Pi,\vec R,F_i)$,
 which must equal $F_i(X)$ for a specific $X\in\mathbb X^{\Pi}$, where the choice of $X$ depends only on $\vec R$,
 and the distribution of $X$ (over $\vec R$) is $\frac1{n^c}$-close to the distribution over $\mathbb X^{\Pi}$, for any given constant $c$.
 Thus, different instances of $\mathcal M$ with the same description $\Pi$ and the same random bits $\vec R$,
