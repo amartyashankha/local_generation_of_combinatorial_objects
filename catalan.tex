@@ -148,8 +148,9 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
 (where the heights of the endpoitns are $y_i$ and $y_{i+1}$).
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
-If the interval in question has odd length, \textcolor{Maroon}{we sample one step on the boundary}, \todo{Fix}
-and proceed with a shortened even length interval.
+If the interval in question has odd length, we sample a single step from an endpoint, and proceed with a shortened even length interval.
+Sampling a single step is easy since there are only two outcomes, and we can explicitly compute the probabilities for either outcome,
+as in Lemma~\ref{lem:probability_approximation_oracle} (see Section~\ref{sec:computing_probabilities}).
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_height_sampling.pdf}
@@ -250,9 +251,8 @@ Since the right interval is flipped in our analysis, this changes the prefix/bou
 and hence, the expression for $S_{right}$ uses $k' = k+2U-2D$.
 This also implies that $k' = \Bo(\sqrt{B\log n})$ (using Lemma~\ref{lem:DyckPathDeviationBound}).
 We can now use Equation~\ref{eq:height_sampling_probability} to evaluate the probabilties $p_d = S_{left}\cdot S_{right}/S_{total}$.
-Recall that $p_d = S_{left}(d)\cdot S_{right}(d)/S_{total}(d)$, where $S_{left}$ and $S_{right}$ are the number of possible paths
-in the left and right half of the interval respectively, when exactly $U+d$ up steps are assigned to the first half.
-$S_{total}$ is the total number of possible paths in the interval.
+Recall that $S_{left}$ and $S_{right}$ are the number of possible paths in the left and right half of the interval,
+when exactly $U+d$ up steps are assigned to the first half, and $S_{total}$ is the total number of possible paths in the interval.
 
 We will invoke the rejection sampling technique (Lemma~\ref{lem:rejection_sampling}), by constructing a different distribution $q_d$
 that approximates $p_d$ up to logarithmic factors over the vast majority of its support
@@ -268,9 +268,9 @@ However, the argument for why this $q_d$ is a good approximation to $p_d$ is far
 
 First, we consider the case where $k\cdot k'\le 2U+1$.
 In this case, we use loose bounds for $S_{left} < \binom{B}{D-d}$ and $S_{right} < \binom{B}{U-d}$.
-The preceding upper bounds hold because $\binom{B}{D-d}$ and $\binom{B}{U-d}$ are the total number of \emph{unconstrained} paths
+These are true because $\binom{B}{D-d}$ and $\binom{B}{U-d}$ are the total number of \emph{unconstrained} paths
 in the left and right half respectively, and adding the boundary constraint can only reduce the number of paths.
-We also prove the following lemma in Section~\ref{sec:dyck_appendix} to bound the value of $S_{right}$.
+We also prove the following lemma in Section~\ref{sec:dyck_appendix} to bound the value of $S_{total}$.
 \begin{restatable}{lemma}{DTotalFarBoundary}
 \label{lem:DTotalFarBoundary}
 When $kk' > 2U + 1$, $S_{total} > \frac 12\cdot \binom{2B}{2D}$.
@@ -282,26 +282,27 @@ is only a constant factor away from the number of unconstrained paths (see Secti
 The case where the boundaries are closer (i.e. $k\cdot k' \le 2U+1$) is trickier,
 since the individual counts need not be close to the corresponding binomial counts.
 However, in this case we can still ensure that the sampling probability is within poly-logarithmic factors of the binomial sampling probability.
-We use the following lemmas (proven in Section~\ref{sec:dyck_appendix}).
-
+We use the following lemmas to bound $S_{left}$ and $S_{right}$ (proofs in Section~\ref{sec:dyck_appendix}).
 \begin{restatable}{lemma}{DLeftBound}
 \label{lem:DLeftBound}
 $S_{left} \le c_1 \frac{ k\cdot\sqrt{\log n}}{\sqrt{B}}\cdot{{B}\choose{D-d}}$ for some constant $c_1$.
 \end{restatable}
-
 \begin{restatable}{lemma}{DRightBound}
 \label{lem:DRightBound}
 $S_{right} \le c_2 \frac{k'\cdot \sqrt{log n}}{\sqrt{B}}\cdot{{B}\choose{U-d}}$ for some constant $c_2$.
 \end{restatable}
 
+Finally, we obtain a diferent bound on $S_{total}$ for the \emph{near boundary} case.
 \begin{restatable}{lemma}{DTotalNearBoundary}
 \label{lem:DTotalNearBoundary}
 When $kk' \le 2U + 1$, $S_{total} \ge c_3 \frac{k\cdot k'}{B}\cdot{{2B}\choose{2D}}$ for some constant $c_3$.
 \end{restatable}
 
-\todo[inline,color=red!80!green!25]{Explain this more?}
-We can now put these lemmas together to show that $p_d/q_d \le \Theta(\log n)$ and invoke Lemma~\ref{lem:rejection_sampling} to sample the value of $d$.
-This gives us the height of the Dyck path at the midpoint of the two given points.
+Multiplying these inequalities together allows us to bound $p_d = S_{left}\cdot S_{right}/S_{total} \le \Theta(q_d\log n)$,
+implying $p_d/q_d \le \Theta(\log n)$.
+Consequently, we can leverage Lemma~\ref{lem:rejection_sampling} to obtain a sample from $\{ p_d\}$
+using $\mathcal O(\log^{\mathcal O(1)}n)$ samples from $\{ q_d\}$,
+thus determining the height of the Dyck path at the midpoint of the interval.
 
 \begin{theorem}
 \label{thm:dyck_midpoint_sampling}
@@ -400,18 +401,18 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
 \end{figure}
 
 How can one maintain such an invariant?
-After sampling the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
+After determining the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
 We re-establish the invariant by sampling an additional point on either side.
 This proceeds as follows for some violating interval $[x_i, x_{i+1}]$ (example violation in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
-    \item \textcolor{Maroon}{Sample} the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ according to
+    \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ according to
     the uniform distribution over all possible paths that respect the current boundary constraint
     (see Section~\ref{sec:sampling_the_lowest_achievable_height}).
-    \item \textcolor{Maroon}{Sample} an intermediate position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
+    \item Find an intermediate position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
     (see Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
 \end{enumerate}
-The sample $\func{Height}(x)$ results in two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
+The newly sampled position $x$ produces two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
 Since $h = \func{Height}(x)$ has been determined to be the minimum height in the overall range $[x_i, x_{i+1}]$,
 the invariant is preserved in the new intervals (see Figure~\ref{fig:dyck_invariant_preserve}).
 Lemma~\ref{lem:first_return_interval} in Section~\ref{sec:finding_the_correct_interval}
@@ -790,10 +791,29 @@ As in Section~\ref{sec:sampling_the_height}, we swap $x_i$ and $x_{i+1}$ if nece
 Due to Invariant~\ref{inv:boundary_invariant}, we know that the lowest achievable height in the interval $[x_i, x_{i+1}]$ is $y_i$,
 i.e. the boundary constraint for the left half becomes $k = 1$ instead of $k = y_i + 1$, since the constrained boundary is at height $y_i$.
 Similarly, the boundary constraint for the right half becomes $k' = 2U - 2D + 1$.
-The rest of the algorithm can proceed as described in Section~\ref{sec:sampling_the_height}.
+
+The algorithm for sampling the height at the midpoint $x_{mid}$ of $[x_i,x_{i+1}]$ can proceed as described in Section~\ref{sec:sampling_the_height}.
 Of course, in this scenario, the boundary is never far away, and therefore we should always use the strategy in Section~\ref{sec:the_difficult_case}.
-This allows us to combine the results from Theorem~\ref{thm:dyck_height_sampling} and Theorem~\ref{thm:dyck_first_return_sampling},
-thus obtaining the following implementation
+The second step is to re-establish Invariant~\ref{inv:boundary_invariant} in the newly created sub-interval $[x_{mid},x_{i+1}]$\footnote{
+Note that the invariant is not broken for the $[x_i,x_{mid}]$ sub-interval since $y_i+1$ was the original boundary constraint.
+In general, the invariant will be automatically preserved for one of the sub-intervals; the side corresponding to $\min(y_i,y_{i+1})$.},
+using the two step strategy from Section~\ref{sec:maintaining_a_boundary_invariant}.
+This involves determining the height of one additional point $x'\in [x_{mid},x_{i+1}]$.
+Finally, we can continue with the height sampling algorithm from Theorem~\ref{thm:dyck_height_sampling},
+by recursively halving one of the newly created intervals (the one containing $x$).
+Figure~\ref{fig:dyck_invariant_height_queries} illustrates the aforementioned three steps.
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=\textwidth]{images/dyck_invariant_height_queries.pdf}
+    \caption{Performing \func{Height} queries while maintaining Invariant~\ref{inv:boundary_invariant}.
+    The first step is to sample the height at the midpoint $x_{mid}$ of an existing interval $[x_i,x_{i+1}]$ that contains $x$.
+    Next, we re-establish Invariant~\ref{inv:boundary_invariant} by sampling an additional point $x'$ within the violating interval
+    Finally, we recurse on the appropriate sub-interval (yellow box).
+    }
+    \label{fig:dyck_invariant_height_queries}
+\end{figure}
+
+Hence, we can combine results from Theorem~\ref{thm:dyck_height_sampling} and Theorem~\ref{thm:dyck_first_return_sampling} to obtain the following:
 \CatalanGrand*
 
 
@@ -818,4 +838,3 @@ Once we have found an interval that is known to contain the \func{Reverse-First-
 we can follow the strategy from the proof of Theorem~\ref{thm:dyck_first_return_sampling};
 recursively sub-dividing the relevant interval and finding the newly created sub-interval that contains the return,
 until we converge on the correct return position.
-\todo[inline,color=red!80!green!25]{Edit this}
