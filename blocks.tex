@@ -23,10 +23,10 @@ $\sum_{u=a}^b p_{vu}$, can be approximated efficiently.
 
 \subsubsection{Partitioning and Filling the Blocks}
 \label{sec:block_partitioning_and_filling}
-We fix some sufficiently large constant $L$, and assign the vertex $u$ to the $\lceil\sum^{u}_{i=1} p_{vi}/L\rceil^\textrm{th}$ block of $v$.
-Essentially, each block represents a contiguous range of vertices, where the expected number of neighbors of $v$ in the block is in $[L-1,L+1]$
-(for example, for $G(n,p)$, each block contains roughly $L/p$ vertices).
-Let us define $\Gamma^{(i)}(v) = \Gamma(v) \cap B^{(i)}_v$, the actual neighbors appearing in block $B^{(i)}_v$.
+We fix a sufficiently large constant $L$, and assign the vertex $u$ to the $\lceil\sum^{u}_{i=1} p_{vi}/L\rceil^\textrm{th}$ block of $v$.
+Essentially, each block represents a contiguous range of vertices, where the expected number of neighbors of $v$ in the block is $\approx L$
+(for example, in $G(n,p)$, each block contains $\approx L/p$ vertices).
+We define $\Gamma^{(i)}(v) = \Gamma(v) \cap B^{(i)}_v$, the neighbors appearing in block $B^{(i)}_v$.
 Our construction ensures that $L-1 < \mathbb E \left[|\Gamma^{(i)}(v)|\right] < L+1$ for every $i < |\vec B_v|$
 (i.e., the condition holds for all blocks except possibly the last one).
 
@@ -57,8 +57,8 @@ We postpone the description of our implementation of $\func{Fill}$ to Section~\r
 
 \subsubsection{Putting it all together: \func{Random-Neighbor} queries}
 \label{sec:random_neighbor}
-\begin{wrapfigure}[11]{R}{0.41\textwidth}
-\vspace{-1.0em}
+\begin{wrapfigure}[10]{R}{0.41\textwidth}
+\vspace{-1.75em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Block sampling.}
@@ -109,11 +109,12 @@ Therefore, each vertex is returned with the same probability.
 
 \begin{restatable}{lemma}{rand-gen-fast}
 \label{lem:rand_gen_fast}
-Algorithm~\ref{alg:random} terminates in $\mathcal{O}(\log n)$ iterations in expectation, or $\mathcal{O}(\log^2 n)$ iterations with high probability.
+Algorithm~\ref{alg:random} terminates in $\mathcal{O}(\log n)$ iterations in expectation, or $\mathcal{O}(\log^2 n)$ iterations w.h.p.
 \end{restatable}
 \begin{proof}
-From Lemma~\ref{lem:EmptyBlock}, a $(1/3)$-fraction of the blocks are non-empty with high probability,
-and hence the probability of choosing a non-empty block is at least $1/3$.
+Using Lemma~\ref{lem:EmptyBlock}, we conclude that
+%a $(1/3)$-fraction of the blocks are non-empty with high probability, and hence
+the probability of choosing a non-empty block is at least $1/3$.
 Since $M = \Theta(\log n)$ by Lemma~\ref{lem:MaxBlockSize}, the success probability of each iteration is at least $1/(3M)=\Omega(1/\log n)$,
 Thus, the number of iterations required is $O(\log^2 n)$ with high probability.
 \end{proof}
@@ -126,17 +127,17 @@ Thus, the number of iterations required is $O(\log^2 n)$ with high probability.
 \label{sec:fill_implement}
 
 \begin{wrapfigure}[13]{R}{0.39\textwidth}
-\vspace{-1.5em}
+\vspace{-0.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Filling a block}
     \label{alg:fill}
     \begin{algorithmic}
     \Procedure{Fill}{$v,i$}
-    \State{$(a,b) \gets B^{(i)}_j$}
+    \State{$(a,b) \gets B^{(i)}_v$}
     %	\State{$w_v \gets \min \{(P_v \cap (u, n]) \cup \{n+1\}\}$}
     %    \For{$b$ in $P_v^{(i)}\cup\{\END(v,i)\}$}
-            \While{$a \ge b$}
+            \While{$a < b$}
                 \State{\textbf{sample} $u\sim\mathsf{F}(v,a,b)$}
                 \State{$B_u^{(j)} \gets$ block containing $v$}
     %            \State{$j\gets \BLOCK(u,v)$}
@@ -157,14 +158,14 @@ Thus, the number of iterations required is $O(\log^2 n)$ with high probability.
 Lastly, we describe the implementation of the $\func{Fill}$ procedure, employing the approach of skipping non-neighbors, as developed for Algorithm~\ref{alg:oblivious-coin-toss}. We aim to simulate the following process: perform coin-tosses $C_{vu}$ with probability $p_{vu}$ for every $u \in B^{(i)}_v$ and update $\ADJ[v][u]$'s according to these coin-flips unless they are decided (i.e., $\ADJ[v][u] \neq \PHI$). We directly generate a sequence of $u$'s where the coins $C_{vu} = \ONE$, then add $u$ to $P_v$ and vice versa if $X_{vu}$ has not previously been decided. Thus, once $B^{(i)}_v$ is \filled, we will obtain $P_v^{(i)} = \Gamma^{(i)}(v)$ as desired.
 
 As discussed in Section~\ref{sec:ER-rand}, while we have recorded all occurrences of $\ADJ[v][u]=\ONE$ in $P_v^{(i)}$,
-we need and efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss},
+we need an efficient way of checking whether $\ADJ[v][u] = \ZERO$ or $\PHI$. In Algorithm~\ref{alg:oblivious-coin-toss},
 $\LAST$ serves this purpose by showing that $\ADJ[v][u]$ for all $u \leq \LAST[v]$ are decided as shown in Lemma~\ref{lem:cond-0}.
-Here instead, with our block structure, we maintain a single bit marking whether each block is \filled~or \unfilled:
+Here instead, we maintain a single bit marking whether each block is \filled~or \unfilled:
 a \filled~block implies that $\ADJ[v][u]$ for all $u \in B^{(i)}_v$ are decided.
-The block structure along with mark bits, unlike $\LAST$, are capable of handling intermittent ranges of intervals,
-namely blocks, which is sufficient for our purpose, as shown in the following lemma.
-This yields the implementation Algorithm~\ref{alg:fill} for the $\func{Fill}$ procedure
-fulfilling the requirement previously given in Section~\ref{sec:block_partitioning_and_filling}. 
+The block structure along with the mark bits, unlike $\LAST$, is capable of handling intermittent ranges of intervals,
+which is sufficient for our purpose, as shown in the following lemma.
+This yields the implementation of Algorithm~\ref{alg:fill} for the $\func{Fill}$ procedure
+fulfilling the requirement previously given in Section~\ref{sec:block_partitioning_and_filling}.
 
 \begin{restatable}{lemma}{cond}\label{lem:cond-0-fill}
 The data structures $P_v^{(i)}$'s and the block marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{Fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B^{(i)}_v$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B^{(i)}_v$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
@@ -189,7 +190,7 @@ Each execution of Algorithm~\ref{alg:fill} (the \func{Fill} operation) on an \un
 \begin{itemize}
 \item terminates within $\bo(1)$ iterations (of its \textup{\textbf{repeat}} loop);
 \item computes $\bo(\log n)$ quantities of $\prod_{u \in [a,b]} (1-p_{vu})$ and $\sum_{u\in[a,b]} p_{vu}$ each;
-\item aside from the above computations, uses $\bo(\log n)$ time, $\bo(1)$ random $N$-bit words, and $\bo(1)$ additional space.
+\item uses an additional $\mathcal O(\log n)$ time, $\mathcal O(1)$ random $\log n$-bit words, and $\mathcal O(1)$ additional space.
 \end{itemize}
 \end{restatable}
 
@@ -202,12 +203,12 @@ Each execution of Algorithm~\ref{alg:random} (the \func{Random-Neighbor} query),
 \begin{itemize}
 \item terminates within $\bo(\log^2 n)$ iterations (of its \textup{\textbf{repeat}} loop);
 \item computes $\bo(\log^3 n)$ quantities of $\prod_{u \in [a,b]} (1-p_{vu})$ and $\sum_{u\in[a,b]} p_{vu}$ each;
-\item aside from the above computations, uses $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space.
+\item uses an additional $\mathcal O(\log^3 n)$ time, $\mathcal O(\log^2 n)$ random words, and $\mathcal O(1)$ additional space.
 \end{itemize}
 \end{restatable}
 
-\paragraph*{Extension to other query types}
-We finally extend our algorithm to support other query types as follows.
+\subparagraph*{Extension to other query types}
+Finally, we extend our algorithm to support other query types:
 \begin{itemize}
 \item \func{Vertex-Pair}(u,v): We simply need to make sure that Lemma~\ref{lem:cond-0-fill} holds, so we first apply \func{Fill}$(u,j)$ on block $B_u^{(j)}$ containing $v$ (if needed), then answer accordingly.
 \item \func{Next-Neighbor}(v): We maintain $\LAST$, and keep invoking \func{Fill} until we find a neighbor. Recall that by Lemma~\ref{lem:EmptyBlock}, the probability that a particular block is empty is a small constant. Then with high probability, there exists no $\omega(\log n)$ \emph{consecutive} empty blocks $B^{(i)}_v$'s for any vertex $v$, and thus \func{Next-Neighbor} only invokes up to $\bo(\log n)$ calls to \func{Fill}.

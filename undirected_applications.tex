@@ -24,16 +24,18 @@ using $\poly(\log n)$ random bits, which may be of independent interest. We rema
 \subsubsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
 As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
-\begin{restatable}{corollary}{res:oblivious:corol} \todo{Change to thm?}
-The final algorithm in Section~\ref{sec:undirected} locally implements a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
+\begin{restatable}{corollary}{res:oblivious:corol}
+There exists an algorithm that implements local access to a Erd\"{o}s-R\'{e}nyi $G(n,p)$ random graph,
+through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
+while using $\bo(\log^3 n)$ time, $\bo(\log^3 n)$ random bits, and $\bo(\log^2 n)$ additional space per query with high probability.
 \end{restatable}
 
 We remark that there exists an alternative approach that picks $F\sim\mathsf{F}(v,a,b)$ directly via a closed-form formula $a+\lceil\frac{\log U}{\log (1-p)}\rceil$ where $U$ is drawn uniformly from $[0,1)$, rather than binary-searching for $U$ in its CDF. Such an approach may save some $\poly(\log n)$ factors in the resources, given the prefect-precision arithmetic assumption. This usage of the $\log$ function requires $\Omega(n)$-bit precision, which is not applicable to our computation model.
 
-While we are able to generate our random graph on-the-fly supporting all three types of queries, our construction still only requires $\bo(m+n)$ space ($N$-bit words) in total at any state; that is, we keep $\bo(n)$ words for $\LAST$, $\bo(1)$ words per neighbor in $P_v$'s, and one marking bit for each block (where there can be up to $m+n$ blocks in total). Hence, our memory usage is nearly optimal for the $G(n,p)$ model:
+While we are able to generate our random graph on-the-fly supporting all three types of queries, our construction still only requires $\bo(m+n)$ space ($\log n$-bit words) in total at any state; that is, we keep $\bo(n)$ words for $\LAST$, $\bo(1)$ words per neighbor in $P_v$'s, and one marking bit for each block (where there can be up to $m+n$ blocks in total). Hence, our memory usage is nearly optimal for the $G(n,p)$ model:
 
 \begin{restatable}{corollary}{res:er-optimal}
-\label{thm:er-optimal} \todo{Is this needed?}
+\label{thm:er-optimal}
 The final algorithm in Section~\ref{sec:undirected} can generate a complete random graph
 from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using overall
 $\widetilde{\mathcal{O}}(n+m)$ time, random bits and space, which is $\widetilde{\bo}(pn^2)$ in expectation.
@@ -64,12 +66,13 @@ yielding an implementation for the Stochastic Block model using $O(r\, \poly(\lo
 \begin{restatable}{theorem}{res:sbm-data}\label{thm:sbm-data}
 There exists a data structure that samples a community for each vertex independently at random from $\mathsf{R}$
 with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that ask for the number of occurrences of vertices of each community
-in any contiguous range, using $O(r\,\poly(\log n))$ time, random $N$-bit words and additional space per query.
+in any contiguous range, using $O(r\,\poly(\log n))$ time, random bits, and additional space per query.
 Further, this data structure may be implemented in such a way that requires no overhead for initialization.
 \end{restatable}
-\begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct} \todo{Change this to thm?}
-The final algorithm in Section~\ref{sec:undirected} implements a random graph from the Stochastic Block model with randomly-assigned communities
-using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per query with high probability.
+\begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct}
+There exists an algorithm that implements local access to a random graph from the Stochastic Block Model with randomly-assigned communities,
+through \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries,
+using $O(r\,\poly(\log n))$ time, random bits, and additional space per query w.h.p.
 \end{restatable}
 
 We provide the full details of the construction in Section~\ref{sec:multivariate_hypergeometric_sampling}.

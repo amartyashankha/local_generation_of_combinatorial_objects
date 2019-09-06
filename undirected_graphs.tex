@@ -18,9 +18,9 @@ The deterministic guarantee comes at the cost of more complicated data-structure
 }
 \fi
 
-First, consider the adjacency matrix $\ADJ$ of $G$ where each entry $\ADJ[u][v]$ can exist in three possible states:
+First, consider the adjacency matrix $\ADJ$ of $G$, where each entry $\ADJ[u][v]$ can exist in three possible states:
 $\ADJ[u][v] = \ONE$ or $\ZERO$ if the algorithm has determined that $\{u,v\}\in E$ or $\{u,v\} \notin E$ respectively,
-and $\ADJ[u][v] = \PHI$ if whether ${u,v}\in E$ or not will be determined by future random choices
+and $\ADJ[u][v] = \PHI$ if whether $\{u,v\}\in E$ or not will be determined by future random choices
 (in fact, the marginal probability of $\mathbb P[(u,v)\in E]$ conditioned on all prior samples is still $p_{uv}$).
 Our implementation also maintains the vector $\LAST$ (used in the same sense as \cite{reut}),
 where $\LAST[v]$ records the neighbor of $v$ returned in the last call \func{Next-Neighbor}$(v)$, or $\LAST[v]=0$ if no such call has been invoked.
@@ -28,15 +28,15 @@ All cells of $\ADJ$ and $\LAST$ are initialized to $\PHI$ and $0$, respectively.
 
 We use the Bernoulli random variable $X_{uv} \sim \mathsf{Bern}(p_{uv})$ when sampling the value of $\ADJ[u][v]=\phi$.
 For the sake of analysis, we will frequently view our random process as if the \emph{entire} table of random variables $X_{uv}$ has been sampled
-\emph{up-front} (i.e. all coins have already been flipped), and the algorithm simply ``uncovers'' these variables instead of making coin-flips.
-Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{uv}$ once the graph generation is complete.
+\emph{up-front}, and the algorithm simply ``uncovers'' these variables instead of making coin-flips.
+Thus, every cell $\ADJ[u][v]$ is originally $\PHI$, but will eventually take the value $X_{uv}$.
 
-\paragraph*{Obstacles for maintaining $\ADJ$ explicitly}
-First, consider a naive implemention that fills out the cells of $\ADJ$ one-by-one as required by each query;
+\subparagraph*{Obstacles for maintaining $\ADJ$ explicitly:}
+Consider a naive implemention that fills out the cells of $\ADJ$ one-by-one as required by each query;
 equivalently, we perform $\func{Vertex-Pair}$ queries on successive vertices until a neighbor is found.
 There are two problems with this approach.
-Firstly, the algorithm only finds a neighbor, for a \func{Random-Neighbor} or \func{Next-Neighbor} query, with probability $p_{uv}$,
-which requires too many iterations: for $G(n,p)$ this requires $1/p$ iterations, which is already infeasible for $p = o(1/\poly(\log n))$.
+Firstly, the algorithm only finds a neighbor, for a \func{Random-Neighbor} or \func{Next-Neighbor} query, with probability $p_{uv}$:
+for $G(n,p)$ this requires $1/p$ iterations, which is already infeasible for $p = o(1/\poly(\log n))$.
 Secondly, the algorithm may generate a large number of non-neighbors in the process, possibly in random or arbitrary locations.
 
 
@@ -92,8 +92,8 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
 
 \subsubsection{Queries and Updates}
 \label{sec:nn-correctness}
-\begin{wrapfigure}[13]{r}{0.42\textwidth}
-\vspace{-3em}
+\begin{wrapfigure}[14]{r}{0.42\textwidth}
+\vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Sampling \func{Next-Neighbor}}
@@ -136,10 +136,12 @@ More specifically, $F\sim\mathsf{F}(v,a,b)$ represents the event that $C_{v,a+1}
 which happens with probability $\mathbb P[F=f]=\prod_{u=a+1}^{f-1} (1-p_{vu}) \cdot p_{vf}$.
 For convenience, let $F = b$ denote the event where all $C_{vu}=\ZERO$. Our algorithm samples $F_1\sim\mathsf{F}(v,\LAST[v],w_v)$ to find the first occurrence of $C_{v,F_1} = \ONE$, then samples $F_2\sim\mathsf{F}(v,F_1,w_v)$ to find the second occurrence $C_{v,F_2} = \ONE$, and so on.
 These values $\{F_i\}$ are iterated as $u$ in Algorithm~\ref{alg:oblivious-coin-toss}.
-As this process generates $u$ satisfying $C_{vu}=1$ in the increasing order, we repeat until we find one that also satisfies $\ADJ[u][v]=\phi$.
+This process generates $u$ satisfying $C_{vu}=1$ in increasing order,
+until we find one that also satisfies $\ADJ[u][v]=\phi$ (this outcome is captured by the condition $\LAST[u] < v$),
+or until the next generated $u$ is equal to $w_v$.
 Note that once the process terminates at some $u$, we make no implications on the results of any uninspected coin-flips after $C_{vu}$.
 
-\paragraph*{Obstacles for extending beyond \func{Next-Neighbor} queries}
+\subparagraph*{Obstacles for extending beyond \func{Next-Neighbor} queries:}
 There are two main issues that prevent this method from supporting \func{Random-Neighbor} queries.
 Firstly, while one might consider applying \func{Next-Neighbor} starting from some random location $u$ to find the minimum $u' \geq u$
 where $\ADJ[v][u']=\ONE$, the probability of choosing $u'$ will depend on the probabilities $p_{vu}$'s, and is generally not uniform.
