@@ -341,13 +341,13 @@
 \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
                                      {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
-                                     {\sffamily\large\bfseries\raggedright}} % EDITED from \Large
+                                     {\sffamily\Large\bfseries\raggedright}} % EDITED from \Large
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {-2.00ex \@plus-1ex \@minus-.2ex}%
-                                    {0.8ex \@plus .2ex}%
+                                    {-3.25ex \@plus-1ex \@minus-.2ex}%
+                                    {1.5ex \@plus .2ex}%
                                     {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\z@}%
-                                       {1.5ex \@plus1ex \@minus .2ex}%
+                                       {3.25ex \@plus1ex \@minus .2ex}%
                                        {-1em}%
                                       {\sffamily\large\bfseries}}
 \setlength\leftmargini  \parindent

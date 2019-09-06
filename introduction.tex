@@ -1,7 +1,7 @@
 \section{Introduction}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a huge random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
-or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
+or is it possible to provide local query access to the object and generate it incrementally ``on-the-fly'' (as requested by the algorithm)?
 Such an \emph{implementation} would ideally emulate the random object by answering appropriate queries,
 in a manner that is consistent with a specific instance of the random object, sampled from the true distribution.
 This paradigm is useful when we wish to simulate a sub-linear algorithm on a random object,
@@ -31,6 +31,22 @@ we define a new model for implementing random objects which have huge descriptio
 In this setting, our algorithms are unable to read the full input,
 but can still answer queries to a valid sampled object using a sub-linear number of local probes to the input description.
 
+Finally, we define a new model that allows us to generate a richer class of random objects that do not have a succinct description.
+Specifically, we study uniformly random \emph{valid} $q$-colorings of an input graph $G$ with maximum degree $\Delta$.
+This is in contrast to prior work in the area, where random objects are defined as a distribution with $\mathcal O(1)$ parameters
+(for example, $n$ and $p$ in the $G(n,p)$ model).
+The distribution over valid colorings of $G$ is instead specified via a ``huge'' input (the underlying graph $G$),
+that is far too large to be read by a sub-linear time algorithm.
+Instead, our implementation accesses the description through local neighborhood probes to $G$.
+
+This new model can be compared to \emph{Local Computation Algorithms}, which also implement query access to a consistent valid solution,
+and read their input using local probes.
+Inspired by this connection, we extend our model to support implementations that are memory-less.
+This setting allows multiple independent (possibly simultaneous) instantiations to agree on the same random object, without any communication.
+When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to implement queries to the color of any given node in sub-linear time,
+such that the resulting colors are consistent with a single valid coloring drawn from the uniform distribution.
+Unlike LCAs which can return an arbitrary valid solution, our model requires a uniformly random one.
+
 
 
 
@@ -39,7 +55,7 @@ but can still answer queries to a valid sampled object using a sub-linear number
 \label{par:random_graphs}
 Random graphs are one of the most well studied types of random object.
 We consider the problem of implementing local access to a number of fundamental random graph models,
-through some natural queries including \func{Vertex-Pair}, \func{Next-Neighbor},
+through natural queries, including \func{Vertex-Pair}, \func{Next-Neighbor},
 and a newly introduced \func{Random-neighbor} query\footref{foot:graph_queries}, using polylogarithmic resources per query.
 Our results on random graphs are summarized in Table~\ref{table:graph_results}.
 
@@ -107,7 +123,7 @@ using $O(r\,\poly(\log n))$ time, random bits, and space per query w.h.p.
 
 \subparagraph*{Directed Random Graphs - The Small World Model (Section~\ref{sec:small_world}):}
 \label{par:directed_random_graphs}
-We also consider local-access implementations for directed graphs through Kleinberg's Small World model,
+We consider local-access implementations for directed graphs through Kleinberg's Small World model,
 where the probabilities are based on distances in a 2-dimensional grid.
 This model was introduced in \cite{kleinberg} to capture the geographical structure of real world networks,
 in addition to reproducing observed properties of short routing paths and low diameter.
