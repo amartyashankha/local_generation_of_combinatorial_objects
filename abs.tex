@@ -36,7 +36,7 @@ This is in contrast to prior work in the area, where the relevant random objects
 (for example, $n$ and $p$ in the $G(n,p)$ model).
 The distribution over valid colorings of $G$ is instead specified via a ``huge'' input (the underlying graph $G$),
 that is far too large to be read by a sub-linear time algorithm.
-Instead, our implementation accesses the description through local neighborhood probes to $G$,
+Instead, our implementation accesses $G$ through local neighborhood probes.
 and is able to answer queries to the color of any given vertex in sub-linear time for $q\ge 9\Delta$,
 in a manner that is consistent with a specific random valid coloring of $G$.
 Furthermore, the implementation is memory-less, and can maintain consistency with independent copies of itself using a \emph{public random oracle}.

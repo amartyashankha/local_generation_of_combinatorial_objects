@@ -26,23 +26,23 @@ Further work in \cite{sparse,reut} considers the implementation of different ran
 In addition to supporting \func{Vertex-Pair} and \func{Next-Neighbor},
 we also introduce and implement a new \func{Random-Neighbor} query for undirected graphs with independent edge probabilities.
 
-To support the implementation of a richer class of combinatorial objects, such as random colorings of an input graph $G$,
-we define a new model for implementing random objects which have huge description size (the underlying graph $G$).
-In this setting, our algorithms are unable to read the full input,
-but can still answer queries to a valid sampled object using a sub-linear number of local probes to the input description.
+%To support the implementation of a richer class of combinatorial objects, such as random colorings of an input graph $G$,
+%we define a new model for implementing random objects which have huge description size (the underlying graph $G$).
+%In this setting, our algorithms are unable to read the full input,
+%but can still answer queries to a valid sampled object using a sub-linear number of local probes to the input description.
 
 Finally, we define a new model that allows us to generate a richer class of random objects that do not have a succinct description.
-Specifically, we study uniformly random \emph{valid} $q$-colorings of an input graph $G$ with maximum degree $\Delta$.
+Specifically, we study uniformly random \emph{valid} $q$-colorings of an input graph $G$ with max degree $\Delta$.
 This is in contrast to prior work in the area, where random objects are defined as a distribution with $\mathcal O(1)$ parameters
 (for example, $n$ and $p$ in the $G(n,p)$ model).
-The distribution over valid colorings of $G$ is instead specified via a ``huge'' input (the underlying graph $G$),
-that is far too large to be read by a sub-linear time algorithm.
-Instead, our implementation accesses the description through local neighborhood probes to $G$.
+The distribution over valid colorings is instead specified via a ``huge'' input (the underlying graph $G$),
+that is too large to be read by a sub-linear time algorithm.
+Instead, our implementation accesses $G$ using local neighborhood probes.
 
 This new model can be compared to \emph{Local Computation Algorithms}, which also implement query access to a consistent valid solution,
 and read their input using local probes.
-Inspired by this connection, we extend our model to support implementations that are memory-less.
-This setting allows multiple independent (possibly simultaneous) instantiations to agree on the same random object, without any communication.
+Inspired by this connection, we extend our model to support \emph{memory-less} implementations.
+This allows multiple independent (possibly simultaneous) instantiations to agree on the same random object, without any communication.
 When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to implement queries to the color of any given node in sub-linear time,
 such that the resulting colors are consistent with a single valid coloring drawn from the uniform distribution.
 Unlike LCAs which can return an arbitrary valid solution, our model requires a uniformly random one.
@@ -141,7 +141,7 @@ using $O(\log^2 n)$ time and random words per query with high probability.
 
 \paragraph*{Catalan Objects (Section~\ref{sec:catalan_objects})}%
 \label{par:intro_catalan_objects}
-\todo{Add reference for interval-summable paper}
+\todo{Add reference for interval-summable paper "An approximate L1-difference algorithm for massive data streams"}
 Catalan objects capture a well studied combinatorial property and admit numerous interpretations that include
 well bracketed expressions, rooted trees and binary trees, Dyck languages etc.
 In this paper, we focus on the Dyck path interpretation and implement local access to a uniformly random instance of a Dyck path.
