@@ -192,9 +192,9 @@ Finally, $S_{total}$ is the total number of possible paths in the $2B$ interval.
 
 We will now use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}).
 An important point to note is that in order to apply this lemma, we must be able to compute the $p_d$ values at least approximately.
-For now, we assume that we have access to an oracle that will compute the value for us.
-Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:dyck_appendix} shows how to construct such an oracle.
-We also use the following lemma to bound the deviation of the path with high probability.\todo{Fix}
+Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:computing_probabilities} shows how to compute these approximations.
+We also use the following lemma to bound the deviation of the path with high probability.
+A proof is presented in Section~\ref{sec:dyck_path_boundaries_and_deviations}.
 \begin{restatable}{lemma}{DyckPathDeviationBound}
 \label{lem:DyckPathDeviationBound}
 Consider a contiguous \emph{sub-path} of a simple Dyck path of length $2n$
@@ -202,11 +202,10 @@ where the sub-path is of length $2B$ comprising of $U$ up-steps and $D$ down-ste
 Then there exists a constant $c$ such that the quantities $|B-U|$, $|B-D|$, and $|U-D|$
 are all $<c\sqrt{B\log n}$ with probability at least $1-1/n^2$ for every possible sub-path.
 \end{restatable}
-\textcolor{Maroon}{This lemma allows us to ignore potential midpoint heights that cause a deviation greater than $c \sqrt{B\log n}$}.
-A proof is presented in Section~\ref{sec:dyck_path_boundaries_and_deviations}.
-One implication of Lemma~\ref{lem:DyckPathDeviationBound} is that with high probability,
-the correctly sampled value for $d$ will be $\mathcal O(\sqrt{B\log n})$.
-In other words, The height of the midpoint takes on one of only  $\mathcal O(\sqrt{B\log n})$ distinct values with high probability.
+
+This lemma allows us to ignore potential midpoint heights that cause a deviation greater than $c \sqrt{B\log n}$.
+A direct implication is that with high probability, the correctly sampled value for $d$ will be $\mathcal O(\sqrt{B\log n})$.
+In other words, the height of the midpoint takes on one of only  $\mathcal O(\sqrt{B\log n})$ distinct values with high probability.
 This immediately suggests a $\tilde{\mathcal O}(\sqrt{B})$ time algorithm for sampling the midpoint height,
 by explicitly computing the probabilities of each of these potential heights, and directly sampling from the resulting distribution.
 However, we can go further and obtain a $\mathcal O(poly(\log n))$ time algorithm.
@@ -346,14 +345,12 @@ We then binary search by updating either the successor or predecessor of $x$ and
 
 \subsection{Supporting ``First Return'' Queries}%
 \label{sec:supporting_first_return_queries}
-In this section, we show how to implement more complex queries to a Dyck path.
-Specifically, we introduce $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$ (if at all).
-The utility of this kind of query can be seen through other random Catalan objects.
-For instance, if we consider a random well bracketed expression, $\func{First-Return}(x)$ is the position of the bracket matching the $x^{th}$ one.
-If we consider a random rooted tree,
-$\func{First-Return}$ corresponds to the next child of a vertex (see Section~\ref{sec:bijections_to_other_catalan_objects}).
-An important detail here is that if the first step from $x$ to $x+1$ is an down-step, there is no well defined ``\func{First-Return}''.
-In case of trees, this would correspond to a leaf which has no children.
+In this section, we discuss more complex queries to a Dyck path.
+Specifically, we implement $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$.
+The utility of this kind of query is illustrated through bijections to other random Catalan objects
+in Section~\ref{sec:bijections_to_other_catalan_objects}.
+An important detail here is that if the first step from $x$ to $x+1$ is an down-step, there is no well defined \func{First-Return}.
+%In case of trees, this would correspond to a leaf which has no children.
 
 %We will use the following asymptotic formula for \emph{close-to-central} binomial coefficients
 %which will allow us the approximate the probabilities in Section~\ref{sec:estimating_the_cdf}.

@@ -24,7 +24,7 @@ using $\poly(\log n)$ random bits, which may be of independent interest. We rema
 \subsubsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
 As $p_{vu} = p$ for all edges $\{u,v\}$ in the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model, we have the closed-form formulas $\prod_{u=a}^b (1-p_{vu}) = (1-p)^{b-a+1}$ and $\sum_{u=a}^b p_{vu} = (b-a+1)p$, which can be computed in constant time according to our assumption, yielding the following corollary.
-\begin{restatable}{corollary}{res:oblivious:corol}
+\begin{restatable}{corollary}{res:oblivious:corol} \todo{Change to thm?}
 The final algorithm in Section~\ref{sec:undirected} locally implements a random graph from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using $\bo(\log^3 n)$ time, $\bo(\log^2 n)$ random $N$-bit words, and $\bo(\log^2 n)$ additional space per query with high probability.
 \end{restatable}
 
@@ -33,7 +33,7 @@ We remark that there exists an alternative approach that picks $F\sim\mathsf{F}(
 While we are able to generate our random graph on-the-fly supporting all three types of queries, our construction still only requires $\bo(m+n)$ space ($N$-bit words) in total at any state; that is, we keep $\bo(n)$ words for $\LAST$, $\bo(1)$ words per neighbor in $P_v$'s, and one marking bit for each block (where there can be up to $m+n$ blocks in total). Hence, our memory usage is nearly optimal for the $G(n,p)$ model:
 
 \begin{restatable}{corollary}{res:er-optimal}
-\label{thm:er-optimal}
+\label{thm:er-optimal} \todo{Is this needed?}
 The final algorithm in Section~\ref{sec:undirected} can generate a complete random graph
 from the Erd\"{o}s-R\'{e}nyi $G(n,p)$ model using overall
 $\widetilde{\mathcal{O}}(n+m)$ time, random bits and space, which is $\widetilde{\bo}(pn^2)$ in expectation.
@@ -52,14 +52,12 @@ However, this only requires one $N$-bit random word.
 
 \subsubsection{Stochastic Block model}
 \label{sec:application_sbm}
-\todo[inline,color=red!80!green!25]{Read this section}
 In the Stochastic Block model, each vertex is assigned to some community $C_i$, $i \in [r]$.
 By partitioning the product by communities, we may rewrite the desired formulas, for $v \in C_i$,
 as $\prod_{u=a}^b (1-p_{vu}) = \prod_{j=1}^r (1-p_{ij})^{|[a,b]\cap C_j|}$ and $\sum_{u=a}^b p_{vu}=\sum_{j=1}^r |[a,b]\cap C_j|\cdot p_{ij}$.
-Thus, it is sufficient to design a data structure,
-that draws a community assignment for the vertex set according to the given distribution $\mathsf{R}$.
-This data structure should be able to efficiently count the number of occurrences of vertices of each community in any contiguous range,
-namely the value $|[a,b]\cap C_j|$ for each $j \in [r]$.
+Thus, it suffices to design a data structure that is able to efficiently count the number of occurrences of vertices of each community
+in any contiguous range (namely the value $|[a,b]\cap C_j|$ for each $j \in [r]$),
+where the vertices are assigned communities according to a given distribution $\mathsf{R}$.
 To this end, we use the following lemma,
 yielding an implementation for the Stochastic Block model using $O(r\, \poly(\log n))$ resources per query.
 
@@ -69,7 +67,7 @@ with $\frac{1}{\poly(n)}$ error in the $L_1$-distance, and supports queries that
 in any contiguous range, using $O(r\,\poly(\log n))$ time, random $N$-bit words and additional space per query.
 Further, this data structure may be implemented in such a way that requires no overhead for initialization.
 \end{restatable}
-\begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct}
+\begin{restatable}{corollary}{res:sbm-construct}\label{cor:sbm-construct} \todo{Change this to thm?}
 The final algorithm in Section~\ref{sec:undirected} implements a random graph from the Stochastic Block model with randomly-assigned communities
 using $O(r\,\poly(\log n))$ time, random $N$-bit words, and additional space per query with high probability.
 \end{restatable}
@@ -80,8 +78,8 @@ The overall data structure is a balanced binary tree, where the root corresponds
 and the children of each vertex correspond to the first and second half of the parent's range.
 Each node\footnote{For clarity, ``vertex'' is only used in the sampled graph, and ``node'' is only used in the internal data structures.}
 holds the number of vertices of each community in its range.
-The tree initially contains only the root, with the number of vertices of each community sampled according to the multinomial distribution
-(for $n$ samples (vertices) from the probability distribution $\mathsf{R}$).
+The tree initially contains only the root, with the number of vertices of each community $\langle |C_1|, |C_2|,\cdots, |C_r| \rangle$
+sampled according to the multinomial distribution (for $n$ samples from the distribution $\mathsf{R}$).
 The children are generated top-down on an as-needed basis according to the given queries.
 The technical difficulties arise when generating the children,
 where one needs to sample the counts assigned to either child from the correct marginal distribution.
@@ -100,8 +98,8 @@ in $O(r\cdot\poly(\log B))$ time and random words.
 Recall that $\mathsf{R}$ denotes the given distribution over integers $[r]$ (namely, the random distribution of communities for each vertex).
 Our algorithm generates and maintains random variables $X_1, \ldots, X_n$ (denoting the community assignment),
 each of which is drawn independently from $\mathsf{R}$.
-Given a pair $(i, j)$, it uses Theorem~\ref{thm:sbm-data} to sample the vector $\vec{C}(i, j) = \langle c_1, \ldots, c_r \rangle$,
-where $c_k$ counts the number of variables in $\{X_i, \ldots, X_j\}$ that take on the value $k$.
+Given a pair $(a, b)$, it uses Theorem~\ref{thm:sbm-data} to sample the vector $\vec{C}(a, b) = \langle c_1, \ldots, c_r \rangle$,
+where $c_k$ counts the number of variables in $\{X_a, \ldots, X_b\}$ that take on the value $k$.
 
 We maintain a complete binary tree whose leaves corresponds to indices from $[n]$.
 Each node represents a range and stores the vector $\vec{C}$ for the corresponding range.

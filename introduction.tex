@@ -162,7 +162,7 @@ A random coloring is sampled by proposing $\mathcal O(n\log n)$ color updates an
 This is an inherently sequential process with the acceptance of a particular proposal depending on all preceding neighboring proposals.
 Moreover, unlike the previously considered random objects, this one has no succinct representation, and we can only uncover the proper distribution
 by probing the underlying graph (in the manner of \emph{local computation algorithms} \cite{LCA, LCA_space_efficient}).
-Unlike LCAs which have to return \emph{some} valid solution, we also have to make sure that we return a solution from the correct distribution.
+Unlike LCAs which can return an \emph{arbitrary} valid solution, we also have to make sure that we return a solution from the correct distribution.
 We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 9\Delta$.
 
 Unlike all prior results in the area, this implementation has an additional feature that it is memoryless,

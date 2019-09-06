@@ -1,6 +1,6 @@
 \begin{abstract}
 
-\todo[inline,color=red!80!green!25]{Talk about enhanced model}
+\todo[inline,color=red!80!green!25]{Consistency and spell check}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
@@ -25,10 +25,20 @@ and $\func{First-Return}$ queries to find the time when the walk returns to a sp
 This in turn can be used to implement $\func{Next-Neighbor}$ queries on random rooted and binary trees,
 and $\func{Matching-Bracket}$ queries on random well bracketed expressions (the Dyck language).
 
-Finally, we study random $q$-colorings of graphs with max degree $\Delta$.
-In contrast to the prior settings, where random objects are generated according to a single distribution with $\mathcal O(1)$ parameters
-(for example, $n$ and $p$ in the $G(n,p)$ model), the distribution here is specified via a ``huge'' input (in this case, the underlying graph).
-When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to answer queries to the color of any given node in sub-linear time.
+Finally, we define a new model that allows us to generate a richer class of random objects that do not have a succinct description.
+Specifically, we study uniformly random \emph{valid} $q$-colorings of an input graph $G$ with maximum degree $\Delta$.
+This is in contrast to prior work in the area, where random objects are defined as a distribution with $\mathcal O(1)$ parameters
+(for example, $n$ and $p$ in the $G(n,p)$ model).
+The distribution over valid colorings of $G$ is instead specified via a ``huge'' input (the underlying graph $G$),
+that is far too large to be read by a sub-linear time algorithm.
+Instead, our implementation accesses the description through local neighborhood probes to $G$.
+
+This new model can be compared to \emph{Local Computation Algorithms}, which also implement query access to a consistent valid solution,
+and read their input using local probes.
+Inspired by this connection, we extend our model to support implementations that are memory-less.
+This setting allows multiple independent (possibly simultaneous) instantiations to agree on the same random object without any communication.
+When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to implement queries to the color of any given node in sub-linear time,
+such that the resulting colors are consistent with a single valid coloring drawn from the uniform distribution.
 
 \end{abstract}
 

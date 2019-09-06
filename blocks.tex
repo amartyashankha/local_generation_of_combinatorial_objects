@@ -184,7 +184,7 @@ Further, observe that the coin-flips are simulated independently of the state of
 By tracking the resource required by Algorithm~\ref{alg:fill} we obtain the following lemma; note that ``additional space'' refers to the enduring memory that the implementation must allocate and keep even after the execution, not its computation memory. The $\log n$ factors in our complexities are required to perform binary-search for the range of $B^{(i)}_v$, or for the value $u$ from the CDF of $\mathsf{F}(u,a,b)$, and to maintain the ordered sets $P_v^{(i)}$ and $P_u^{(j)}$.
 
 \begin{restatable}{lemma}{fill_time}
-\label{lem:fill_time}
+\label{lem:fill_time} \todo{Is this too long?}
 Each execution of Algorithm~\ref{alg:fill} (the \func{Fill} operation) on an \unfilled~block $B^{(i)}_v$, in expectation:
 \begin{itemize}
 \item terminates within $\bo(1)$ iterations (of its \textup{\textbf{repeat}} loop);
