@@ -117,6 +117,7 @@ $\mathcal U_{\mathcal D}$ and $\mathcal U_{\mathcal R}$ is $\mathcal O(1/n^2)$.
 
 \subsection{Estimating the Sampling Probabilities}%
 \label{sec:computing_probabilities}
+\todo[inline,color=red!80!green!25]{Catalan Trap numbers here}
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
 Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
@@ -132,21 +133,30 @@ The additive error can also be cast as multiplicative since factorials are large
 
 The probability $p_d$ can be written as an arithmetic expression involving sums and products of a constant number of factorial terms.
 Given a $1\pm1/n^c$ multiplicative approximation to $l_a = \ln a$ and $l_a = \ln b$, we wish to approximate $\ln(ab)$ and $\ln(a+b)$.
-The former is trivial since $\ln(ab) = \ln a + \ln b$.
+The former is trivial since $\ln(ab) = l_a + l_b$.
 For the latter, we assume $a>b$ and use the identity $\ln(a+b) = \ln a + \ln(1+b/a)$ to note that it suffices to approximate $\ln(1+b/a)$.
-We define $\hat l_a = l_a\cdot(1\pm \mathcal O(1/n^c))$ and $\hat l_b = l_b\cdot(1\pm \mathcal O(1/n^c))$.
-In case $\hat l_b-\hat l_a <c\ln n\implies b/a < 1/n^c$, we approximate $\ln(a+b)$ by $\ln a$ since $\ln(1+b/a) = \mathcal O(1/n^c)$ in this case.
-Otherwise, using the fact that $l_a-l_b = o(n^2)$, we compute:
+We define $\tilde l_a = l_a\cdot(1\pm \mathcal O(1/n^c))$ and $\tilde l_b = l_b\cdot(1\pm \mathcal O(1/n^c))$.
+In case $\tilde l_b-\tilde l_a < -c\ln n\implies b/a < 1/n^c$,
+we approximate $\ln(a+b)$ by $\ln a$ since $\ln(1+b/a) = \mathcal O(1/n^c)$ in this case.
+
+Otherwise, we notice that $\max(a,b) = \mathcal O\left((n!)^2\right)\implies \max(l_a, l_b) = o(n^3)\implies l_a-l_b = o(n^3)$.
+This is true because if we write out the expression for $p_d = S_{left}\cdot S_{right}/S_{total}$ in terms of sums and products of factorials,
+the largest possible value will be a product of at most two terms that are present in the numerator/denominator of a binomial term
+(see the expression for generalized Catalan numbers in Equation~\ref{eq:catalan_trapezoid}).
+Hence, the claim $\max(a,b) = \mathcal O\left((n!)^2\right)$ follows from the fact that
+the numerators/denominators of the relevant binomial coefficient in Equation~\ref{eq:catalan_trapezoid} are at most $n!$.
+Using this fact, we obtain the following:
 \[
-1+e^{\hat l_b-\hat l_a} = 1+\frac ba\cdot \mathlarger e^{\mathcal O\left( \frac{l_b-l_a}{n^c}\right)}
-= 1+\frac ba\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-2}} \right)\right)
-= \left( 1+\frac ba\right)\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-2}} \right)\right)
+1+e^{\tilde l_b-\tilde l_a} = 1+\frac ba\cdot \mathlarger e^{\mathcal O\left( \frac{l_b-l_a}{n^c}\right)}
+= 1+\frac ba\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-3}} \right)\right)
+= \left( 1+\frac ba\right)\cdot\left( 1 \pm \mathcal O\left( \frac{1}{n^{c-3}} \right)\right)
 \]
-In other words, the value of $c$ decreases every time we have a sunm operation.
+In other words, the value of $c$ decreases every time we have a sum operation.
 Since there are only a constant number of such arithmetic operations in the expression for $p_d$,
-we can set $c$ to be a high enough constant (when approximating the factorials) and obtain the desired $1\pm1/n^3$ approximation to $\ln p_d$.
+we can set $c$ to be a high enough constant when approximating the factorials,
+cewhich allows us to obtain the desired $1\pm1/n^3$ multiplicative approximation to $\ln p_d$.
 If $\ln p_d < -3\ln n$, we approximate $p_d = 0$.
-Otherwise, we can exponentiate the approximation to obtain $p_d\cdot e^{-\mathcal O(\ln n/n^3)} = p_d\left( 1 \pm \mathcal O(1/n^2)\right)$.
+Otherwise, we can exponentiate the approximation to obtain $\tilde p_d=p_d\cdot e^{-\mathcal O(\ln n/n^3)} = p_d\left( 1\pm\mathcal O(1/n^2)\right)$.
 \end{proof}
 
 
