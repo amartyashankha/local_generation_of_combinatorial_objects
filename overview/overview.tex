@@ -113,35 +113,48 @@ For instance, our implementation for the directed small world model admits such 
 
 \subsection{Basic Tools for Efficient Sampling}
 \label{sec:basic_tools_for_efficient_sampling}
-In this section, we describe the main techniques used to sample from a distribution $\{ p_d\}$,
-which differ based on the type of access to $\{p_d\}$ provided to the algorithm.
-If the algorithm is given cumulative distribution function (CDF) queries to $\{p_d\}$,
+In this section, we describe the main techniques used to sample from a distribution $\{ p_i\}$,
+which differ based on the type of access to $\{p_i\}$ provided to the algorithm.
+If the algorithm is given cumulative distribution function (CDF) queries to $\{p_i\}$,
 then it is well known that via $\mathcal O(\log n)$ CDF evaluations, one can sample according
-to a distribution that is at most $n^{-c}$ far from $\{p_d\}$ in $L_1$ distance.
+to a distribution that is at most $n^{-c}$ far from $\{p_i\}$ in $L_1$ distance.
 
-When only given access to queries to the probability distribution function of $\{p_d\}$, sampling can be more challenging.
-The approach that we use in this work is to construct an auxiliary distribution $\{q_d\}$ with the following two properties:
-First, $\{ q_d\}$ has an efficiently computable CDF.
-Second, $q_d$ approximates $p_d$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_d\}$.
-the following Lemma from \cite{huge} formalizes this concept. %, and shows that if we can provide such a $\{ q_d\}$,
-%we can quickly sample according to a distribution that is close to $\{ p_d\}$.
+When only given access to queries to the probability distribution function of $\{p_i\}$, sampling can be more challenging.
+The approach that we use in this work is to construct an auxiliary distribution $\{q_i\}$ with the following two properties:
+First, $\{ q_i\}$ has an efficiently computable CDF.
+Second, $q_i$ approximates $p_i$ pointwise to within a polylogarithmic multiplicative factor for ``most'' of the support of $\{ p_i\}$.
+the following Lemma from \cite{huge} formalizes this concept. %, and shows that if we can provide such a $\{ q_i\}$,
+%we can quickly sample according to a distribution that is close to $\{ p_i\}$.
 \begin{lemma}
 \label{lem:rejection_sampling} (From \cite{huge})
 Let $\{p_i\}$ and $\{q_i\}$ be distributions on $[n]$ satisfying the following conditions:
 \begin{enumerate}
-\item There is a poly-time algorithm to approximate $p_i$ and $q_i$ up to $\pm \frac{1}{n^{c+1}}$ for any $i\in [n]$.
-    \item We can generate an index $i$ according to a distribution $\{\hat q_d\}$, that is $ \frac{1}{n^c}$ close to $\{q_d\}$ in $L_1$ distance.
-    \item There exists a $poly(log n)$-time recognizable set $S$ such that
+    \item There is a $\log^{\mathcal O(1)}n$ time algorithm to approximate $p_i$ and $q_i$
+    up to a multiplicative $\left(1\pm \frac{1}{n^c}\right)$ factor.
+    \item We can generate an index $i$ according to a distribution $\{\hat q_i\}$,
+    where $\hat q_i$ is a $\left(1\pm \frac{1}{n^c}\right)$ multiplicative approximation to $q_i$.
+    \item There exists a $poly(\log n)$-time recognizable set $S$ such that
     \begin{itemize}
         \item $1-\sum\limits_{i\in S} p_i < \frac 1{n^c}$
         \item For every $i\in S$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
     \end{itemize}
 \end{enumerate}
-Then, we can use $\log^{\mathcal O(1)}n$ samples from $\{\hat q_i\}$ to generate an index $i$
+Then, with high probabiltiy we can use only $\log^{\mathcal O(1)}n$ samples from $\{\hat q_i\}$ to generate an index $i$
 according to a distribution that is $ \mathcal O\left(\frac{1}{n^c}\right)$-close to $\{p_i\}$ in $L_1$ distance.
 \end{lemma}
 \begin{proof}
+We begin by setting an upper bound $U = \log^{\mathcal O(1)}n$ on $p_i/q_i$ for all $i\in S$.
+The sampling proceeds in iterations, such that in each iteration we obtain an index $i$ according to the distribution $\{ \hat q_i\}$.
+If $i\not\in S$, this index is returned with probability $\tilde p_i/U\tilde q_i$,
+where $\tilde p_i$ and $\tilde q_i$ are the $\left( 1\pm \frac{1}{n^c} \right)$ multiplicative approximations to $p_i$ and $q_i$,
+Otherwise, we repeat this process until some output is returned.
 
+The probability of returning index $i\in S$ in a particular iteration is $\hat q_i\cdot (\tilde p_i/U \tilde q_i)$,
+which is in turn a $\left( 1\pm \frac{1}{n^c} \right)$ multiplicative approximation to $p_i/U$.
+Hence, the probability of success in a single iteration is roughly $1/U$,
+and therefore we only need $\mathcal O(U\log n) = \log^{\mathcal O(1)}n$ iterations (and the same number of samples from $\{ \hat q_i\}$)
+in order to succeed with high probability.
+The resulting distribution of indices approximates $\{ p_i\}$ pointwise on the domain $S$, up to a factor of $\left( 1\pm \frac{1}{n^c} \right)$.
+Since the remainder of the domain contains at most $ \frac{1}{n^c}$ probability mass,
+the output distribution is $\mathcal O\left(\frac{1}{n^c}\right)$ close to $\{ p_i\}$ in $L_1$ distance.
 \end{proof}
-
-\todo[inline,color=red!80!green!25]{Should we prove this?}
