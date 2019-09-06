@@ -308,18 +308,20 @@ we will need to proceed to check whether the color was subsequently overwritten,
 %and summing up over all neighbors and epochs, we obtain the following:
 Summing up over all neighbors and epochs, we obtain the following bound:
 \begin{align}
-T_{t} &= \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathbb P[C^{t'}_w = c]\cdot
-\left[ T_{t'} + W^t_{t'} \right] \\
-&\le \Delta \cdot \mathlarger\sum\limits_{t'=1}^{t} \mathcal B\left( \frac 1q\right)
-\left[ T_{t'} + T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3}
-+ \cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \right]\\
+T_{t} &= \textcolor{RawSienna}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
+\mathlarger\sum\limits_{t'=1}^{t}\ \  \textcolor{Blue}{\mathbb P[C^{t'}_w = c]}\cdot
+\left[ \textcolor{BrickRed}{T_{t'}} + \textcolor{OliveGreen}{W^t_{t'}} \right] \\
+&\le \textcolor{RawSienna}{\Delta} \cdot \mathlarger\sum\limits_{t'=1}^{t} \textcolor{Blue}{\mathcal B\left( \frac 1q\right)}\cdot
+\left[ \textcolor{BrickRed}{T_{t'}} +
+\textcolor{OliveGreen}{T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3}
++ \cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1}} \right]\\
 &\le \Delta\cdot\mathcal B\left( \frac{1}{q}\right) \Biggl[
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'} +
 \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \mathcal B\left(\frac1\alpha\right) + \mathcal B\left(\frac1{\alpha^2}\right) + \cdots\right)
 \Biggr]
 \end{align}
 In the last step, we just group together all the terms corresponding to the same epoch.
-Using Lemma~\ref{lem:color_reject_probability} and the fact that $\mathbb P[C^{t'}_w = c]$ is independent of all other events,
+Using Lemma~\ref{lem:color_reject_probability} and the fact that $\textcolor{Blue}{\mathbb P[C^{t'}_w = c]}$ is independent of all other events,
 we can write a recurrence for the expected number of probes.
 \begin{align}
 \mathbb E[T_t] \le \Delta\cdot\frac{1}{2\alpha\Delta}
