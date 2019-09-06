@@ -171,10 +171,10 @@ Consequently, multiple independent instances of the algorithm having access to t
 will respond to queries in a manner consistent with each other; they will generate exactly the same coloring, regardless of the queries asked.
 
 \begin{restatable}{theorem}{ColoringGrand}
-\label{thm:coloring_grand}\todo{fix me}
-Given adjacency list query access to a graph with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
+\label{thm:coloring_grand}
+Given neighborhood query access to a graph $G$ with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
 we can generate the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
-to the uniform distribution over all valid colorings of the graph, in a consistent manner,
+to the uniform distribution over all valid colorings of $G$, in a consistent manner,
 using only $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time, probes, and public random bits per query.
 \end{restatable}
 

@@ -351,10 +351,10 @@ Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected numbe
 \ColoringGrand*
 \begin{proof}
 Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(\epsilon) \le 3(\ln n + \ln 1/\epsilon)$.
-Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
+Also, since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
 the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^{-3.06/\alpha})$.
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially reads $\mathcal O(t\Delta)$ color proposals from the public random tape,
-while iterating through all $\Delta$ neighbors of $v$ in all $t$ epochs.
+while iterating through all $\le \Delta$ neighbors of $v$ in all $t$ epochs.
 Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
 $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
 \end{proof}
