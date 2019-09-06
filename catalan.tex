@@ -421,16 +421,16 @@ shows how this invariant can help us efficiently search for the interval contain
 \end{figure}
 
 
-\subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}\todo{"Sample" used a lot. explanation could be better.}
+\subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}
 \label{sec:sampling_the_lowest_achievable_height}
 First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$).
 We will refer to $h$ as the \emph{``mandatory boundary''} in this interval;
 i.e. no height in the interval may be lower than the boundary, but at least one point \emph{must} touch the boundary (have height $h$).
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
-Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ down steps and a boundary that is $k-1$ units below $y_i$.
+Say this interval defines a generalized Dyck problem with $U$ up steps, $D$ down steps, and a boundary that is $k-1$ units below $y_i$.
 
 \begin{wrapfigure}[16]{r}{0.496\textwidth}
-\vspace{-3.0em}
+\vspace{-2.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Finding the Mandatory boundary}
@@ -458,7 +458,8 @@ Say this interval defines a generalized Dyck problem with $U$ up steps and $D$ d
 \end{framed}
 \end{wrapfigure}
 Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper} \le y_i$),
-we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as:
+we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as follows
+(see Figure~\ref{fig:dyck_mandatory_boundary}):
 \[
 P_{k_{lower}}^{k_{upper}} = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)
 \]
@@ -467,6 +468,13 @@ Since we can compute the quantities $P_{k_{mid}}^{k_{up}}$, $P_{k_{low}}^{k_{mid
 we can sample a single bit to decide if the \emph{``lower boundary''} should move up or if the \emph{``upper boundary''} should move down.
 We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k'$ becomes the \emph{``mandatory boundary''}
 (i.e. the walk reaches the height exactly $k'-1$ units below $y_i$ but no lower.
+\begin{figure}[htpb]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/dyck_mandatory_boundary.pdf}
+    \caption{$P_{k_{low}}^{k^{up}}$ counts all the paths that dip at least $k_{up}$ units below the starting point,
+    but \textbf{do not} dip $k_{low}$ units below the starting point. $k_{mid}$ would lie halfway between these boundaries.}
+    \label{fig:dyck_mandatory_boundary}
+\end{figure}
 
 
 
