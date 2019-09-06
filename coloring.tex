@@ -10,7 +10,6 @@ The implementation can also access a tape of public random bits $\vec R$.
 Moreover, multiple independent instances of $\func{Color}$ that are given access to the same public tape of random bits $\vec R$,
 should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
 Unlike our previous results, the choice of $\vec X$ only depends on $\vec R$,
-%\footnote{In the case of undirected graphs and Catalan objects, the final sample depend both on the randomness and the order and content of queries},
 and the \func{Color} implementations do not need to use any additional memory to maintain consistency.
 For a formal description of this model, see Definition~\ref{def:local_access_LCA}.
 This model is essentially a generalization of \emph{Local Computation Algorithms} \cite{LCA}.
@@ -354,8 +353,8 @@ Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected numbe
 Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(\epsilon) \le 3(\ln n + \ln 1/\epsilon)$.
 Since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
 the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^{-3.06/\alpha})$.
-Finally, we note that each call to \func{Accepted}$(v,t)$ potentially samples $\mathcal O(t\Delta)$ color proposals,
-while iterating through all the neighbors of $v$ in all $t$ epochs.
+Finally, we note that each call to \func{Accepted}$(v,t)$ potentially reads $\mathcal O(t\Delta)$ color proposals from the public random tape,
+while iterating through all $\Delta$ neighbors of $v$ in all $t$ epochs.
 Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
 $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
 \end{proof}

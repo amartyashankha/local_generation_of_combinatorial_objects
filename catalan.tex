@@ -1,4 +1,4 @@
-\section{Sampling Random Catalan Objects}%
+\section{Implementing Random Catalan Objects}%
 \label{sec:catalan_objects}
 %\todo{Mention that this is imperfect sampling (close impl.)}
 %Earlier, we were interested in querying the following random object.
@@ -31,7 +31,7 @@ The number of possible Dyck paths (see Theorem~\ref{thm:number_of_dyck_paths}) i
 Many important combinatorial objects occur in Catalan families of which these are an example.
 
 We will approach the problem of partially sampling Catalan objects through Dyck paths.
-This, in turn, will allow us to sample other random Catalan objects such as rooted trees, and bracketed expressions.
+This, in turn, will allow us to implement access other random Catalan objects such as rooted trees, and bracketed expressions.
 Specifically, we will want to answer the following queries:
 \begin{itemize}
     \item \func{Direction}$(t)$: Returns the value of the $t^{th}$ step in the Dyck path (whether the step is up or down).
@@ -97,7 +97,7 @@ Moving forwards, we will focus on Dyck paths for the sake of simplicity.
 
 
 \subsection{Catalan Trapezoids and Generalized Dyck Paths}
-In order to sample Dyck paths locally, we will need to analyze more general Catalan objects.
+In order to implement local access to random Dyck paths, we will need to analyze more general Catalan objects.
 Specifically, we consider a sequence of $U$ up-steps and $D$ down-steps,
 such that any prefix of the sequence containing $U'$ up and $D'$ down steps satisfies $U'-D' \ge 1-k$.
 This means that we start our Dyck path at a height of $k-1$, and we are never allowed to cross below zero (Figure~\ref{fig:complex_dyck}).
@@ -129,25 +129,25 @@ Consider the situation after a sequence of \func{Height} queries to the Dyck pat
 such that the corresponding heights were sampled to be $ \langle y_1, y_2,\cdots, y_m \rangle$.
 These revealed locations partition the path into disjoint \emph{intervals} $[x_i,x_{i+1}]$,
 where the heights of the endpoints of each interval have been determined (as $y_i = \func{Height}(x_i)$).
-We notice that these intervals can be sampled independently of each other.
+We notice that these intervals can be generated independently of each other.
 Specifically, the path within the interval $[x_i, x_{i+1}]$ will be sampled from $\mathsf C_k(U,D)$,
 where $k - 1 = y_i$, $U + D = x_{i+1} - x_i$, and $U-D = y_{i+1} - y_i$.
 Moreover, since the heights of the endpoints $y_i$ and $y_{i+1}$ are known, this choice is independent of any samples outside the interval.
-Next, in Section~\ref{sec:sampling_the_height}, we will show how one can sample heights within such an interval,
+Next, in Section~\ref{sec:implementing_height_queries}, we will show how one can determine heights within such an interval,
 and in Section~\ref{sec:supporting_first_return_queries} we will move on to the more complicated $\func{First-Return}$ queries.
 
 %We also maintain a threshold $\mathcal T = \Theta(\log^4 n)$.
-%If a query lands in an interval that has length less than $\mathcal T$, then we brute force sample the entire interval one step at a time.
+%If a query lands in an interval that has length less than $\mathcal T$, then we brute force  the entire interval one step at a time.
 %Assuming that the probabilities of these events can be approximated efficiently (Lemma~\ref{lem:probability_approximation_oracle},
 %this take $\poly(\log n)$ time.
 %\todo{Is this necessary?}
 
 
 
-\subsection{Sampling the Height}
-\label{sec:sampling_the_height}
-We implement $\func{Height}(t)$ by showing how to (efficiently) sample the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
-(where the heights of the endpoitns are $y_i$ and $y_{i+1}$).
+\subsection{Implementing \func{Height} queries}
+\label{sec:implementing_height_queries}
+We implement $\func{Height}(t)$ by showing how to (efficiently) determine the height of the path in the midpoint of an existing interval $[x_i, x_{i+1}]$
+(where the heights of the endpoints are $y_i$ and $y_{i+1}$).
 We can then extend this to arbitrary positions by running a binary search on the appropriate interval using the midpoint samples.
 If the interval in question has odd length, we sample a single step from an endpoint, and proceed with a shortened even length interval.
 Sampling a single step is easy since there are only two outcomes, and we can explicitly compute the probabilities for either outcome,
@@ -206,7 +206,7 @@ are all $<c\sqrt{B\log n}$ with probability at least $1-1/n^2$ for every possibl
 This lemma allows us to ignore potential midpoint heights that cause a deviation greater than $c \sqrt{B\log n}$.
 A direct implication is that with high probability, the correctly sampled value for $d$ will be $\mathcal O(\sqrt{B\log n})$.
 In other words, the height of the midpoint takes on one of only  $\mathcal O(\sqrt{B\log n})$ distinct values with high probability.
-This immediately suggests a $\tilde{\mathcal O}(\sqrt{B})$ time algorithm for sampling the midpoint height,
+This immediately suggests a $\widetilde{\mathcal O}(\sqrt{B})$ time algorithm for determining the midpoint height,
 by explicitly computing the probabilities of each of these potential heights, and directly sampling from the resulting distribution.
 However, we can go further and obtain a $\mathcal O(poly(\log n))$ time algorithm.
 
@@ -282,7 +282,7 @@ is only a constant factor away from the number of unconstrained paths (see Secti
 The case where the boundaries are closer (i.e. $k\cdot k' \le 2U+1$) is trickier,
 since the individual counts need not be close to the corresponding binomial counts.
 However, in this case we can still ensure that the sampling probability is within poly-logarithmic factors of the binomial sampling probability.
-We use the following lemmas to bound $S_{left}$ and $S_{right}$ (proofs in Section~\ref{sec:dyck_appendix}).
+We use the following lemmas to bound $S_{left}$ and $S_{right}$ (proofs in Section~\ref{sec:appendix_implementing_height_queries}).
 \begin{restatable}{lemma}{DLeftBound}
 \label{lem:DLeftBound}
 $S_{left} \le c_1 \frac{ k\cdot\sqrt{\log n}}{\sqrt{B}}\cdot{{B}\choose{D-d}}$ for some constant $c_1$.
@@ -330,14 +330,12 @@ by answering queries of the form \func{Height}$(x)$ with the correctly sampled h
 using only $\mathcal O(poly(\log n))$ resources per query.
 \end{theorem}
 \begin{proof}
-The algorithm maintains a successor-predecessor data structure (e.g. Van Emde Boas tree) to store all positions $x$ that have already been sampled.
-Each newly sampled position is added to this structure.
+The algorithm maintains a successor-predecessor data structure (e.g. Van Emde Boas tree) to store all positions $x$ that have already been determined.
+Each newly determined position is added to this structure.
 Given a query \func{Height}$(x)$, the algorithm first finds the successor and predecessor (say $a$ and $b$) of $x$ among the already queried positions.
 This provides us the guarantee required to apply Theorem~\ref{thm:dyck_midpoint_sampling},
 which allows us to query the height at the midpoint of $a$ and $b$.
-We then binary search by updating either the successor or predecessor of $x$ and repeat until we sample the height of position $x$.
-%Once the interval length becomes less than $\Theta(\log^2 n)$,
-%we perform the full sampling (as in Theorem~\ref{thm:dyck_midpoint_sampling}) which provides us the height at position $x$.
+We then binary search by updating either the successor or predecessor of $x$ and repeat until we determine the height of position $x$.
 \end{proof}
 
 
@@ -361,7 +359,6 @@ An important detail here is that if the first step from $x$ to $x+1$ is an down-
 %\end{restatable}
 
 %Recall that we maintain a threshold $\mathcal T = \Theta(\log^4 n)$ such that
-%if an un-sampled interval in the Dyck path has length less than $\mathcal T$, then we sample the entire interval using brute force.
 %By setting $\mathcal T = \Theta(\log^4 n)$, we see that for intervals with length $B > \mathcal T$,
 %the maximum deviations are bounded by $\mathcal O(\sqrt{B\log n}) = \mathcal O(\log^{2.5}n)$ with high probability.
 %This means that if we write the deviation as $c\sqrt B$, we see that $c = \mathcal O(\sqrt{\log n})$ which is $o(B^{1/6})$,
@@ -379,13 +376,13 @@ Even if we had an efficient technique to filter intervals, we would want to avoi
 In addition, the fact that a specific interval \emph{does not} contain the first return implies dependencies for all subsequent samples.
 
 We resolve these difficulties by maintaining a new invariant.
-Consider all positions whose heights have have already been sampled, either directly as a result of user given $\func{Height}$ queries,
+Consider all positions whose heights have have already been determined, either directly as a result of user given $\func{Height}$ queries,
 or indirectly due to recursive $\func{Height}$ calls; $\langle x_1, x_2,\cdots, x_m \rangle$ in increasing order i.e. $x_i<x_{i+1}$.
 Let the corresponding heights be $ \langle y_1, y_2,\cdots, y_m \rangle$ i.e. $\func{Height}(x_i) = y_i$.
 \begin{invariant}
 \label{inv:boundary_invariant}
-For any interval $[x_i,x_{i+1}]$ where the heights  of the endpoints have been sampled to be $y_i$ and $y_{i+1}$,
-and no other position in the interval has yet been sampled,
+For any interval $[x_i,x_{i+1}]$ where the heights  of the endpoints have been determined to be $y_i$ and $y_{i+1}$,
+and every other height in the interval has yet to determined,
 the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constrained to lie above $min(y_i, y_{i+1})$.
 \end{invariant}
 \begin{figure}[htpb]
@@ -401,9 +398,9 @@ the section of the Dyck path between positions $x_i$ and $x_{i+1}$ is constraine
 How can one maintain such an invariant?
 After determining the height of a particular position $x_i$ as $y_i$ (with $x_{i-1} < x_i < x_{i+1}$),
 the invariant is potentially broken on either side of $x_i$.
-We re-establish the invariant by sampling an additional point on either side
+We re-establish the invariant by determining the height of an additional point on either side
 (see Section~\ref{sec:maintaining_height_queries_under_invariant} for details).
-Specifically, we use the following \emph{two step strategy} to sample the additional point for some violating interval $[x_i, x_{i+1}]$
+Specifically, we use the following \emph{two step strategy} to find the additional point for some violating interval $[x_i, x_{i+1}]$
 (example violation in Figure~\ref{fig:dyck_boundary_invariant}):
 \begin{enumerate}
     \item Sample the lowest height $h$ achieved by the walk between $x_i$ and $x_{i+1}$ according to
@@ -412,7 +409,7 @@ Specifically, we use the following \emph{two step strategy} to sample the additi
     \item Find an intermediate position $x$ such that $x_i < x < x_{i+1}$ and $\func{Height}(x) = h$
     (see Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
 \end{enumerate}
-The newly sampled position $x$ produces two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
+The newly determined position $x$ produces two sub-intervals $[x_i, x]$ and $[x, x_{i+1}]$.
 Since $h = \func{Height}(x)$ has been determined to be the minimum height in the overall range $[x_i, x_{i+1}]$,
 the invariant is preserved in the new intervals (see Figure~\ref{fig:dyck_invariant_preserve}).
 Lemma~\ref{lem:first_return_interval} in Section~\ref{sec:finding_the_correct_interval}
@@ -421,12 +418,12 @@ shows how this invariant can help us efficiently search for the interval contain
     \centering
     \includegraphics[width=\textwidth]{images/dyck_invariant_preserve.pdf}
     \caption{An interval $[x_i, x_{i+1}]$ that violates the invariant is ``fixed'' by first sampling the lowest height $h$ achieved within the interval,
-    and then sampling a position $x\in [x_i, x_{i+1}]$ such that $Height(x) = h$.}
+    and then generating a position $x\in [x_i, x_{i+1}]$ such that $Height(x) = h$.}
     \label{fig:dyck_invariant_preserve}
 \end{figure}
 
 
-\subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}
+\subsubsection{Sampling the Lowest Achievable Height: Mandatory Boundary}\todo{"Sample" used a lot. explanation could be better.}
 \label{sec:sampling_the_lowest_achievable_height}
 First, we need to sample the lowest height $h$ of the walk between $x_i$ and $x_{i+1}$ (with corresponding heights $y_i$ and $y_{i+1}$).
 We will refer to $h$ as the \emph{``mandatory boundary''} in this interval;
@@ -475,7 +472,7 @@ We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k
 
 
 
-\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}
+\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}\todo{Sample?}
 \label{sec:sampling_first_position_touching_mandatory_boundary}
 
 Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to sample a position $x$ with height $h = x_i-k+1$.
@@ -494,7 +491,7 @@ We will parameterize the position $x$ the number of up-steps $d$ between $x_i$ a
 implying that $x = x_{i} + 2d + k - 1$.
 Given a specific $d$, we want to compute the number of valid paths that result in
 $d$ up-steps before the first approach to the boundary.
-Note that unlike Section~\ref{sec:sampling_the_height}, $d$ is used here to parameterize the (horizontal) $x$-position of the desired point.
+Note that unlike Section~\ref{sec:implementing_height_queries}, $d$ is used here to parameterize the (horizontal) $x$-position of the desired point.
 We will calculate the probability $p_d$ associated with a particular position
 by counting the total number of paths to the left and right of the first approach and multiplying them together.
 
@@ -683,9 +680,9 @@ The only other requirement is the ability to approximate the $p_d$ values, which
 \begin{theorem}
 \label{thm:first_return_in_interval}
 Given a sub-interval $[x_{i},x_{i+1}]$ of a random Dyck path of length $2n$,
-such that the only sampled heights in the interval are $y_i=\func{Height}(x_i)$ and $y_{i+1}=\func{Height}(x_{i+1})$,
+such that the only determined heights in the interval are $y_i=\func{Height}(x_i)$ and $y_{i+1}=\func{Height}(x_{i+1})$,
 and a mandatory boundary constraint at $k$,
-there exists an algorithm that samples a point $x$ within the interval such that $\func{Height}(x) = y_i-k+1$,
+there exists an algorithm that generates a point $x$ within the interval such that $\func{Height}(x) = y_i-k+1$,
 using $\poly(\log n)$ time, random bits, and additional space.
 \end{theorem}
 
@@ -722,13 +719,13 @@ So, it is not possible for the first return to be in this interval.
 
 The good news is that there are only two intervals that we need to worry about, one of which is just the adjacent one $[x_i, x_{i+1}]$.
 The problem of finding the other interval that may contain the first return boils down to finding the smallest index $f>i$ such that $y_f\le y_i$.
-To this end, we define $M_{[a,b]}$ as the minimum sampled height in the range of positions $[a,b]$.
+To this end, we define $M_{[a,b]}$ as the minimum determined height in the range of positions $[a,b]$.
 %(lowest $y$-value) of any sampled boundary in the range of positions $[a,b]$ along the Dyck path.
 
 One solution is to maintain a range tree $\mathbf R$ \cite{comp_geo} over the range $[2n]$.
 Assuming that $2n = 2^l$, we can view $\mathbf R$ as a complete binary tree with depth $r$.
 Every non-leaf node is denoted by $\mathbf R_{[a,b]}$, and corresponds to a range $[a,b]\subseteq[2n]$ that is the union of the ranges of its children.
-Each $\mathbf R_{[a,b]}$ stores the value $M_{[a,b]}$ which is is the minimum sampled height
+Each $\mathbf R_{[a,b]}$ stores the value $M_{[a,b]}$ which is is the minimum determined height
 in the range of positions $[a,b]$, or $\infty$ if none of the heights have been revealed.
 %the height of the last boundary update that affected the entire range $[a,b]$.
 The leaf nodes are denoted as $\{\mathbf R_i\}_{i\in[2n]}$, and correspond to the singleton range corresponding to position $i\in [2n]$.
@@ -766,13 +763,13 @@ where $x'>x_i$ is the position where the Dyck path first returns to $\func{Heigh
 \end{theorem}
 \begin{proof}
 In order to make the presentation simpler, we ensure that the next determined position after $x_i$ is $x_i+1$ (i.e. $x_{i+1} = x_i + 1$).
-This can be done by invoking $\func{Height}(x_i+1)$, if it has not been sampled already.
+This can be done by invoking $\func{Height}(x_i+1)$, if it has not been determined already.
 If $\func{Height}(x_i+1) = y_{i+1} < y_i$, we can terminate because $\func{First-Return}(x_i)$ is not defined.
 Otherwise, we notice that in this setting, the first return cannot lie in the adjacent interval $[x_i,x_{i+1}] = [x_i, x_i+1]$.
 
 Hence, we proceed to finding the smallest value $f$ such that $y_f < y_i$, by using the range tree data structure described above.
 Since $\func{Height}(x_{f-1}) \ge y_i > \func{Height}(x_f)$ by definition, the interval $(x_{f-1},x_f]$ must contain a position at height $y_i$.
-We sample a point in the middle of this interval and fix the boundary invariant by sampling another point,
+We sample a point in the middle\todo{middle?} of this interval and fix the boundary invariant by sampling another point,
 essentially breaking it up into $\mathcal O(1)$ sub-intervals each at most half the size of the original.
 Based on the new samples, we again find the (newly created) sub-interval containing the first return in $\mathcal O(1)$ time.
 We repeat up to $\mathcal O(\log n)$ times, performing binary search to find the position of the first return.
@@ -788,12 +785,13 @@ do not interfere with the implementation of \func{Height} queries.
 As before, we consider the currently revealed heights $ \langle y_1, y_2,\cdots, y_m \rangle$,
 along with the corresponding positions $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order).
 Say that we are now presented with a a query $\func{Height}(x)$, where $x_i < x < x_{i+1}$.
-As in Section~\ref{sec:sampling_the_height}, we swap $x_i$ and $x_{i+1}$ if necessary in order to ensure that $y_i < y_{i+1}$.
+As in Section~\ref{sec:implementing_height_queries}, we swap $x_i$ and $x_{i+1}$ if necessary in order to ensure that $y_i < y_{i+1}$.
 Due to Invariant~\ref{inv:boundary_invariant}, we know that the lowest achievable height in the interval $[x_i, x_{i+1}]$ is $y_i$,
 i.e. the boundary constraint for the left half becomes $k = 1$ instead of $k = y_i + 1$, since the constrained boundary is at height $y_i$.
 Similarly, the boundary constraint for the right half becomes $k' = 2U - 2D + 1$.
 
-The algorithm for sampling the height at the midpoint $x_{mid}$ of $[x_i,x_{i+1}]$ can proceed as described in Section~\ref{sec:sampling_the_height}.
+The algorithm for determining the height at the midpoint $x_{mid}$ of $[x_i,x_{i+1}]$
+can proceed as described in Section~\ref{sec:implementing_height_queries}.
 Of course, in this scenario, the boundary is never far away, and therefore we should always use the strategy in Section~\ref{sec:the_difficult_case}.
 The second step is to re-establish Invariant~\ref{inv:boundary_invariant} in the newly created sub-interval $[x_{mid},x_{i+1}]$\footnote{
 Note that the invariant is not broken for the $[x_i,x_{mid}]$ sub-interval since $y_i+1$ was the original boundary constraint.
@@ -807,7 +805,7 @@ Figure~\ref{fig:dyck_invariant_height_queries} illustrates the aforementioned th
     \centering
     \includegraphics[width=\textwidth]{images/dyck_invariant_height_queries.pdf}
     \caption{Performing \func{Height} queries while maintaining Invariant~\ref{inv:boundary_invariant}.
-    The first step is to sample the height at the midpoint $x_{mid}$ of an existing interval $[x_i,x_{i+1}]$ that contains $x$.
+    The first step is to determine the height at the midpoint $x_{mid}$ of an existing interval $[x_i,x_{i+1}]$ that contains $x$.
     Next, we re-establish Invariant~\ref{inv:boundary_invariant} by sampling an additional point $x'$ within the violating interval
     Finally, we recurse on the appropriate sub-interval (yellow box).
     }

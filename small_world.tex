@@ -17,22 +17,22 @@ Hence, the expected degree of $v$ is at most $\sum_{k=1}^{2(\sqrt{n}-1)}O(1/k) =
 It is straightforward to verify that this bound holds with high probability (use Hoeffding's inequality).
 Since the degree of $v$ is small, in this model we can afford to perform \func{All-Neighbors} queries instead of \func{Next-Neighbor} queries using an additional $\poly(\log n)$ resources.
 
-Nonetheless, internally in our implementation, we sample for our neighbors one-by-one similarly to how we process \func{Next-Neighbor} queries.
+Nonetheless, internally in our implementation, we generate our neighbors one-by-one similarly to how we process \func{Next-Neighbor} queries.
 We perform our sampling in two phases.
-In the first phase, we sample a distance $d$, such that the next neighbor closest to $v$ is at distance $d$.
-We maintain $\LAST[v]$ to be the last sampled distance.
-In the second phase, we sample all neighbors of $v$ at distance $d$, under the assumption that there must be at least one such neighbor.
-For simplicity, we sample these neighbors as if there are \emph{full} $4d$ vertices at distance $d$ from $v$:
-some sampled neighbors may lie outside our $\sqrt n\times\sqrt n$ grid, which are simply discarded.
+In the first phase, we compute a distance $d$, such that the next neighbor closest to $v$ is at distance $d$.
+We maintain $\LAST[v]$ to be the last computed distance.
+In the second phase, we generate all neighbors of $v$ at distance $d$, under the assumption that there must be at least one such neighbor.
+For simplicity, we generate these neighbors as if there are \emph{full} $4d$ vertices at distance $d$ from $v$:
+some generated neighbors may lie outside our $\sqrt n\times\sqrt n$ grid, which are simply discarded.
 As the running time of our implementation is proportional to the number of implementation neighbors,
 then by the bound on the number of neighbors, this assumption does not asymptotically worsen the performance of the implementation.
 
-\subsubsection{Phase 1: Sample the distance $D$}
+\subsubsection{Phase 1: Generate the distance $D$}
 Let $a = \LAST[v] + 1$, and let $\mathsf{D}(a)$ to denote the probability distribution of the distance where the next closest neighbor of $v$ is located, or $\bot$ if there is no neighbor at distance at most $2(\sqrt{n}-1)$.
-That is, if $D\sim\mathsf{D}(a)$ is drawn, then we proceed to Phase 2 to sample all neighbors at distance $D$.
+That is, if $D\sim\mathsf{D}(a)$ is drawn, then we proceed to Phase 2 to generate all neighbors at distance $D$.
 We repeat the process by sampling the next distance from $\mathsf{D}(a+D)$ and so on until we obtain $\bot$, at which point we return our answers and terminate.
 
-To sample the next distance, we perform a binary search: we must evaluate the CDF of $\mathsf{D}(a)$.
+To generate the next distance, we perform a binary search: we must evaluate the CDF of $\mathsf{D}(a)$.
 The CDF is given by $\mathbb P[D\leq d]$ where $D\sim\mathsf{D}(a)$, the probability that there is \emph{some} neighbor at distance at most $d$.
 As usual, we compute the probability of the negation: there is \emph{no} neighbor at distance at most $d$.
 Recall that each distance $i$ has exactly $|\Gamma_i^v| = 4i$ vertices, and the probability of a vertex $u \in \Gamma_i^v$ is not a neighbor is exactly $1-1/i^2$.
@@ -63,15 +63,15 @@ F_a(b) = &\mathlarger\prod\limits_{d-a}^{b} \left[1-\frac{1}{d^2}\right] = \math
 \end{align}
 \fi
 This gives us a closed form for the CDF, which we can compute with $2^{-N}$ additive error in constant time (by our computation model assumption).
-Thus, we may sample for the distance $D\sim\mathsf{D}(a)$ with $O(\log n)$ time and one random $N$-bit word.
+Thus, we may generate the distance $D\sim\mathsf{D}(a)$ using $O(\log n)$ time and one random $N$-bit word.
 
 \subsubsection{Phase 2: Sampling neighbors at distance $D$}
-After sampling a distance $D$, we now have to sample all the neighbors at distance $D$.
+After sampling a distance $D$, we now have to generate all the neighbors at distance $D$.
 We label the vertices in $\Gamma_D^v$ with unique indices in $\{1, \ldots, 4D\}$.
 Note that now each of the $4D$ vertices in $\Gamma_D^v$ is a neighbor with probability $1/D^2$.
 However, by Phase 1, this is conditioned on the fact that there is at least one neighbor among the vertices in $\Gamma_D^v$,
-which may be difficult to sample when $1/D^2$ is very small.
-We can emulate this na\"{i}vely by repeatedly sampling a ``block'', composing of the $4D$ vertices in $\Gamma_D^v$, by deciding whether each vertex is a neighbor of $v$ with uniform probability $1/D^2$ (i.e., $4D$ identical independent Bernoulli trials), and then discarding the entire block if it contains no neighbor. We repeat this process until we finally sample one block that contains at least one neighbor, and use this block as our output.
+which may be difficult to generate when $1/D^2$ is very small.
+We can emulate this na\"{i}vely by repeatedly sampling a ``block'', composing of the $4D$ vertices in $\Gamma_D^v$, by deciding whether each vertex is a neighbor of $v$ with uniform probability $1/D^2$ (i.e., $4D$ identical independent Bernoulli trials), and then discarding the entire block if it contains no neighbor. We repeat this process until we finally generate one block that contains at least one neighbor, and use this block as our output.
 
 For the purpose of making the sampling process more efficient, we view this process differently. Let us imagine that we are given an infinite sequence of independent Bernoulli variables, each with bias $1/D^2$.
 We then divide the sequence into contiguous blocks of length $4D$ each.
@@ -80,10 +80,10 @@ Our task is to find the \emph{first} occurrence of success (a neighbor), then re
 This first occurrence of a successful Bernoulli trial is given by sampling from the geometric distribution, $X\sim\mathsf{Geo}(1/D^2)$.
 Since the vertices in each block are labeled by $1, \ldots, 4D$, then this first occurrence has label $X' = {X\mathrm{\,mod\,}4D}$.
 By sampling $X\sim\mathsf{Geo}(1/D^2)$, the first $X'$ Bernoulli variables of this block is also implicitly determined. Namely, the vertices of labels $1, \ldots, X'-1$ are non-neighbors, and that of label $X'$ is a neighbor.
-The sampling for the remaining $4D-X'$ vertices can then be performed in the same fashion we sample for next neighbors in the $G(n,p)$ case: 
+The sampling for the remaining $4D-X'$ vertices can then be performed in the same fashion we generate next neighbors in the $G(n,p)$ case: 
 repeatedly find the next neighbor by sampling from $\mathsf{Geo}(1/D^2)$, until the index of the next neighbor falls beyond this block.
 
-Thus at this point, we have sampled all neighbors in $\Gamma_D^v$. We can then update $\LAST[v] \leftarrow D$ and continue the process of larger distances.
+Thus at this point, we have generated all neighbors in $\Gamma_D^v$. We can then update $\LAST[v] \leftarrow D$ and continue the process of larger distances.
 Sampling each neighbor takes $O(\log n)$ time and one random $N$-bit word; the resources spent sampling the distances is also bounded by that of the neighbors.
 As there are $O(\log n)$ neighbors with high probability, we obtain the following theorem.
 
@@ -106,7 +106,7 @@ using one additional $N$-bit word overhead for each answer of $\mathcal{P}$.
 \end{restatable}
 \begin{proof}
 Consider the following rejection sampling process to \textcolor{Maroon}{simulate}\todo{fix me} the Bernoulli trials.
-In addition to each Bernoulli variable $X_i$ with bias $p_i$, we sample another coin-flip $C_i$ with bias $c$.
+In addition to each Bernoulli variable $X_i$ with bias $p_i$, we generate another coin-flip $C_i$ with bias $c$.
 Set $Y_i = X_i \cdot C_i$, then $\mathbb P[Y_i = 1] = \mathbb P[X_i = 1]\cdot\mathbb P[C_i] = c\cdot p_i$, as desired.
 That is, we keep a success of a Bernoulli trial with probability $c$, or reject it with probability $1-c$.
 
@@ -143,7 +143,7 @@ Again, we only require $N$-bit of precision for each computation, and thus one r
 \end{proof}
 
 In Phase 1, we may apply this reduction only when the condition $c \cdot p_i \leq 1-\frac{1}{k}$ is satisfied.
-For lower value of $p_i = 1/D^2$, namely for distance $D < \sqrt{c/(1-1/k)} = O(\sqrt{c})$, we may afford to sample the Bernoulli trials one-by-one as $c$ is $\poly(\log n)$.
+For lower value of $p_i = 1/D^2$, namely for distance $D < \sqrt{c/(1-1/k)} = O(\sqrt{c})$, we may afford to generate the Bernoulli trials one-by-one as $c$ is $\poly(\log n)$.
 We also note that the degree of each vertex is clearly bounded by $O(\log n)$ with high probability, as its expectation is scaled up by at most a factor of $c$.
 Thus, we obtain the following corollary.
 \begin{restatable}{corollary}{res:large-c-corol}\todo{Fix me}
