@@ -207,8 +207,7 @@ Each execution of Algorithm~\ref{alg:random} (the \func{Random-Neighbor} query),
 \end{itemize}
 \end{restatable}
 
-\subparagraph*{Extension to other query types}
-Finally, we extend our algorithm to support other query types:
+\paragraph*{Supporting Other Query Types along with \func{Random-Neighbor}}
 \begin{itemize}
 \item \func{Vertex-Pair}(u,v): We simply need to make sure that Lemma~\ref{lem:cond-0-fill} holds, so we first apply \func{Fill}$(u,j)$ on block $B_u^{(j)}$ containing $v$ (if needed), then answer accordingly.
 \item \func{Next-Neighbor}(v): We maintain $\LAST$, and keep invoking \func{Fill} until we find a neighbor. Recall that by Lemma~\ref{lem:EmptyBlock}, the probability that a particular block is empty is a small constant. Then with high probability, there exists no $\omega(\log n)$ \emph{consecutive} empty blocks $B^{(i)}_v$'s for any vertex $v$, and thus \func{Next-Neighbor} only invokes up to $\bo(\log n)$ calls to \func{Fill}.

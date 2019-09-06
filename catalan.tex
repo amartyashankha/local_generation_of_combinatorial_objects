@@ -1,14 +1,12 @@
 \section{Implementing Random Catalan Objects}%
 \label{sec:catalan_objects}
-%\todo{Mention that this is imperfect sampling (close impl.)}
 %Earlier, we were interested in querying the following random object.
 %In a random permutation of $n$ white marbles and $n$ black marbles, how many white marbles are present in the first $k$ positions.
-%As we have seen before, \todo{we have?} \cite{huge} gives us a method of sampling from this (hypergeometric) distribution.
+%As we have seen before, \cite{huge} gives us a method of sampling from this (hypergeometric) distribution.
 %In constructing a implementation for the Stochastic Block model, we generalized this by adding more colors (multivariate hypergeometric distribution).
 %We also took this to the extreme where all marbles are distinguishable (i.e. a random permutation),
 %and saw that this could also be implemented efficiently.
 %Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
-%\todo{Connect with previous part on SBM}
 \todo[inline,color=red!80!green!25]{$S_{left}$ etc are too large to compute, but we can approximate teh ratios.}
 
 In the previous Section~\ref{sec:application_sbm} on the Stochastic Block Model, we considered random sequences of colored marbles.
@@ -140,7 +138,6 @@ and in Section~\ref{sec:supporting_first_return_queries} we will move on to the 
 %If a query lands in an interval that has length less than $\mathcal T$, then we brute force  the entire interval one step at a time.
 %Assuming that the probabilities of these events can be approximated efficiently (Lemma~\ref{lem:probability_approximation_oracle},
 %this take $\poly(\log n)$ time.
-%\todo{Is this necessary?}
 
 
 
@@ -363,7 +360,6 @@ An important detail here is that if the first step from $x$ to $x+1$ is an down-
 %the maximum deviations are bounded by $\mathcal O(\sqrt{B\log n}) = \mathcal O(\log^{2.5}n)$ with high probability.
 %This means that if we write the deviation as $c\sqrt B$, we see that $c = \mathcal O(\sqrt{\log n})$ which is $o(B^{1/6})$,
 %thus satisfying the condition of Lemma~\ref{lem:CentralBinomialCoefficients}.
-%\todo{Is this necessary?}
 
 
 \subsubsection{Maintaining a Boundary Invariant}
@@ -631,7 +627,7 @@ each of which has a closed form integral (since $f(d)$ defined in Equation~\ref{
 %Otherwise, we obtain the following lemma:}
 %\begin{lemma}
 %\label{lem:ReturnProbabilityConstant}
-%If $U+D > \Theta(\log^4 n)$, the quantity $\mathcal K = 2^{U+D} = 2^{U+D}S_{total}$ is bounded \todo[inline]{finish}
+%If $U+D > \Theta(\log^4 n)$, the quantity $\mathcal K = 2^{U+D} = 2^{U+D}S_{total}$ is bounded
 %and can be computed efficiently.
 %\end{lemma}
 %\begin{proof}
