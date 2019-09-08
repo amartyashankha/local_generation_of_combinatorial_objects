@@ -1,6 +1,5 @@
 \begin{abstract}
 
-\todo[inline,color=red!80!green!25]{Consistency, keywords and spell check}
 \todo[inline,color=red!80!green!25]{access $\rightarrow$ local access}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
@@ -21,10 +20,10 @@ Our implementations require no pre-processing time, and answer each query using 
 
 Next, we show how to implement random Catalan objects, specifically focusing on Dyck paths
 (balanced random walks on the integer line that are always positive).
-Here, we support $\func{Height}$ queries to find the location of the walk,
-and $\func{First-Return}$ queries to find the time when the walk returns to a specified location.
-This in turn can be used to implement $\func{Next-Neighbor}$ queries on random rooted and binary trees,
-and $\func{Matching-Bracket}$ queries on random well bracketed expressions (the Dyck language).
+Here, we support \func{Height} queries to find the location of the walk,
+and \func{First-Return} queries to find the time when the walk returns to a specified location.
+This in turn can be used to implement \func{Next-Neighbor} queries on random rooted and binary trees,
+and \func{Matching-Bracket} queries on random well bracketed expressions (the Dyck language).
 
 Finally, we introduce two features to define a new model that:
 (1) allows multiple independent (and even simultaneous) instantiations of the same implementation,
