@@ -92,8 +92,8 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
 
 \subsubsection{Queries and Updates}
 \label{sec:nn-correctness}
-\begin{wrapfigure}[14]{r}{0.42\textwidth}
-\vspace{-1.5em}
+\begin{wrapfigure}[15]{R}{0.42\textwidth}
+\vspace{-1.0em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Sampling \func{Next-Neighbor}}
@@ -121,12 +121,12 @@ during the first call to \func{Next-Neighbor}$(v)$ that returns a value $u' > u$
 \end{framed}
 \end{wrapfigure}
 We now present Algorithm~\ref{alg:oblivious-coin-toss}, and discuss the correctness of its sampling process.
-The argument here is rather subtle and relies on viewing the random process as an ``uncovering'' of the table of RVs $X_{uv}$
+The argument here is rather subtle and relies on viewing the process as an ``uncovering'' of the table of RVs $X_{uv}$
 (introduced in Section~\ref{sec:undirected}).
-Consider the following experiment for sampling the next neighbor of $v$ in the range $(\LAST[v],w_v)$.
+Consider the following strategy to find \func{Next-Neighbor}$(v)$ in the range $(\LAST[v],w_v)$.
 Suppose that we generate a sequence of $w_v-\LAST[v]-1$ independent coin-tosses,
 where the $i^{th}$ coin $C_{vu}$ corresponding to $u = \LAST[v]+i$ has bias $p_{vu}$, regardless of whether $X_{vu}$ is decided or not.
-Then, we use the sequence $\langle C_{vu} \rangle$ to assign values to \emph{undecided} random variable $X_{vu}$.
+Then, we use the sequence $\langle C_{vu} \rangle$ to assign values to \emph{undecided} random variables $X_{vu}$.
 The main observation here is that, the \emph{decided} random variables $X_{vu} = \ZERO$ do not need coin-flips,
 and the corresponding coin result $C_{vu}$ can be discarded.
 Thus, we generate coin-flips until we encounter some $u$ satisfying both $C_{vu} = \ONE$ and $\ADJ[v][u] = \PHI$.

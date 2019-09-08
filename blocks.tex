@@ -1,7 +1,8 @@
 \subsection{Final Implementation Using Blocks}
 \label{sec:blocks}
-We begin this section by focusing first on \func{Random-Neighbor} queries, then extend the construction to the remaining ones.
-In order to handle \func{Random-Neighbor}$(v)$, we divide the neighbors of $v$ into \emph{blocks} $\vec B_v = \{ B^{(i)}_v, B^{(i)}_v,\ldots\}$,
+We begin this section by focusing first on \func{Random-Neighbor} queries, then extend the construction to the remaining queries.
+In order to handle \func{Random-Neighbor}$(v)$, we divide the neighbors of $v$ into \emph{blocks}
+$\vec B_v = \{ B^{(1)}_v, B^{(2)}_v, \ldots, B^{(i)}_v, \ldots\}$,
 so that each block contains, in expectation, roughly the same number of neighbors of $v$.
 We implement \func{Random-Neighbor}$(v)$ by randomly selecting a block $B^{(i)}_v$,
 filling in entries $\ADJ[v][u]$ for $u \in B^{(i)}_v$ with $\ONE$'s and $\ZERO$'s, and then reporting a random neighbor from this block.
@@ -12,13 +13,13 @@ Since the number of iterations required by this subroutine is roughly proportion
 we choose to allocate a constant number of neighbors in expectation to each block:
 with constant probability the block contains some neighbors, and with high probability it has at most $O(\log n)$ neighbors.
 
-Nonetheless, as the actual number of neighbors appearing in each block may be different,
-we balance out these discrepancies by performing \emph{rejection sampling}, equalizing the probability of choosing any neighbor implicitly,
-again without the knowledge of $\deg(v)$.
+As the actual number of neighbors appearing in each block will be different,
+we balance out these discrepancies by performing \emph{rejection sampling}.
+This equalizes the probability of choosing any neighbor implicitly, without the knowledge of $\deg(v)$.
 Leveraging the fact that the maximum number of neighbors in any block is $\Bo(\log n)$,
 we show not only that the probabability of success in the rejection sampling process is at least $1/\poly(\log n)$,
 but the number of iterations required by \func{Next-Neighbor} is also bounded by $\poly(\log n)$, achieving the overall $\poly(\log n)$ complexities.
-Here in this section, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices,
+Here, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices,
 $\sum_{u=a}^b p_{vu}$, can be approximated efficiently.
 
 \subsubsection{Partitioning and Filling the Blocks}
