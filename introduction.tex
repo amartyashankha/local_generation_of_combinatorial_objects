@@ -241,6 +241,6 @@ Using our implementation, one can execute this algorithm on a random small world
 without incurring the $\mathcal O(n)$ prior-sampling overhead, by generating only those parts of the graph that are accessed by the routing algorithm.
 
 Local access implementations may also be used to design parallel generators for random objects.
-The model from Definition~\ref{def:local_access_LCA} is particularly suited to parallelization,
-since different processors/machines can generate parts of the random object independently,
-by using a \emph{read-only} shared memory containing the public random bits.
+The model in Definition~\ref{def:local_access_LCA} is particularly suited to parallelization;
+different processors/machines can generate parts of the random object independently,
+using a \emph{read-only} shared memory containing public random bits.
