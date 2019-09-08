@@ -43,9 +43,8 @@ This new model can be compared to \emph{Local Computation Algorithms}, which als
 and read their input using local probes.
 Inspired by this connection, we extend our model to support \emph{memory-less} implementations.
 This allows multiple independent (possibly simultaneous) instantiations to agree on the same random object, without any communication.
-When $q > \alpha\Delta$ for a small constant $\alpha$, we show how to implement queries to the color of any given node in sub-linear time,
-such that the resulting colors are consistent with a single valid coloring drawn from the uniform distribution.
-Unlike LCAs which can return an arbitrary valid solution, our model requires a uniformly random one.
+We show how to implement local access to color of any given node in a random coloring, using sub-linear resources.
+Unlike LCAs which can generate an \emph{arbitrary} valid solution, our model requires a uniformly random one.
 
 
 
@@ -141,7 +140,6 @@ using $O(\log^2 n)$ time and random words per query with high probability.
 
 \paragraph*{Catalan Objects (Section~\ref{sec:catalan_objects})}%
 \label{par:intro_catalan_objects}
-\todo{Add reference for interval-summable paper "An approximate L1-difference algorithm for massive data streams"}
 Catalan objects capture a well studied combinatorial property and admit numerous interpretations that include
 well bracketed expressions, rooted trees and binary trees, Dyck languages etc.
 In this paper, we focus on the Dyck path interpretation and implement local access to a uniformly random instance of a Dyck path.
@@ -163,7 +161,7 @@ This allows us to support more involved queries that are widely used;
 for example, \func{First-Return} queries correspond to $\func{Next-Child}$ queries on trees,
 and $\func{Matching-Bracket}$ queries on bracketed expressions (Section~\ref{sec:bijections_to_other_catalan_objects}).
 
-\func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions in \cite{huge}.
+\func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions in \cite{huge, histogram}.
 However, the added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.
 We show how to overcome these challenges, and support both queries using $\mathcal O(\poly(\log n))$ resources.
 
@@ -198,11 +196,10 @@ by probing the underlying graph (in the manner of \emph{local computation algori
 Unlike LCAs which can return an \emph{arbitrary} valid solution, we also have to make sure that we return a solution from the correct distribution.
 We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 9\Delta$.
 
-Unlike all prior results in the area, this implementation has an additional feature that it is memoryless,
-\todo{First talk about independent copies}
-and the generated color values only depend on public random bits.
-Consequently, multiple independent instances of the algorithm having access to the same random bits,
+This implementation also has the feature that multiple independent instances of the algorithm having access to the same random bits,
 will respond to queries in a manner consistent with each other; they will generate exactly the same coloring, regardless of the queries asked.
+Since these implementations are memory-less, the resulting coloring is \emph{oblivious} to the order of queries,
+and only depends on common random bits,
 
 \begin{restatable}{theorem}{ColoringGrand}
 \label{thm:coloring_grand}
