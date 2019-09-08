@@ -52,7 +52,7 @@ To circumvent this problem, we allow each interval $[x_i,x_{i+1}]$ to sample and
 instead of using the global non-negativity constraint.
 This implies that the path within the interval $[x_i,x_{i+1}]$ never reaches the height $y_i-k_i$ or lower.
 Additionally, we maintain a crucial invariant that states that this boundary is achieved by the endpoint of lower height i.e. $\min(y_i,y_{i+1})$.
-If the invariant holds, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest detrmined position $x_j>x$
+If the invariant holds, we can find the interval containing $\func{First-Return}(x)$ by finding the smallest determined position $x_j>x$
 whose sampled height $y_j \le \func{Height}(x)$, and considering the interval $[x_{j-1},x_j]$ preceding $x_j$.
 We use an interval tree to update and query for the known heights.
 

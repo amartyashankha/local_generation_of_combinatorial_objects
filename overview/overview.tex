@@ -54,7 +54,7 @@ We initiate the study of \textbf{random object families} where the description $
 %However, if one wishes to implement local access to the uniform distribution over all valid colorings of a given input graph $G$,
 In this setting, the oracle from Definition~\ref{def:local_access} cannot read the entire input $\Pi$, and instead accesses it through local probes.
 For instance, consider the \textbf{random object family} that maps a graph $G$ to the uniform distribution over valid colorings of $G$.
-Here, the description $\Pi$ includes the entire graph $G$, which is too large to be read by a sublinear time algorithm.
+Here, the description $\Pi$ includes the entire graph $G$, which is too large to be read by a sub-linear time algorithm.
 In this case, the oracle can query the underlying graph using neighborhood probes.
 The number of such probes used to answer a single query must be sub-linear in the input size.
 
@@ -139,7 +139,7 @@ Let $\{p_i\}_{i\in [n]}$ and $\{q_i\}_{i\in [n]}$ be distributions on $[n]$ sati
         \item For every $i\in S$, it holds that $p_i\le \log^{\mathcal{O}(1)} n\cdot q_i$
     \end{itemize}
 \end{enumerate}
-Then, with high probabiltiy we can use only $\log^{\mathcal O(1)}n$ samples from $\{\hat q_i\}$ to generate an index $i$
+Then, with high probability we can use only $\log^{\mathcal O(1)}n$ samples from $\{\hat q_i\}$ to generate an index $i$
 according to a distribution that is $ \mathcal O\left(\frac{1}{n^c}\right)$-close to $\{p_i\}$ in $L_1$ distance.
 \end{lemma}
 \begin{proof}

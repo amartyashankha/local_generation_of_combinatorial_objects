@@ -58,7 +58,7 @@ and $\func{First-Return}(x)$ returns the position after the matched closing brac
     \includegraphics[width=\textwidth]{images/dyck_tree_bijection.pdf}
     \caption{Bijections from Dyck paths to bracketed expressions and ordered rooted trees.
     Note that the color coded \emph{positions} on the path correspond to tree nodes, and the path itself is a DFS traversal of the tree.
-    The bijection to bracketed expressions proceeds by directly replacing up and down steps with opening and closing backets respectively
+    The bijection to bracketed expressions proceeds by directly replacing up and down steps with opening and closing brackets respectively
     (we color the brackets with the \emph{higher} endpoint of the corresponding step).
     Green dashed arrows show successive $\func{First-Return}$ queries on the path.
     Using the bijection, this is equivalent to revealing three child sub-trees in order from left to right for the corresponding tree node,
@@ -370,7 +370,7 @@ An important detail here is that if the first step from $x$ to $x+1$ is an down-
 \subsubsection{Maintaining a Boundary Invariant}
 \label{sec:maintaining_a_boundary_invariant}
 Notice that after performing a set of $\func{Height}$ queries $\langle x_1, x_2,\cdots, x_m \rangle$ to the Dyck path,
-many different positions are revealed (possibly in adverserial locations).
+many different positions are revealed (possibly in adversarial locations).
 This partitions the path into at most $m+1$ disjoint and independent \emph{intervals} with known boundary conditions.
 The first step towards finding the $\func{First-Return}$ from position $t$ would be to locate the \emph{interval} where the first return occurs.
 Even if we had an efficient technique to filter intervals, we would want to avoid considering all $\Theta(m)$ intervals to find the correct one.

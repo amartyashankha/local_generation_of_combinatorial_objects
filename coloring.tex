@@ -1,7 +1,7 @@
 \section{Random Coloring of a Graph}%
 \label{sec:random_coloring_of_a_graph}
 A \emph{valid} $q$-coloring of a graph $G=(V, E)$ is a vector of colors $\vec X \in [q]^V$, such that for all $(u,v)\in E$, $\vec X_u \not= \vec X_v$.
-We present a sublinear time algorithm to provide local access to a uniformly random valid $q$-coloring of an input graph.
+We present a sub-linear time algorithm to provide local access to a uniformly random valid $q$-coloring of an input graph.
 Specifically, we implement $\func{Color}(v)$, which returns the color $\vec X_v$ of node $v$, where $\vec X$ is a uniformly random valid coloring.
 The implementation can access the input graph $G$ through a sub-linear number of \emph{neighborhood queries}.
 A neighborhood query of the form $\func{All-Neighbors}(v)$ returns a list of neighbors of $v$.
@@ -17,7 +17,7 @@ Given a computation problem with input $x$ and a set of valid outputs $F(x)$,
 LCAs provide query access to some $y\in F(x)$ using only a sub-linear number of probes to $x$.
 This makes it feasible to consider sub-linear algorithms for problems where the output size is super-linear.
 Our model has the additional restriction that the output must be drawn uniformly at random from $F(x)$, rather than just being an arbitrary member.
-Since the number of possible outputs ($|F(x)|$) may be exponential, it is not possible to encode all the requisite random bits in sublinear space.
+Since the number of possible outputs ($|F(x)|$) may be exponential, it is not possible to encode all the requisite random bits in sub-linear space.
 Therefore, we use a source of public randomness $\vec R$.
 
 \paragraph*{Sequential Algorithm for Random Coloring}
@@ -121,7 +121,7 @@ We show how to reduce the probe complexity by appropriately pruning the $k$-neig
 \label{sec:local_coloring_algortihm}
 Given query access to the adjacency matrix of a graph $G$ with maximum degree $\Delta$ and a vertex $v$,
 the algorithm has to output the color assigned to $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
-We want to be able to answer such queries in sublinear time, without simulating the entire Markov Chain.
+We want to be able to answer such queries in sub-linear time, without simulating the entire Markov Chain.
 We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
 
 The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
@@ -145,7 +145,7 @@ So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm
 \subsubsection{Local Access to an Initial Valid Coloring}
 \label{sec:local_access_to_an_initial_valid_coloring}
 One caveat that we have not addressed is how we should initialize the Markov Chain.
-The starting state can be any valid coloring of $G$, but we have to be able to access the initial colors of requisite vertices in sublinear time.
+The starting state can be any valid coloring of $G$, but we have to be able to access the initial colors of requisite vertices in sub-linear time.
 One option is to simply assume that we have oracle access to an arbitrary valid coloring.
 We can also invoke a result from \cite{coloring_initialize} that provides a \emph{Local Computation Algorithm} for $(\Delta+1)$-coloring of a graph.
 Specifically, they provide local access to the color of any vertex using $\mathcal O(\Delta^{\mathcal O(1)}\log n)$ queries to the underlying graph,
@@ -176,12 +176,12 @@ We can prune the number of recursive calls by only processing the neighbors $w$ 
 In this case, the expected number of neighbors that have to be probed recursively is less than $t\Delta/q$
 (since the total number of neighbor proposals over $t$ epochs is at most $t\Delta$, and there are $q$ possible colors).
 So, the overall runtime is upper bounded by $(t\Delta/q)^{t}$.
-For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sublinear.
+For this algorithm, if we allow $q > t\Delta = \Omega(\Delta\log n)$ colors, the runtime becomes sub-linear.
 So, we can use this simple algorithm only when $q$ is sufficiently large.
 However, we want a sub-linear time algorithm for $q = \mathcal O(\Delta)$.
 
 
-\subsubsection{A Sublinear Time Algorithm for $q = \mathcal O(\Delta)$} \todo{Go over this again}
+\subsubsection{A Sub-linear Time Algorithm for $q = \mathcal O(\Delta)$} \todo{Go over this again}
 \label{sec:jumping_back_to_past_epochs}
 The expected number of neighbors that need to be checked recursively can always be $t\Delta/q$ in the worst case.
 The crucial observation is that even though these recursive calls seem unavoidable,
@@ -355,5 +355,5 @@ the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially reads $\mathcal O(t\Delta)$ color proposals from the public random tape,
 while iterating through all $\le \Delta$ neighbors of $v$ in all $t$ epochs.
 Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
-$\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sublinear for $\alpha > 3.06$.
+$\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sub-linear for $\alpha > 3.06$.
 \end{proof}

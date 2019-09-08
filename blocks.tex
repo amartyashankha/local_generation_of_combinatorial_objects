@@ -17,7 +17,7 @@ As the actual number of neighbors appearing in each block will be different,
 we balance out these discrepancies by performing \emph{rejection sampling}.
 This equalizes the probability of choosing any neighbor implicitly, without the knowledge of $\deg(v)$.
 Leveraging the fact that the maximum number of neighbors in any block is $\Bo(\log n)$,
-we show not only that the probabability of success in the rejection sampling process is at least $1/\poly(\log n)$,
+we show not only that the probability of success in the rejection sampling process is at least $1/\poly(\log n)$,
 but the number of iterations required by \func{Next-Neighbor} is also bounded by $\poly(\log n)$, achieving the overall $\poly(\log n)$ complexities.
 Here, we will extensively rely on the assumption that the expected number of neighbors for consecutive vertices,
 $\sum_{u=a}^b p_{vu}$, can be approximated efficiently.
@@ -172,7 +172,7 @@ fulfilling the requirement previously given in Section~\ref{sec:block_partitioni
 The data structures $P_v^{(i)}$'s and the block marking bits together provide a succinct representation of $\ADJ$ as long as modifications to $\ADJ$ are performed solely by the \func{Fill} operation in Algorithm~\ref{alg:fill}. In particular, let $u \in B^{(i)}_v$ and $v \in B_u^{(j)}$. Then, $\ADJ[v][u]=\ONE$ if and only if $u \in P_v^{(i)}$. Otherwise, $\ADJ[v][u]=\ZERO$ when at least one of $B^{(i)}_v$ or $B_u^{(j)}$ is marked as \filled. In all remaining cases, $\ADJ[v][u]=\PHI$.
 \end{restatable}
 \begin{proof}
-The condition for $\ADJ[v][u]=\ONE$ still holds by constuction. Otherwise, observe that $\ADJ[v][u]$ becomes decided precisely during a \func{Fill}$(v,i)$ or a \func{Fill}$(u,j)$ operation, which thereby marks one of the corresponding blocks as \filled.
+The condition for $\ADJ[v][u]=\ONE$ still holds by construction. Otherwise, observe that $\ADJ[v][u]$ becomes decided precisely during a \func{Fill}$(v,i)$ or a \func{Fill}$(u,j)$ operation, which thereby marks one of the corresponding blocks as \filled.
 \end{proof}
 
 
