@@ -7,7 +7,6 @@
 %We also took this to the extreme where all marbles are distinguishable (i.e. a random permutation),
 %and saw that this could also be implemented efficiently.
 %Now we focus on a more challenging variant of this question with more complicated conditional dependences among the placement of the marbles.
-\todo[inline,color=red!80!green!25]{$S_{left}$ etc are too large to compute, but we can approximate teh ratios.}
 
 In the previous Section~\ref{sec:application_sbm} on the Stochastic Block Model, we considered random sequences of colored marbles.
 Next, we focus on an important variant of these sequences as Catalan objects, which impose a global constraint on the types of allowable sequences.
@@ -187,9 +186,13 @@ This results in a different starting point, and the prefix/boundary constraint w
 Hence, we define $k' = k + 2U - 2D$  to represent the new boundary constraint (since the final height of the $2B$-interval is $k'-1$).
 Finally, $S_{total}$ is the total number of possible paths in the $2B$ interval.
 
-We will now use the rejection sampling lemma (Lemma~\ref{lem:rejection_sampling}).
-An important point to note is that in order to apply this lemma, we must be able to compute the $p_d$ values at least approximately.
-Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:computing_probabilities} shows how to compute these approximations.
+We cannot directly sample from this complicated distribution $\{ p_d\}$.
+Instead, we use the rejection sampling strategy from Lemma~\ref{lem:rejection_sampling}.
+An important point to note is that in order to apply this lemma, we must be able to approximate the $p_d$ values.
+However, we cannot naively use the formula from Equation~\ref{eq:height_sampling_probability},
+since the values of $\{ S_{left},S_{right},S_{total}\}$ are too large to compute explicitly.
+Lemma~\ref{lem:probability_approximation_oracle} in Section~\ref{sec:computing_probabilities}
+shows how to indirectly compute the probabilty approximations.
 We also use the following lemma to bound the deviation of the path with high probability.
 A proof is presented in Section~\ref{sec:dyck_path_boundaries_and_deviations}.
 \begin{restatable}{lemma}{DyckPathDeviationBound}
@@ -475,20 +478,22 @@ We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k
     but \textbf{do not} dip $k_{low}$ units below the starting point. $k_{mid}$ would lie halfway between these boundaries.}
     \label{fig:dyck_mandatory_boundary}
 \end{figure}
+\todo{coinciding boundary}
 
 
 
-\subsubsection{Sampling First Position that Touches the \emph{``Mandatory Boundary''}}\todo{Sample?}
+\subsubsection{Determining First Position that Touches the \emph{``Mandatory Boundary''}}\todo{Sample?}
 \label{sec:sampling_first_position_touching_mandatory_boundary}
 
-Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to sample a position $x$ with height $h = x_i-k+1$.
-In fact, we will do something stronger by sampling the \emph{first} time the walk touches the boundary after $x_i$.
+Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to generate a position $x\in[x_i,x_{i+1}]$ with $\func{Height}(x) = y_i-k+1$,
+according to the uniform distribution over all paths that touch, but do not violate the boundary at $k$.
+In fact, we will do something stronger by determining the \emph{first} time the walk touches the boundary after $x_i$.
 As before, we assume that this interval contains $U$ up steps and $D$ down steps.
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=\textwidth]{images/dyck_first_approach_sampling.pdf}
     \caption{Zooming into the error in Figure~\ref{fig:dyck_boundary_invariant}.
-        We sample a position $x$ (yellow) on the boundary (red),
+        We generate a position $x$ (yellow) on the boundary (red),
         such that the section of the path to the left of $x$ never approaches the red boundary (it respects the orange boundary).}
     \label{fig:dyck_mandatory_boundary_sampling}
 \end{figure}
@@ -512,14 +517,13 @@ and $S_{total}$ to be the total number of paths that touch the ``mandatory bound
     &&S_{right} = C_1(U-d, D-d-k+1)
     &&S_{total} = C_k(U,D) - C_{k-1}(U,D)
 \end{align*}}
-Our goal is to sample $d$ from the distribution $\{ p_d\}$ where $p_d = S_{left}\cdot S_{right}/S_{total}$.
+Our goal is to generate $d$ from the distribution $\{ p_d\}$ where $p_d = S_{left}\cdot S_{right}/S_{total}$.
 The application of Lemma~\ref{lem:rejection_sampling} requires us to approximate $\{p_d\}$
 with a ``well behaved'' $\{q_d\}$ (one whose CDF can be efficiently estimated).
-Since we only require a asymptotic (up to $\poly(\log n)$ factors) approximation to $\{p_d\}$,
-it suffices to estimate the number of paths asymptotically as well.
+Since $q_d$ only needs to approximate $p_d$ up to $\poly(\log n)$ factors,
+we focus on obtaining $\poly(\log n)$ approximations to the path counts $\{ S_{left},S_{right},S_{total}\}$.
 Using Equation~\ref{eq:catalan_trapezoid}, we obtain approximations for $S_{left}$ and $S_{right}$
 (Lemma~\ref{lem:ReturnDLeftBound} and Lemma~\ref{lem:ReturnDRightBound} with proofs in Section~\ref{sec:omitted_supporting_first_return_queries}).
-Our general strategy will be to integrate continuous versions of these approximations in order to obtain a CDF of some approximating distribution.
 \begin{restatable}{lemma}{ReturnDLeftBound}
 \label{lem:ReturnDLeftBound}
 If $d > \log^4 n$, then $S_{left}(d)
@@ -536,14 +540,15 @@ where $r_{right}(d) = \frac{(U-D-k-1)^2}{4(U+D-2d-k+1)}$.
 Furthermore, $r_{right}(d)=\mathcal O(\log^2 n)$.
 \end{restatable}
 
-Unfortunately, these continuous approximation functions obtained do not admit closed form integrals.
+Our general strategy will be to integrate continuous versions of these approximations in order to obtain a CDF of some approximating distribution.
+Unfortunately, the continuous approximation functions obtained do not admit closed form integrals.
 The main culprit is the exponential term in both expressions.
 We tackle this issue by noticing that the values of the exponents are bounded by $\mathcal O(\log^2 n)$ over the majority of the range of $d$.
-Within this range of $d$ values, the approximating functions may be further simplified by taking a piecewise linear approximation,
+Within this range of $d$ values, the exponential term may be further simplified by taking a piecewise constant approximation,
 where each of the pieces corresponds to a fixed value of the \emph{floor of the corresponding exponent}.
 This technique is elaborated in Section~\ref{sec:estimating_the_cdf}.
 
-We now consider the \emph{``problematic''} values of $d$ that are outside the range of the two preceding lemmas.
+We start by considering the \emph{``problematic''} values of $d$ that are outside the range of the two preceding lemmas.
 These values are the ones where $d < \log^4 n$ or $2d > U+D-k-\log^4 n$.
 Since $d$ is the number of up steps in the left sub-interval, $d \ge 0$.
 Further, since the length of the right sub-interval nust be non-negative (see Figure~\ref{fig:dyck_mandatory_boundary_sampling}),
