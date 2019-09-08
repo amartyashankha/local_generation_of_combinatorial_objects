@@ -335,11 +335,11 @@
                                    {2.3ex \@plus.2ex}%
                                    {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {-2.50ex\@plus -1ex \@minus -.2ex}%
-                                     {1.0ex \@plus .2ex}%
+                                     {-2.75ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
                                      {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-2.5ex\@plus -1ex \@minus -.2ex}%
+                                     {-2.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.0ex \@plus .2ex}%
                                      {\sffamily\Large\bfseries\raggedright}} % EDITED from \Large
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
