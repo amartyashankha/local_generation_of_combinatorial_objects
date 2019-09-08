@@ -181,12 +181,11 @@ So, we can use this simple algorithm only when $q$ is sufficiently large.
 However, we want a sub-linear time algorithm for $q = \mathcal O(\Delta)$.
 
 
-\subsubsection{A Sublinear Time Algorithm for $q = \mathcal O(\Delta)$}
+\subsubsection{A Sublinear Time Algorithm for $q = \mathcal O(\Delta)$} \todo{Go over this again}
 \label{sec:jumping_back_to_past_epochs}
 The expected number of neighbors that need to be checked recursively can always be $t\Delta/q$ in the worst case.
 The crucial observation is that even though these recursive calls seem unavoidable,
 we can aim to reduce the size of the recursive sub-problem, and thus bound the number of levels of recursion.
-%\textcolor{Maroon}{Because of the more complex structure of this epoch jumping process}, the main challenge is to analyze the runtime.
 
 Algorithm~\ref{alg:coloring} shows our final procedure for generating $\bm\chi^t_v$, where $c =\vec C^t_v$ is $v$'s proposal at epoch $t$.
 We iterate through all neighbors $w$ of $v$, checking for conflicts.

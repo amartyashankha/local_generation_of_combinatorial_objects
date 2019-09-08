@@ -143,7 +143,7 @@ using $\mathcal{O}(\poly(\log n))$ time, space and random bits (since such graph
 \begin{restatable}{theorem}{DirectedGrand}\label{DirectedGrand}
 There exists an algorithm that implements \func{All-Neighbors} queries for a random graph from Kleinberg's Small World model,
 where probability of including each directed non-grid edge $(u,v)$ in the graph is $c/(\func{dist}(u,v))^2$,
-where $c = \mathcal O(\poly(\log n))$ and $\func{dist}$ denotes the Manhattan distance,
+where the range of allowed values of $c$ is $\log^{\pm\mathcal O(1)} n$ and $\func{dist}$ denotes the Manhattan distance,
 using $O(\log^2 n)$ time and random words per query with high probability.
 \end{restatable}
 

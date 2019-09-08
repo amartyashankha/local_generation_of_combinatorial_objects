@@ -478,11 +478,10 @@ We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k
     but \textbf{do not} dip $k_{low}$ units below the starting point. $k_{mid}$ would lie halfway between these boundaries.}
     \label{fig:dyck_mandatory_boundary}
 \end{figure}
-\todo{coinciding boundary}
 
 
 
-\subsubsection{Determining First Position that Touches the \emph{``Mandatory Boundary''}}\todo{Sample?}
+\subsubsection{Determining First Position that Touches the \emph{``Mandatory Boundary''}}
 \label{sec:sampling_first_position_touching_mandatory_boundary}
 
 Now that we have a ``\emph{mandatory boundary}'' $k$, we just need to generate a position $x\in[x_i,x_{i+1}]$ with $\func{Height}(x) = y_i-k+1$,
