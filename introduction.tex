@@ -171,8 +171,8 @@ We also introduce and support \func{First-Return} queries, where $\func{First-Re
 the first time when the random walk returns to the same \emph{height} as it was at time $t$, as long as $\func{Height}(t+1)=\func{Height}(t)+1$
 (Section~\ref{sec:bijections_to_other_catalan_objects} presents the rationale for this definition).
 This allows us to support more involved queries that are widely used;
-for example, \func{First-Return} queries correspond to $\func{Next-Child}$ queries on trees,
-and $\func{Matching-Bracket}$ queries on bracketed expressions (Section~\ref{sec:bijections_to_other_catalan_objects}).
+for example, \func{First-Return} queries are equivalent to finding the next child of a node in a random rooted tree,
+and also to finding a matching closing bracket in random bracketed expressions (Section~\ref{sec:bijections_to_other_catalan_objects}).
 
 \func{Height} queries for unconstrained random walks follow trivially from the implementation of interval summable functions in \cite{huge, histogram}.
 However, the added non-negativity constraint introduces intricate non-local dependencies on the distribution of positions.

@@ -1,6 +1,5 @@
 \begin{abstract}
 
-\todo[inline,color=red!80!green!25]{access $\rightarrow$ local access}
 Consider an algorithm performing a computation on a \emph{huge random object} (for example a random graph or a ``long'' random walk).
 Is it necessary to generate the entire object prior to the computation,
 or is it possible to provide query access to the object and sample it incrementally ``on-the-fly'' (as requested by the algorithm)?
@@ -27,17 +26,17 @@ and \func{Matching-Bracket} queries on random well bracketed expressions (the Dy
 
 Finally, we introduce two features to define a new model that:
 (1) allows multiple independent (and even simultaneous) instantiations of the same implementation,
-to be consistent with each other without the need for communication
+to be consistent with each other without the need for communication,
 (2) allows us to generate a richer class of random objects that do not have a succinct description.
 Specifically, we study uniformly random \emph{valid} $q$-colorings of an input graph $G$ with maximum degree $\Delta$.
 This is in contrast to prior work in the area, where the relevant random objects are defined as a distribution with $\mathcal O(1)$ parameters
 (for example, $n$ and $p$ in the $G(n,p)$ model).
 The distribution over valid colorings is instead specified via a ``huge'' input (the underlying graph $G$),
 that is far too large to be read by a sub-linear time algorithm.
-Instead, our implementation accesses $G$ through local neighborhood probes.
+Instead, our implementation accesses $G$ through local neighborhood probes,
 and is able to answer queries to the color of any given vertex in sub-linear time for $q\ge 9\Delta$,
 in a manner that is consistent with a specific random valid coloring of $G$.
-Furthermore, the implementation is memory-less, and can maintain consistency with independent copies of itself.
+Furthermore, the implementation is memory-less, and can maintain consistency with non-communicating copies of itself.
 
 \end{abstract}
 
