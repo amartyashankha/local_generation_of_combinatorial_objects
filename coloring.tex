@@ -199,18 +199,18 @@ If no conflict is seen, we proceed to check whether $c\not= \vec X^{t-1}_w$.
     \label{alg:coloring}
     \begin{algorithmic}[1]
         \Procedure{Accepted}{$v, t$}
-            \State {$c\gets\vec C^t_v$} \Comment{\parbox[t]{.57\linewidth}{Find the current proposal using the public random bits}}
+            \State {$c\gets\vec C^t_v$} \Comment{\parbox[t]{.6\linewidth}{\small Find the current proposal using the public random bits}}
             \For{$w \gets \Gamma(v)$} \label{alg:line:iterate_through_neighbors}
-                \Comment{\parbox[t]{.57\linewidth}{Iterate through the neighbors, checking for conflicts}}
+                \Comment{\parbox[t]{.6\linewidth}{\small Iterate through the neighbors, checking for conflicts}}
                 \If {$\vec C_w^t = c$} \label{alg:line:check_immediate_conflict}
-                    \Comment{\parbox[t]{.57\linewidth}{Check for conflict with neighbor's current proposal}}
+                    \Comment{\parbox[t]{.6\linewidth}{\small Check for conflict with neighbor's current proposal}}
                     \State \Return $\ZERO$
                 \EndIf
                 \For{$t' \gets [t, t-1, t-2, \cdots, 1, 0]$} \label{alg:line:iterate_backwards}
-                \Comment{\parbox[t]{.5\linewidth}{Check for conflict with neighbor's prior state}}
+                \Comment{\parbox[t]{.45\linewidth}{\footnotesize Check for conflict with neighbor's prior state}}
                     \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)} \label{alg:line:check_accepted}
-                        \Comment{\parbox[t]{.5\linewidth}{Potential conflict with neighbor's color}}
-                        \State $overwritten\gets \FALSE$ \Comment{\parbox[t]{.5\linewidth}{Check if color $c$ is overwritten by a future proposal}}
+                        \Comment{\parbox[t]{.45\linewidth}{\footnotesize Potential conflict with neighbor's color}}
+                        \State $overwritten\gets \FALSE$ \Comment{\parbox[t]{.45\linewidth}{\footnotesize Check if color $c$ is overwritten by a future proposal}}
                         \For{$\widetilde t \gets {\scriptstyle [t'+1, t'+2, t'+3, \cdots, t-1]}$} \label{alg:line:check_overwritten}
                             \If {\func{Accepted}($w, \widetilde t$)} \label{alg:line:check_overwritten_recursive}
                                 \State $overwritten\gets \TRUE$

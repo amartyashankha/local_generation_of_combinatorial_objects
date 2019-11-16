@@ -432,8 +432,14 @@ i.e. no height in the interval may be lower than the boundary, but at least one 
 We assume that $y_i\le y_{i+1}$ without loss of generality; if this is not the case, swap $x_i$ and $x_{i+1}$ and consider the reversed path.
 Say this interval defines a generalized Dyck problem with $U$ up steps, $D$ down steps, and a boundary that is $k-1$ units below $y_i$.
 
-\begin{wrapfigure}[16]{r}{0.496\textwidth}
-\vspace{-2.5em}
+Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper} \le y_i$),
+we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as follows
+(see Figure~\ref{fig:dyck_mandatory_boundary}):
+\[
+P_{k_{lower}}^{k_{upper}} = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)
+\]
+\begin{wrapfigure}[16]{r}{0.6\textwidth}
+\vspace{-1.5em}
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Finding the Mandatory boundary}
@@ -460,17 +466,12 @@ Say this interval defines a generalized Dyck problem with $U$ up steps, $D$ down
     \end{algorithmic}
 \end{framed}
 \end{wrapfigure}
-Given any two boundaries $k_{lower}$ and $k_{upper}$ on this interval (with $k_{lower} < k_{upper} \le y_i$),
-we can count the number of possible generalized Dyck paths that violate the $k_{upper}$ boundary but \emph{not} the $k_{lower}$ boundary as follows
-(see Figure~\ref{fig:dyck_mandatory_boundary}):
-\[
-P_{k_{lower}}^{k_{upper}} = C_{k_{lower}}(U,D) - C_{k_{upper}}(U,D)
-\]
 We define the current lower and upper boundaries as $k_{low} = k, k_{up} = 0$, and set $k_{mid} = (k_{low} + k_{up})/2$.
 Since we can compute the quantities $P_{k_{mid}}^{k_{up}}$, $P_{k_{low}}^{k_{mid}}$, and $P_{total} = P_{k_{low}}^{k_{up}}$,
 we can sample a single bit to decide if the \emph{``lower boundary''} should move up or if the \emph{``upper boundary''} should move down.
 We then repeat this binary search until we find $k' = k_{low} = k_{up}-1$ and $k'$ becomes the \emph{``mandatory boundary''}
 (i.e. the walk reaches the height exactly $k'-1$ units below $y_i$ but no lower.
+\vspace{2.5em}
 \begin{figure}[htpb]
     \centering
     \includegraphics[width=0.9\textwidth]{images/dyck_mandatory_boundary.pdf}
