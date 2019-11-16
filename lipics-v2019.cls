@@ -214,13 +214,13 @@
 \renewcommand\Large{\@setfontsize\Large{12}{14}}
 \setlength\parindent{1.5em}
 \setlength\headheight{3mm}
-\setlength\headsep{10mm}
+\setlength\headsep   {10mm}
 \setlength\footskip{3mm}
-\setlength\textwidth{162mm}
-\setlength\textheight{230mm}
-\setlength\oddsidemargin{24mm}
-\setlength\evensidemargin{24mm}
-\setlength\marginparwidth{20mm}
+\setlength\textwidth{140mm}
+\setlength\textheight{222mm}
+\setlength\oddsidemargin{32mm}
+\setlength\evensidemargin{38mm}
+\setlength\marginparwidth{25mm}
 \setlength\topmargin{13mm}
 \setlength{\skip\footins}{2\baselineskip \@plus 4\p@ \@minus 2\p@}
 \def\@listi{\leftmargin\leftmargini
@@ -247,22 +247,22 @@
                    \llap{\hbox to0.5\oddsidemargin{  \ifx\@hideLIPIcs\@undefined\ifx\@ArticleNo\@empty\textcolor{blue}{XX}\else\@ArticleNo\fi:\fi\thepage\hss}}\leftmark\hfil}%
     \def\@oddhead{\large\sffamily\bfseries\rightmark\hfil
                   \rlap{\hbox to0.5\oddsidemargin{\hss  \ifx\@hideLIPIcs\@undefined\ifx\@ArticleNo\@empty\textcolor{blue}{XX}\else\@ArticleNo\fi:\fi\thepage}}}%
-    %\def\@oddfoot{\hfil
-                  %\rlap{%
-                    %\vtop{%
-                      %\vskip10mm
-                      %\colorbox[rgb]{0.99,0.78,0.07}
-                                    %{\@tempdima\evensidemargin
-                                     %\advance\@tempdima1in
-                                     %\advance\@tempdima\hoffset
-                                     %\hb@xt@\@tempdima{%
-                                       %\ifx\@hideLIPIcs\@undefined
-                                         %\textcolor{darkgray}{\normalsize\sffamily
-                                         %\bfseries\quad
-                                         %\expandafter\textsolittle
-                                         %\expandafter{\@EventShortTitle}}%
-                                       %\fi
-                                     %\strut\hss}}}}}
+    \def\@oddfoot{\hfil
+                  \rlap{%
+                    \vtop{%
+                      \vskip10mm
+                      \colorbox[rgb]{0.99,0.78,0.07}
+                                    {\@tempdima\evensidemargin
+                                     \advance\@tempdima1in
+                                     \advance\@tempdima\hoffset
+                                     \hb@xt@\@tempdima{%
+                                       \ifx\@hideLIPIcs\@undefined
+                                         \textcolor{darkgray}{\normalsize\sffamily
+                                         \bfseries\quad
+                                         \expandafter\textsolittle
+                                         \expandafter{\@EventShortTitle}}%
+                                       \fi
+                                     \strut\hss}}}}}
     \let\@evenfoot\@empty
     \let\@mkboth\markboth
   \let\sectionmark\@gobble
@@ -304,7 +304,7 @@
   \vskip-\headsep
   \@titlerunning
   \@authorrunning
-  \let \footnote \thanks
+  %%\let \footnote \thanks
   \parindent\z@ \raggedright
   \if!\@title!\def\@title{\textcolor{red}{Author: Please fill in a title}}\fi
     {\LARGE\sffamily\bfseries\mathversion{bold}\@title \par}%
@@ -335,21 +335,21 @@
                                    {2.3ex \@plus.2ex}%
                                    {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {-2.75ex\@plus -1ex \@minus -.2ex}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
                                      {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-2.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.0ex \@plus .2ex}%
-                                     {\sffamily\Large\bfseries\raggedright}} % EDITED from \Large
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\sffamily\Large\bfseries\raggedright}}
 \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-                                    {-2.00ex \@plus-0.5ex \@minus-.1ex}%
-                                    {0.75ex \@plus .1ex}%
-                                    {\sffamily\Large\bfseries\raggedright}}
+                                    {-3.25ex \@plus-1ex \@minus-.2ex}%
+                                    {1.5ex \@plus .2ex}%
+                                    {\sffamily\large\bfseries\raggedright}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\z@}%
-                                       {2.00ex \@plus0.5ex \@minus .1ex}%
+                                       {3.25ex \@plus1ex \@minus .2ex}%
                                        {-1em}%
-                                      {\sffamily\large\bfseries}}
+                                      {\sffamily\normalsize\bfseries}}
 \setlength\leftmargini  \parindent
 \setlength\leftmarginii {1.2em}
 \setlength\leftmarginiii{1.2em}
@@ -357,25 +357,25 @@
 \setlength\leftmarginv  {1.2em}
 \setlength\leftmarginvi {1.2em}
 \renewcommand\labelenumi{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
+  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumi.}}
 \renewcommand\labelenumii{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
+  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumii.}}
 \renewcommand\labelenumiii{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
+  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiii.}}
 \renewcommand\labelenumiv{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
+  \textcolor{darkgray}{\sffamily\bfseries\upshape\mathversion{bold}\theenumiv.}}
 \renewcommand\labelitemi{%
-  \textcolor{DarkOrchid}{\ifnum\@listdepth=\@ne
+  \textcolor[rgb]{0.6,0.6,0.61}{\ifnum\@listdepth=\@ne
                                   \rule{0.67em}{0.33em}%
                                 \else
                                   \rule{0.45em}{0.225em}%
                                 \fi}}
 \renewcommand\labelitemii{%
-  \textcolor{DarkOrchid}{\rule{0.45em}{0.225em}}}
+  \textcolor[rgb]{0.6,0.6,0.61}{\rule{0.45em}{0.225em}}}
 \renewcommand\labelitemiii{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\textasteriskcentered}}
+  \textcolor[rgb]{0.6,0.6,0.61}{\sffamily\bfseries\textasteriskcentered}}
 \renewcommand\labelitemiv{%
-  \textcolor{DarkOrchid}{\sffamily\bfseries\textperiodcentered}}
+  \textcolor[rgb]{0.6,0.6,0.61}{\sffamily\bfseries\textperiodcentered}}
 \renewenvironment{description}
                {\list{}{\advance\partopsep\topsep\topsep\z@\@plus\p@
                         \labelwidth\z@ \itemindent-\leftmargin
@@ -393,13 +393,13 @@
   \fontsize{9}{12}\selectfont
   \noindent\ignorespaces}
   {\vskip0.7\baselineskip\noindent
-   %\subjclassHeading
-   %\ifx\@ccsdescString\@empty
-     %\textcolor{red}{Author: Please fill in 1 or more \string\ccsdesc\space macro}%
-   %\else
-     %\@ccsdescString
-   %\fi
-   %\vskip0.7\baselineskip
+   \subjclassHeading
+   \ifx\@ccsdescString\@empty
+     \textcolor{red}{Author: Please fill in 1 or more \string\ccsdesc\space macro}%
+   \else
+     \@ccsdescString
+   \fi
+   \vskip0.7\baselineskip
    \noindent\keywordsHeading
    \ifx\@keywords\@empty
      \textcolor{red}{Author: Please fill in \string\keywords\space macro}%
@@ -447,11 +447,10 @@
    \rlap{\color[rgb]{0.51,0.50,0.52}\vrule\@width\textwidth\@height1\p@}%
    \hspace*{7mm}\fboxsep1.5mm\colorbox[rgb]{1,1,1}{\raisebox{-0.4ex}{%
      \normalsize\sffamily\bfseries\refname}}%
-   \@xsect{3ex \@plus.1ex}%
+   \@xsect{1ex \@plus.2ex}%
    \list{\@biblabel{\@arabic\c@enumiv}}%
-        {\leftmargin15mm
+        {\leftmargin8.5mm
          \labelsep\leftmargin
-         \itemsep2mm
          \settowidth\labelwidth{\@biblabel{#1}}%
          \advance\labelsep-\labelwidth
          \usecounter{enumiv}%
@@ -467,9 +466,9 @@
      {\@latex@warning{Empty `thebibliography' environment}}%
    \endlist}
 \renewcommand\footnoterule{%
-  \kern-20\p@ % EDITED from -8
+  \kern-8\p@
   {\color[rgb]{0.60,0.60,0.61}\hrule\@width40mm\@height1\p@}%
-  \kern6.6\p@} % EDITED from 6.6
+  \kern6.6\p@}
 \renewcommand\@makefntext[1]{%
     \parindent\z@\hangindent1em
     \leavevmode
@@ -680,7 +679,7 @@
 \let\@keywords\@empty
 \def\keywordsHeading{%
   \textcolor{darkgray}{\fontsize{9}{12}\sffamily\bfseries
-                       Keywords\enskip}}
+                       Keywords and phrases\enskip}}
 \RequirePackage{comment}
 \excludecomment{CCSXML}
 % inspired by https://tex.stackexchange.com/questions/12810/how-do-i-split-a-string
@@ -745,18 +744,16 @@
                       Acknowledgements\enskip}}
 \RequirePackage{amsthm}
 \thm@headfont{%
-  \textcolor{Periwinkle}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
+  \textcolor{darkgray}{$\blacktriangleright$}\nobreakspace\sffamily\bfseries}
 \def\th@remark{%
   \thm@headfont{%
-    \textcolor{Periwinkle}{$\blacktriangleright$}\nobreakspace\sffamily}%
+    \textcolor{darkgray}{$\blacktriangleright$}\nobreakspace\sffamily}%
   \normalfont % body font
   \thm@preskip\topsep \divide\thm@preskip\tw@
   \thm@postskip\thm@preskip
 }
 \def\@endtheorem{\endtrivlist}%\@endpefalse
-\renewcommand\qedsymbol{\textcolor{Periwinkle}{\ensuremath{\square}}}
-\renewcommand\qedsymbol{\textcolor{Periwinkle}{\ensuremath{\thicksquare}}}
-%\renewcommand\qedsymbol{\setlength{\fboxsep}{2.5pt}\setlength{\fboxrule}{1pt}\fcolorbox{DarkOrchid}{white}{\null}}
+\renewcommand\qedsymbol{\textcolor{darkgray}{\ensuremath{\blacktriangleleft}}}
 \renewenvironment{proof}[1][\proofname]{\par
   \pushQED{\qed}%
   \normalfont \topsep6\p@\@plus6\p@\relax
