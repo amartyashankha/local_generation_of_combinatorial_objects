@@ -7,16 +7,6 @@ Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- 
 %{\color{red} Should we still be explicitly mentioning the CDFs? now that we have two ``assumptions'' (product and sum) maybe we should tone this section as actually computing them (rather than just providing CDFs). also did we actually mention sums?}
 
 Next, we focus on the Stochastic Block model with randomly-assigned communities.
-\iffalse
-{\color{red}In this case, a naive solution would be to simply assign communities to contiguous blocks of indices.
-In such a setting, the problem of calculating $\mathsf{F}(v,a,b)$, simply reduces to the $G(n,p)$ case,
-with some additional case analysis to check when we are at a community boundary.
-However, this setup is unrealistic,
-and not particularly useful in the context of the Stochastic Block model.
-In fact most algorithms operating on these graphs,
-are trying to unveil the underlying community structure.}
-{\color{blue} I'd say these motivations should show up in intro or preliminaries (for the full version)}
-\fi
 Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random, according to some given distribution $\mathsf{R}$ over the communities. We formulate a method of sampling community assignments locally.
 This essentially allows us to sample from the \emph{multivariate hypergeometric distribution},
 using $\poly(\log n)$ random bits, which may be of independent interest. We remark that, as our first step, we sample for the number of vertices of each community. That is, our construction can alternatively support the community assignment where the number of vertices of each community is given, under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
