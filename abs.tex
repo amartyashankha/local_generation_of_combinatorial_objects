@@ -18,10 +18,10 @@ Next, we give the first local-access implementation for \func{All-Neighbors} que
 Our implementations require no pre-processing time, and answer each query using $ \mathcal{O}(\poly(\log n)) $ time, random bits, and additional space.
 
 Next, we show how to implement random Catalan objects, specifically focusing on Dyck paths
-(balanced random walks on the integer line that are always positive).
+(balanced random walks on the integer line that are always non-negative).
 Here, we support \func{Height} queries to find the location of the walk,
 and \func{First-Return} queries to find the time when the walk returns to a specified location.
-This in turn can be used to implement \func{Next-Neighbor} queries on random rooted and binary trees,
+This in turn can be used to implement \func{Next-Neighbor} queries on random rooted ordered trees,
 and \func{Matching-Bracket} queries on random well bracketed expressions (the Dyck language).
 
 Finally, we introduce two features to define a new model that:

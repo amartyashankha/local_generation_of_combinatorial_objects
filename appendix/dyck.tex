@@ -77,7 +77,7 @@ Now we consider a sub-path of length $2B$ and let $U$ denote the sum of the $X_i
 Using Chernoff bound with $\mathbb E[X] = B$, we get:
 \[
 \mathbb P\left[ |U-B| < 3\sqrt{B \log n}\right]
-= \mathbb P\left[ |U-B| < 3\frac{\sqrt{\log n}}{\sqrt B}B\right] < e^{\frac{9\log n}{3}} \approx \frac{1}{n^3}
+= \mathbb P\left[ |U-B| < 3\frac{\sqrt{\log n}}{\sqrt B}B\right] < e^{-\frac{9\log n}{3}} = \frac{1}{n^3}
 \]
 Since $U$ and $D$ are symmetric, the same argument applies.
 \end{proof}
@@ -118,7 +118,7 @@ and so the $L_1$ distance between the uniform distributions on $\mathcal D$ and 
 \label{sec:computing_probabilities}
 \begin{lemma}
 \label{lem:probability_approximation_oracle}
-Given a Dych sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
+Given a Dyck sub-path problem within a global Dyck path of size $2n$ and a probability expression of the form
 $p_d = \frac{S_{left}\cdot S_{right}}{S_{total}}$, there exists a $\poly(\log n)$ time oracle that returns a
 $\left( 1\pm 1/n^2\right)$ multiplicative approximation to $p_d$ if $p_d = \Omega(1/n^2)$ and returns $0$ otherwise.
 \end{lemma}
@@ -235,7 +235,7 @@ Since the term $k'/(2U+1)$ is positive and $\le 1$ (since $kk' \le 2U+1$), we ca
 
 
 
-\subsection{Omitted Proofs from Section~\ref{sec:supporting_first_return_queries}: Supporting \func{First-Return} Queries}
+\subsection{Omitted Proofs from Section~\ref{sec:supporting_first_return_queries}: \func{First-Return} Queries}
 \label{sec:omitted_supporting_first_return_queries}
 %\ReturnProbabilityBoundNotNormalized*
 %\begin{proof}

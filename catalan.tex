@@ -216,7 +216,7 @@ However, we can go further and obtain a $\mathcal O(poly(\log n))$ time algorith
 We first consider the case when the boundary constraint is far away from the starting point, i.e. $k$ is large.
 The following lemma (proof in Section~\ref{sec:dyck_path_boundaries_and_deviations}) shows that in this case,
 we can safely \emph{ignore} the constraint.  Intuitively, this is because the boundary is so far away,
-that we do not hit it with high probability even if we choose a random \emph{unconstrained} path.
+that with high probability, we do not hit it even if we choose a random \emph{unconstrained} path.
 \begin{restatable}{lemma}{DyckPathIrrelevantBoundary}
 \label{lem:dyck_path_irrelevant_boundary}
 Given a Dyck path sampling problem of length $B$ with $U$ up, $D$ down steps, and a boundary at $k$,
@@ -349,7 +349,7 @@ In this section, we discuss more complex queries to a Dyck path.
 Specifically, we implement $\func{First-Return}(x)$ to allow the user to query the next time the path returns to \func{Height}$(x)$.
 The utility of this kind of query is illustrated through bijections to other random Catalan objects
 in Section~\ref{sec:bijections_to_other_catalan_objects}.
-An important detail here is that if the first step from $x$ to $x+1$ is an down-step, there is no well defined \func{First-Return}.
+An important detail here is that if the first step from $x$ to $x+1$ is a down-step, there is no well defined \func{First-Return}.
 %In case of trees, this would correspond to a leaf which has no children.
 
 %We will use the following asymptotic formula for \emph{close-to-central} binomial coefficients
@@ -794,7 +794,7 @@ Finally, we show that the boundary constraints introduced in order to maintain I
 do not interfere with the implementation of \func{Height} queries.
 As before, we consider the currently revealed heights $ \langle y_1, y_2,\cdots, y_m \rangle$,
 along with the corresponding positions $ \langle x_1, x_2,\cdots, x_m \rangle$ (in increasing order).
-Say that we are now presented with a a query $\func{Height}(x)$, where $x_i < x < x_{i+1}$.
+Say that we are now presented with a query $\func{Height}(x)$, where $x_i < x < x_{i+1}$.
 As in Section~\ref{sec:implementing_height_queries}, we swap $x_i$ and $x_{i+1}$ if necessary in order to ensure that $y_i < y_{i+1}$.
 Due to Invariant~\ref{inv:boundary_invariant}, we know that the lowest achievable height in the interval $[x_i, x_{i+1}]$ is $y_i$,
 i.e. the boundary constraint for the left half becomes $k = 1$ instead of $k = y_i + 1$, since the constrained boundary is at height $y_i$.

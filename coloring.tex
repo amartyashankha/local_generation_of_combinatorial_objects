@@ -272,10 +272,12 @@ while computing a single $\bm \chi_v^t$.
 We define $W^t_{t'}$ to be a random variable indicating the number of calls to \func{Accepted} that are required,
 to check whether a color $c$ assigned at epoch $t'$ was overwritten at some epoch before $t$.
 \end{definition}
-Using $\mathcal B(p)$ to denote the Bernoulli random variable with bias $p$, we obtain an expression for $R^t_{t'}$.
+Using $\mathcal B(p)$ to denote the Bernoulli random variable with bias $p$, we obtain an expression for $W^t_{t'}$
+(using $\le$ to denote stochastic dominance).
 \begin{align}
 \label{eq:color_overwrite}
-W^t_{t'} \le \Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
+W^t_{t'} \le
+\Biggl[T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2}
 + \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots
 + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1} \Biggr]
 \end{align}
@@ -298,7 +300,7 @@ while computing a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t]
 We start by constructing a recurrence for the expected number of calls to $\func{Accepted}$ used by the algorithm.
 When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
 (in reality, only the last occurence matters, but we are looking for an upper bound).
-If such a $t'$ is found (this happens with probability $1/q$ independently for each trial), there is a recursive call to $\func{Accepted}(w,t')$,
+If such a $t'$ is found (which happens with probability $1/q$ independently for each trial), there is a recursive call to $\func{Accepted}(w,t')$,
 which in turn results in $T_{t'}$ recursive calls to \func{Accepted}.
 If we find that $\bm\chi^{t'}_w = \ONE$ (i.e. $w$ was colored to $c$ at epoch $t'$),
 we will need to proceed to check whether the color was subsequently overwritten, which requires an additional $W^t_{t'}$ calls to \func{Accepted}.
@@ -306,14 +308,16 @@ we will need to proceed to check whether the color was subsequently overwritten,
 %and summing up over all neighbors and epochs, we obtain the following:
 Summing up over all neighbors and epochs, we obtain the following bound:
 \begin{align}
-T_{t} &= \textcolor{Fuchsia}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
+T_{t} &\le \textcolor{Fuchsia}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
 \mathlarger\sum\limits_{t'=1}^{t}\ \  \textcolor{Blue}{\mathbb P\left[\vec C^{t'}_w = c\right]}\cdot
 \left[ \textcolor{BrickRed}{T_{t'}} + \textcolor{OliveGreen!80!black}{W^t_{t'}} \right] \\
 &\le \textcolor{Fuchsia}{\Delta} \cdot \mathlarger\sum\limits_{t'=1}^{t} \textcolor{Blue}{\mathcal B\left( \frac 1q\right)}\cdot
-\left[ \textcolor{BrickRed}{T_{t'}} +
+\Biggl[ \textcolor{BrickRed}{T_{t'}} +
 \textcolor{OliveGreen!80!black}{T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} +
-\mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3}
-+ \cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1}} \right]\\
+\mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots} \notag\\
+&\phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3}
+\phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3}
+\textcolor{OliveGreen!80!black}{\cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1}} \Biggr]\\
 &\le \textcolor{Fuchsia}{\Delta} \cdot \textcolor{Blue}{\mathcal B\left( \frac{1}{q}\right)} \cdot \Biggl[
 \textcolor{BrickRed}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}} +
 \textcolor{OliveGreen!80!black}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot

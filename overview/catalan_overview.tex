@@ -37,7 +37,8 @@ $U+d$ up steps and $D-d$ down steps are assigned to the first half, and $S_{tota
 The problem of determining the number of up steps in the first half of the \emph{interval} was solved for the unconstrained case
 (where the sequence is just a random permutation of up and down steps) in \cite{huge}.
 Adding the non-negativity constraint introduces further difficulties as the distribution over $d$ has a CDF that is difficult to compute.
-We construct a different distribution $\{q_d\}$ that approximates $\{p_d\}$ pointwise to a factor of $\log n$ and has an efficiently computable CDF.
+We construct a different distribution $\{q_d\}$ that approximates $\{p_d\}$ pointwise to a factor of $\mathcal O(\log n)$
+and has an efficiently computable CDF.
 This allows us to sample from $\{q_d\}$ and leverage rejection sampling techniques
 (see Lemma~\ref{lem:rejection_sampling} in Section~\ref{sec:basic_tools_for_efficient_sampling}) to obtain samples from $\{p_d\}$.
 
