@@ -449,7 +449,7 @@
      \normalsize\sffamily\bfseries\refname}}%
    \@xsect{1ex \@plus.2ex}%
    \list{\@biblabel{\@arabic\c@enumiv}}%
-        {\leftmargin8.5mm
+        {\leftmargin19mm
          \labelsep\leftmargin
          \settowidth\labelwidth{\@biblabel{#1}}%
          \advance\labelsep-\labelwidth
