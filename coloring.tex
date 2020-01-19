@@ -38,15 +38,22 @@ implying that the distribution of resulting colors is $\epsilon$ close to the un
 \subsection{Modified Glauber Dynamics based on a Distributed Algorithm}%
 \label{sec:modified_glauber_dynamics}
 
-Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{ghaffari_fischer}.
+Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{ghaffari_fischer}
+(also in \cite{yitong}).
 The modified Markov chain proceeds in epochs.
 We denote the initial coloring of the graph by the vector $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch, every node attempts to recolor itself simultaneously in a conservative manner, as described below:
 \begin{itemize}
     \item Sample $|V|$ colors $ \langle c_1, c_2,\cdots, c_n \rangle$ from $[q]$, where $c_v$ is the color proposed by vertex $v$.
-    \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$, if and only if for all neighbors $w$ of $v$, $\vec X^{k-1}_w\not=c_v$ and $c_w\not=c_v$.
-Specifically, a vertex $v$ is recolored if and only if its proposed color $c_v$
-does not conflict with any of it's neighbors current colors (at the end of the previous epoch), or their current proposals.
+    \item For each vertex $v$, we set $\vec X^k_v$ to $c_v$, if and only if for all neighbors $w$ of $v$:
+    \begin{enumerate}
+        \item \fbox{$c_v \not= c_w$}
+        The proposed color $c_v$ does not conflict with any of the neighbor proposals.
+        \item \fbox{$c_v \not= \vec X^{k-1}_w$}
+        Proposal $c_v$ does not conflict with any of the neighbor's current colors\footnote{Color of $w$ at the end of the previous epoch.}.
+        \item \fbox{$c_w \not= \vec X^{k-1}_v$}
+        None of the neighboring proposals $c_w$ conflict with current color of $v$.
+    \end{enumerate}
 \end{itemize}
 
 This procedure is a special case of the \emph{Local Glauber Dynamics},
@@ -54,6 +61,7 @@ which was presented in \cite{ghaffari_fischer} as a distributed algorithm for sa
 Note that \cite{ghaffari_fischer} also uses a marking probability $\gamma$,
 which indicates the likelihood of any vertex participating in a given round.
 For our purposes, it suffices to set $\gamma = 1$.}
+This Markov Chain was also discovered independently in \cite{yitong}.
 In the distributed setting, our epochs correspond to synchronous rounds, where many vertices recolor themselves simultaneously.
 
 In order to bound the mixing time of this Markov chain,
@@ -79,12 +87,12 @@ have the same transition probabilities as the original Markov Chain.
 We can directly use the result from the coupling defined in \cite{ghaffari_fischer}.
 \begin{lemma}
 \label{lem:ghaffari_fischer_single_epoch_distance}
-If $q = 2\alpha\Delta$, then there exists a coupling $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$, such that if $d(\vec X^0, \vec Y^0) = 1$,
-then $\mathbb E[d(\vec X^1,\vec Y^1)] \le 1-\left( 1-\frac1{2\alpha}\right)e^{-3/\alpha} + \frac{1/2\alpha}{1-1/\alpha}$
+If $q = 3\alpha\Delta$, then there exists a coupling $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$, such that if $d(\vec X^0, \vec Y^0) = 1$,
+then $\mathbb E[d(\vec X^1,\vec Y^1)] \le 1-\left( 1-\frac1{3\alpha}\right)e^{-2/\alpha} + \frac{1/3\alpha}{1-2/3\alpha}$
 \end{lemma}
 \begin{corollary}
 \label{cor:single_epoch_distansce}
-If $q \ge 9\Delta$ and $d(\vec X^0, \vec Y^0) = 1$, then $\mathbb E[d(\vec X^1,\vec Y^1)] < \frac1{e^{1/3}}$
+If $q \ge 9\Delta$ (or $\alpha > 3$) and $d(\vec X^0, \vec Y^0) = 1$, then $\mathbb E[d(\vec X^1,\vec Y^1)] < \frac1{e^{1/3}}$
 \end{corollary}
 
 The \emph{path coupling} lemma from \cite{path_coupling} uses a coupling on adjacent states to bound the mixing time.
@@ -122,7 +130,7 @@ We show how to reduce the probe complexity by appropriately pruning the $k$-neig
 Given query access to the adjacency matrix of a graph $G$ with maximum degree $\Delta$ and a vertex $v$,
 the algorithm has to output the color assigned to $v$ after running $t = \mathcal O(\ln n)$ epochs of \emph{Modified Glauber Dynamics}.
 We want to be able to answer such queries in sub-linear time, without simulating the entire Markov Chain.
-We will define the number of colors as $q = 2\alpha\Delta$ where $\alpha > 1$.
+We will define the number of colors as $q = 3\alpha\Delta$ where $\alpha > 1$.
 
 The proposals at each epoch are a vector of color samples $\vec C^{t} \thicksim_{\mathcal U} [q]^n$,
 where $\vec C^t_v$ is the color proposed by $v$ in the $t^{th}$ epoch.
@@ -132,14 +140,15 @@ instances of our algorithm will be able to access them in a consistent manner us
 We also use $\vec X^t$ to denote the final vector of vertex colors at the end of the $t^{th}$ epoch.
 Finally, we define indicator variables $\bm \chi^t_v$ to indicate whether the color $\vec C^t_v$ proposed by vertex $v$
 was accepted at the $t^{th}$ epoch: $\bm \chi^t_v = \ONE$ if and only if for all neighbors $w\in \Gamma(v)$,
-we satisfy the condition $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$
-(i.e. the proposed color does not conflict with any neighboring proposal or any neighbor's color from the preceding epoch).
-So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ is set to be $\vec C^i_v$
+we satisfy the conditions $\vec C^t_w\not= \vec X^{t-1}_v$, $\vec C^t_v\not= \vec X^{t-1}_w$ and $\vec C^t_v\not= \vec C^t_w$
+(see Section~\ref{sec:modified_glauber_dynamics}).
+
+So, the color of a vertex $v$ after the $t^{th}$ epoch $\vec X^t_v$ will be $\vec C^i_v$
 where $i\le t$ is the largest index such that $\bm \chi^i_v=1$.
 While the proposals $\vec C^t_v$ can simply be read off the public random tape $\vec R$,
 it is not clear how we can determine the $\bm \chi^t_v$ values efficiently.
 Computing $\vec X^t_v$ is quite simple if we know the values $\bm\chi^i_v$ for all $i\le t$.
-So, we focus our attention on the query $\func{Accepted}(v,t)$ that returns $\bm\chi^t_v$.
+So, we focus our attention on the query $\func{Accepted}(v,t)$ that samples and returns the value of $\bm\chi^t_v$.
 
 
 \subsubsection{Local Access to an Initial Valid Coloring}
@@ -187,30 +196,33 @@ The expected number of neighbors that need to be checked recursively can always 
 The crucial observation is that even though these recursive calls seem unavoidable,
 we can aim to reduce the size of the recursive sub-problem, and thus bound the number of levels of recursion.
 
-Algorithm~\ref{alg:coloring} shows our final procedure for generating $\bm\chi^t_v$, where $c =\vec C^t_v$ is $v$'s proposal at epoch $t$.
+Algorithm~\ref{alg:coloring} shows our final procedure for generating $\bm\chi^t_v$,
+where $\vec c = \vec C^t$ is used to represent the vector of proposals at epoch $t$.
 We iterate through all neighbors $w$ of $v$, checking for conflicts (Line~\ref{alg:line:iterate_through_neighbors}).
-The condition $c\not=\vec C^t_w$ can be checked by reading $\vec C^t_w$ off the public random tape (Line~\ref{alg:line:check_immediate_conflict}).
-If no conflict is seen, we proceed to check whether $c\not= \vec X^{t-1}_w$.
+The condition $\vec c_v\not=\vec c_w$ can be checked by reading $\vec c_w$ off the public random tape (Line~\ref{alg:line:check_immediate_conflict}).
+If no conflict is seen, we proceed to check the remaining conditions: $\vec c_v\not= \vec X^{t-1}_w$ and $\vec c_w\not= \vec X^{t-1}_v$.
 
-\begin{figure}[htpb]
+\begin{figure}[!ht]
 \begin{framed}
     \renewcommand\figurename{Algorithm}
     \caption{Checking if proposal is accepted}
     \label{alg:coloring}
     \begin{algorithmic}[1]
         \Procedure{Accepted}{$v, t$}
-            \State {$c\gets\vec C^t_v$} \Comment{\parbox[t]{.6\linewidth}{\small Find the current proposal using the public random bits}}
+            \State {$\vec c\gets\vec C^t$} \Comment{\parbox[t]{.6\linewidth}{\small Find current proposals using the public random bits}}
             \For{$w \gets \Gamma(v)$} \label{alg:line:iterate_through_neighbors}
                 \Comment{\parbox[t]{.6\linewidth}{\small Iterate through the neighbors, checking for conflicts}}
-                \If {$\vec C_w^t = c$} \label{alg:line:check_immediate_conflict}
+                \If {$\vec C_w^t = \vec c_v$} \label{alg:line:check_immediate_conflict}
                     \Comment{\parbox[t]{.6\linewidth}{\small Check for conflict with neighbor's current proposal}}
                     \State \Return $\ZERO$
+                        \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict2}}
                 \EndIf
                 \For{$t' \gets [t, t-1, t-2, \cdots, 1, 0]$} \label{alg:line:iterate_backwards}
-                \Comment{\parbox[t]{.45\linewidth}{\footnotesize Check for conflict with neighbor's prior state}}
-                    \If {$\mathcal\vec C^{t'}_w = c$ \textbf{and} \func{Accepted}($w, t'$)} \label{alg:line:check_accepted}
-                        \Comment{\parbox[t]{.45\linewidth}{\footnotesize Potential conflict with neighbor's color}}
-                        \State $overwritten\gets \FALSE$ \Comment{\parbox[t]{.45\linewidth}{\footnotesize Check if color $c$ is overwritten by a future proposal}}
+                \Comment{\parbox[t]{.5\linewidth}{Check conflict with neighbor's prior color}}
+                    \If {$\vec C^{t'}_w = \vec c_v$ \textbf{and} \func{Accepted}($w, t'$)}\label{alg:line:check_accepted}
+                        \Comment{\parbox[t]{.40\linewidth}{\footnotesize Potential conflict: $w$ is colored $\vec c_v$}}
+                        \State $overwritten\gets \FALSE$
+                            \Comment{\parbox[t]{.40\linewidth}{\footnotesize Check if $\vec c_v$ overwritten in future epoch}}
                         \For{$\widetilde t \gets {\scriptstyle [t'+1, t'+2, t'+3, \cdots, t-1]}$} \label{alg:line:check_overwritten}
                             \If {\func{Accepted}($w, \widetilde t$)} \label{alg:line:check_overwritten_recursive}
                                 \State $overwritten\gets \TRUE$
@@ -219,34 +231,62 @@ If no conflict is seen, we proceed to check whether $c\not= \vec X^{t-1}_w$.
                         \EndFor
                         \If {\textbf{not} $overwritten$}
                         \State \Return $\ZERO$
-                        \Comment{\parbox[t]{.6\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict}}
+                            \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict}}
+                        \EndIf
+                        \State \textbf{break}
+                   \EndIf
+                \EndFor
+                \For{$t' \gets [t, t-1, t-2, \cdots, 1, 0]$} \label{alg:line:iterate_backwards2}
+                    \Comment{\parbox[t]{.5\linewidth}{Check if $\vec c_w$ conflicts with $v$'s current color.}}
+                    \If {$\vec C^{t'}_v = \vec c_w$ \textbf{and} \func{Accepted}($v, t'$)}\label{alg:line:check_accepted2}
+                        \Comment{\parbox[t]{.40\linewidth}{\footnotesize Potential conflict: $v$ is colored $\vec c_w$}}
+                        \State $overwritten\gets \FALSE$
+                            \Comment{\parbox[t]{.40\linewidth}{\footnotesize Check if $\vec c_w$ overwritten in future epoch}}
+                        \For{$\widetilde t \gets {\scriptstyle [t'+1, t'+2, t'+3, \cdots, t-1]}$} \label{alg:line:check_overwritten2}
+                            \If {\func{Accepted}($v, \widetilde t$)} \label{alg:line:check_overwritten_recursive2}
+                                \State $overwritten\gets \TRUE$
+                                \State \textbf{break}
+                            \EndIf
+                        \EndFor
+                        \If {\textbf{not} $overwritten$}
+                        \State \Return $\ZERO$
+                            \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict2}}
                         \EndIf
                         \State \textbf{break}
                    \EndIf
                 \EndFor
             \EndFor
-            \State \Return $\ONE$ \Comment{\parbox[t]{.6\linewidth}{No conflicts! This proposal is accepted} \label{alg:line:no_conflict}}
+            \State \Return $\ONE$ \Comment{\parbox[t]{.5\linewidth}{No conflicts! This proposal is accepted} \label{alg:line:no_conflict}}
         \EndProcedure
     \end{algorithmic}
 \end{framed}
 \end{figure}
-To achieve this, we iterate through all the epochs in reverse order (line~\ref{alg:line:iterate_backwards})
-to check whether the color $c$ was ever proposed for vertex $w$.
-If not, we can ignore $w$.
-Otherwise let's say that the most recent proposal for $c$ was at epoch $t'$ i.e. $\vec C^{t'}_w = c$.
+
+In order to check the first condition $\vec c_v\not= \vec X^{t-1}_w$,
+we iterate through all the epochs in reverse order (line~\ref{alg:line:iterate_backwards})
+to check whether the color $\vec c_v$ was ever proposed for vertex $w$ (if not, we can ignore $w$).
+If this is the case, let's say that the most recent proposal for $\vec c_v$ was at epoch $t'$ i.e. $\vec C^{t'}_w = \vec c_v$.
 Now, we directly ``jump'' to the $(t')^{th}$ epoch and recursively check if this proposal was accepted (line~\ref{alg:line:check_accepted}).
 If the proposal $\vec C^{t'}_w$ was not accepted, we keep iterating back in time until we find the next most recent epoch
-when $c$ was proposed by $w$, or until we run out of epochs.
-When we find the most recent epoch $t'$ in which $c$ was accepted i.e. $\bm\chi^{t'}_w = \ONE$,
+when $\vec c_v$ was proposed by $w$, or until we run out of epochs.
+When we find the most recent epoch $t'$ in which $\vec c_v$ was accepted i.e. $\bm\chi^{t'}_w = \ONE$,
 we successively consider epochs $t'+1, t'+2, t'+3, \cdots, t-1$, to see whether,
-the color $c$ was overwritten (line~\ref{alg:line:check_overwritten}) by an accepted proposal in a future epoch.
-This is done by recursively invoking $\func{Accepted}(w,t'+i)$ in order to compute $\bm\chi^{t'+i}_w$ (line~\ref{alg:line:check_overwritten_recursive}).
-If at any of these subsequent iterations, we see that a different proposal was accepted (thus overwriting the color $c$),
+the color $\vec c_v$ was overwritten (line~\ref{alg:line:check_overwritten}) by an accepted proposal in a future epoch.
+This is done by recursively invoking $\func{Accepted}(w,t'+i)$ in order to compute $\bm\chi^{t'+i}_w$
+(line~\ref{alg:line:check_overwritten_recursive}), for $i\ge 1$.
+If at any of these subsequent iterations, we see that a different proposal was accepted (thus overwriting the color $\vec c_v$),
 then neighbor $w$ does not cause a conflict, and we can move on to the next neighbor.
-Otherwise, we have seen that $\bm\chi^{t'}_w = \ONE$ (color $c$ was accepted) and every subsequent proposal until the current epoch $t$ was rejected;
-this implies that color $c$ \emph{survived} as the color of neighbor $w$, i.e. $\vec X^{t-1}_w = c$.
-This leads to a conflict with $v$'s current proposal for color $c$ (line~\ref{alg:line:conflict}) and hence $\bm\chi^t_v = \ZERO$.
-If we exhaust all the neighbors and don't find any conflicts (line~\ref{alg:line:no_conflict}) then $\bm\chi^t_v = \ONE$.
+Otherwise, we have seen that $\bm\chi^{t'}_w = \ONE$ (color $\vec c_v$ was accepted),
+and every subsequent proposal until the current epoch $t$ was rejected;
+this implies that color $\vec c_v$ \emph{survived} as the color of neighbor $w$, i.e. $\vec X^{t-1}_w = \vec c_v$.
+This leads to a conflict with $v$'s current proposal for color $\vec c_v$ (line~\ref{alg:line:conflict}) and hence $\bm\chi^t_v = \ZERO$.
+
+We can also check the second condition $\vec c_w\not= \vec X^{t-1}_v$ in a similar manner.
+In this case, we would iterate back through epochs to find a $t'$ such that $\vec C^{t'}_v = \vec c_w$
+i.e. vertex $v$ proposed color $\vec c_w$ (neighbor's current proposal) at epoch $t'$ (line~\ref{alg:line:check_accepted2}).
+As before, if such a $t'$ is found, we step fowards through the epochs to check
+whether the color of $v$ remains $\vec c_w$, or whether it was overwritten (line~\ref{alg:line:check_overwritten2}).
+If we exhaust all the neighbors and don't find any conflicts of any kind (line~\ref{alg:line:no_conflict}), then $\bm\chi^t_v = \ONE$.
 
 Now we analyze the runtime of $\func{Accepted}$ by constructing and solving a recurrence relation.
 We will use the following lemma to evaluate the expectation of products of relevant random variables.
@@ -257,8 +297,21 @@ The probability that any given proposal is rejected $\mathbb P[\bm\chi^t_v=\ZERO
 Moreover, this upper bound holds even if we condition on all the values in $\vec C$ except $\vec C^t_v$.
 \end{lemma}
 \begin{proof}
-A rejection can occur due to a conflict with at most $2\Delta$ possible values in $\{\vec C^t_w, \vec X^{t-1}_w | w\in\Gamma(v)\}$.
-Since there are $2\alpha\Delta$ colors, the rejection probability is at most $1/\alpha$.
+Let us consider a process for generating the random vector $\vec C^t$ where we first
+
+For $w\in \Gamma(v)$, the probability that proposal $\vec C^t_w$ does not conflict with the current color of $v$ is at least $(1-1/q)$.
+Since there are at most $\Delta$ neighbors, the probability
+that none of the neighbor proposals conflict with $\vec X^{t-1}_v$ is at least $(1-1/q)^{\Delta}$.
+The only other way for a rejection to occur is if the proposal $\vec C^t_v$
+conflicts with any of the colors in $\{\vec C^t_w, \vec X^{t-1}_w | w\in\Gamma(v)\}$.
+Since this set contains at most $2\Delta$ possible values and there are $q=3\alpha\Delta$ colors, the acceptance probability is at least $1-2/3\alpha$.
+%(conditioned on the fact that there was no rejection due to $\vec X^{t-1}_w = \vec C^t_v$).
+Thus the overall acceptance probability is at least:
+\[
+\left(1-\frac{1}{q}\right)^{\Delta}\cdot\left( 1-\frac{2}{3\alpha}\right) \ge \left(1 - \frac{\Delta}{q}\right)\cdot\left( 1-\frac{2}{3\alpha}\right)
+= \left(1 - \frac{1}{3\alpha}\right)\cdot\left( 1-\frac{2}{3\alpha}\right) \ge 1 - \frac{1}{\alpha}
+\]
+Thus, the rejection probability is at most $\frac{1}{\alpha}$.
 \end{proof}
 
 \begin{definition}
@@ -270,7 +323,7 @@ while computing a single $\bm \chi_v^t$.
 \begin{definition}
 \label{def:blah}
 We define $W^t_{t'}$ to be a random variable indicating the number of calls to \func{Accepted} that are required,
-to check whether a color $c$ assigned at epoch $t'$ was overwritten at some epoch before $t$.
+to check whether a color $\vec c_v$ assigned at epoch $t'$ was overwritten at some epoch before $t$.
 \end{definition}
 Using $\mathcal B(p)$ to denote the Bernoulli random variable with bias $p$, we obtain an expression for $W^t_{t'}$
 (using $\le$ to denote stochastic dominance).
@@ -293,48 +346,61 @@ Next, we prove our main lemma that bounds the number of recursive calls to \func
 
 \begin{lemma}
 \label{lem:coloring_recurrence}
-Given graph $G$ and $q=2\alpha\Delta$ colors, for $\alpha > 4.5$, the expected number of recursive calls to the procedure $\func{Accepted}$
-while computing a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{1.02t/\alpha}\right)$.
+Given graph $G$ and $q=3\alpha\Delta$ colors, for $\alpha > 3$, the expected number of recursive calls to the procedure $\func{Accepted}$
+while computing a single $\bm\chi^t_v = \func{Accepted}(v,t)$ is $\mathbb E[T_t] = \mathcal{O}\left(e^{4t/3\alpha}\right)$.
 \end{lemma}
 \begin{proof}
 We start by constructing a recurrence for the expected number of calls to $\func{Accepted}$ used by the algorithm.
-When checking a single neighbor $w$, the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = c$
+When checking for conflicts of the form $\vec X^{t-1}_w = \vec c_v$ (for a specific neighbor $w$),
+the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_w = \vec c_v$
 (in reality, only the last occurence matters, but we are looking for an upper bound).
 If such a $t'$ is found (which happens with probability $1/q$ independently for each trial), there is a recursive call to $\func{Accepted}(w,t')$,
-which in turn results in $T_{t'}$ recursive calls to \func{Accepted}.
-If we find that $\bm\chi^{t'}_w = \ONE$ (i.e. $w$ was colored to $c$ at epoch $t'$),
-we will need to proceed to check whether the color was subsequently overwritten, which requires an additional $W^t_{t'}$ calls to \func{Accepted}.
-%Adding an extra $T_{t'}$ term (corresponding to $\func{Accepted}(w,t')$) to Equation~\ref{eq:color_overwrite},
-%and summing up over all neighbors and epochs, we obtain the following:
+which in turn results in $\textcolor{RawSienna}{T_{t'}}$ recursive calls to \func{Accepted}.
+If we find that $\bm\chi^{t'}_w = \ONE$ (i.e. $w$ was colored to $\vec c_v$ at epoch $t'$),
+we will need to proceed to check whether the color was subsequently overwritten,
+which requires an additional $\textcolor{OliveGreen}{W^t_{t'}}$ calls to \func{Accepted}.
+Thus, the recursive calls from within the first for loop (in Algorithm~\ref{alg:coloring})
+result in the first term in Equation~\ref{eq:coloring_recurrence}.
+
+Similarly, during the second for loop in Algorithm~\ref{alg:coloring}, which checks for conflicts of the form $\vec X^{t-1}_v = \vec c_w$,
+the algorithm iterates through all the epochs $t'$ such that $\vec C^{t'}_v = \vec c_w$.
+As before, such a $t'$ is found with probability $1/q$ independently for each pair $(w, t')$,
+and once found it spawns $(\textcolor{RawSienna}{T_{t'}}+\textcolor{OliveGreen}{W^t_{t'}})$ recursive calls to \func{Accepted}, in expectation.
+
 Summing up over all neighbors and epochs, we obtain the following bound:
 \begin{align}
-T_{t} &\le \textcolor{Fuchsia}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
-\mathlarger\sum\limits_{t'=1}^{t}\ \  \textcolor{Blue}{\mathbb P\left[\vec C^{t'}_w = c\right]}\cdot
-\left[ \textcolor{BrickRed}{T_{t'}} + \textcolor{OliveGreen!80!black}{W^t_{t'}} \right] \\
-&\le \textcolor{Fuchsia}{\Delta} \cdot \mathlarger\sum\limits_{t'=1}^{t} \textcolor{Blue}{\mathcal B\left( \frac 1q\right)}\cdot
-\Biggl[ \textcolor{BrickRed}{T_{t'}} +
+\label{eq:coloring_recurrence}
+T_{t}
+&\le \textcolor{Fuchsia}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
+\mathlarger\sum\limits_{t'=1}^{t}\ \  \textcolor{Blue}{\mathbb P\left[\vec C^{t'}_w = \vec C^t_v\right]}\cdot
+\left[ \textcolor{RawSienna}{T_{t'}} + \textcolor{OliveGreen!80!black}{W^t_{t'}} \right]
++ \textcolor{Fuchsia}{\mathlarger\sum\limits_{w\in \Gamma(v)}}\ \
+\mathlarger\sum\limits_{t'=1}^{t}\ \  \textcolor{Blue}{\mathbb P\left[\vec C^{t'}_v = \vec C^t_w\right]}\cdot
+\left[ \textcolor{RawSienna}{T_{t'}} + \textcolor{OliveGreen!80!black}{W^t_{t'}} \right] \\
+&\le \textcolor{Fuchsia}{2\Delta} \cdot \mathlarger\sum\limits_{t'=1}^{t} \textcolor{Blue}{\mathcal B\left( \frac 1q\right)}\cdot
+\Biggl[ \textcolor{RawSienna}{T_{t'}} +
 \textcolor{OliveGreen!80!black}{T_{t'+1} + \mathcal B\left(\frac{1}{\alpha}\right)\cdot T_{t'+2} +
 \mathcal B\left(\frac{1}{\alpha^2}\right)\cdot T_{t'+3} + \cdots} \notag\\
 &\phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3}
 \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3} \phantom{{}=3}
 \textcolor{OliveGreen!80!black}{\cdots + \mathcal B\left(\frac{1}{\alpha^{t-t'-2}}\right)\cdot T_{t-1}} \Biggr]\\
-&\le \textcolor{Fuchsia}{\Delta} \cdot \textcolor{Blue}{\mathcal B\left( \frac{1}{q}\right)} \cdot \Biggl[
-\textcolor{BrickRed}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}} +
+&\le \textcolor{Fuchsia}{2\Delta} \cdot \textcolor{Blue}{\mathcal B\left( \frac{1}{q}\right)} \cdot \Biggl[
+\textcolor{RawSienna}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}} +
 \textcolor{OliveGreen!80!black}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot
 \left(1 + \mathcal B\left(\frac1\alpha\right) + \mathcal B\left(\frac1{\alpha^2}\right) + \cdots\right)}
 \Biggr]
 \end{align}
 In the last step, we just grouped together all the terms corresponding to the same epoch
 (note that we include additional terms since it's an upper bound).
-Using Lemma~\ref{lem:color_reject_probability} and the fact that $\textcolor{Blue}{\mathbb P[\vec C^{t'}_w = c]}$ is independent of all other events,
-we can write a recurrence for the expected number of probes.
+Using Lemma~\ref{lem:color_reject_probability} and the fact that $\textcolor{Blue}{\mathbb P[\vec C^{t'}_x = \vec C^t_y]}$
+is independent of all other events, we can write a recurrence for the expected number of probes.
 \begin{align}
-\mathbb E[T_t] \le \textcolor{Fuchsia}{\Delta} \cdot \textcolor{Blue}{\frac{1}{2\alpha\Delta}}
+\mathbb E[T_t] \le \textcolor{Fuchsia}{2\Delta} \cdot \textcolor{Blue}{\frac{1}{3\alpha\Delta}}
 \left[
-\textcolor{BrickRed}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}} +
+\textcolor{RawSienna}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}} +
 \textcolor{OliveGreen!80!black}{\mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left(1 + \frac1\alpha + \frac1{\alpha^2} + \cdots\right)}
 \right]
-\le \frac{1}{2\alpha}\cdot \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left[1 + \frac{\alpha}{\alpha-1} \right]
+\le \frac{2}{3\alpha}\cdot \mathlarger\sum\limits_{t'=1}^{t-1} T_{t'}\cdot \left[1 + \frac{\alpha}{\alpha-1} \right]
 \end{align}
 Now, we make the assumption that $\mathbb E[T_{t'}]\le e^{k t/\alpha}$,
 and show that this satisfies the expectation recurrence for the desired value of $k$.
@@ -345,21 +411,21 @@ First, we sum the geometric series:
 \]
 The expectation recurrence to be satisfied then becomes:
 \[
-\mathbb E[T_t]\le \frac 1{2\alpha}\cdot \frac{e^{k t/\alpha}}{e^{k/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
-= e^{k t/\alpha}\cdot \frac{2\alpha-1}{2\alpha(\alpha-1)(e^{k/\alpha}-1)} = e^{k t/\alpha}\cdot f(\alpha, k)
+\mathbb E[T_t]\le \frac 2{3\alpha}\cdot \frac{e^{k t/\alpha}}{e^{k/\alpha}-1}\cdot \left[ 1+ \frac{\alpha}{\alpha-1} \right]
+= e^{k t/\alpha}\cdot \frac{2(2\alpha-1)}{3\alpha(\alpha-1)(e^{k/\alpha}-1)} = e^{k t/\alpha}\cdot f(\alpha, k)
 \]
-We notice that for $k=1.02$ and $\alpha > 4.5$, $f(\alpha) < 1$.
-This can easily be verified by checking that $f(\alpha,1.02)$ decreases monotonically with $\alpha$ in the range $\alpha > 4.5$.
-Thus, our recurrence is satisfied for $k=1.02$, and therefore the expected number of calls is $\mathcal O(e^{1.02t/\alpha})$.
+We notice that for $k=4/3$ and $\alpha > 3$, $f(\alpha) < 1$.
+This can easily be verified by checking that $f(\alpha,4/3)$ decreases monotonically with $\alpha$ in the range $\alpha > 3$.
+Thus, our recurrence is satisfied for $k=4/3$, and therefore the expected number of calls is $\mathcal O(e^{4t/3\alpha})$.
 \end{proof}
 
 \ColoringGrand*
 \begin{proof}
 Since $q\ge 9\Delta$, we can use Corollary~\ref{cor:modified_mixing_time} to obtain $\tau_{mix}(\epsilon) \le 3(\ln n + \ln 1/\epsilon)$.
-Also, since $\alpha > 4.5$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
-the number of calls to $\func{Accepted}$ is $\mathcal O(n^{3.06/\alpha}\epsilon^{-3.06/\alpha})$.
+Also, since $\alpha > 3$, we can invoke Lemma~\ref{lem:coloring_recurrence} to conclude that
+the number of calls to $\func{Accepted}$ is $\mathcal O(n^{4/\alpha}\epsilon^{-4/\alpha})$.
 Finally, we note that each call to \func{Accepted}$(v,t)$ potentially reads $\mathcal O(t\Delta)$ color proposals from the public random tape,
 while iterating through all $\le \Delta$ neighbors of $v$ in all $t$ epochs.
 Since $t \le 3\ln (n/\epsilon)$, this implies that the algorithm uses
-$\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sub-linear for $\alpha > 3.06$.
+$\mathcal O((n/\epsilon)^{4/\alpha}\Delta\log (n/\epsilon))$ time and random bits, which is sub-linear for $\alpha > 4$.
 \end{proof}

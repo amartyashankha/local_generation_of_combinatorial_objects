@@ -207,7 +207,7 @@ This is an inherently sequential process with the acceptance of a particular pro
 Moreover, unlike the previously considered random objects, this one has no succinct representation, and we can only uncover the proper distribution
 by probing the underlying graph (in the manner of \emph{local computation algorithms} \cite{LCA, LCA_space_efficient}).
 Unlike LCAs which can return an \emph{arbitrary} valid solution, we also have to make sure that we return a solution from the correct distribution.
-We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 9\Delta$.
+We are able to construct an efficient oracle that returns the final color of a vertex using only a sub-linear number of probes when $q\ge 12\Delta$.
 
 This implementation also has the feature that multiple independent instances of the algorithm having access to the same random bits,
 will respond to queries in a manner consistent with each other; they will generate exactly the same coloring, regardless of the queries asked.
@@ -216,11 +216,12 @@ and only depends on common random bits,
 
 \begin{restatable}{theorem}{ColoringGrand}
 \label{thm:coloring_grand}
-Given neighborhood query access to a graph $G$ with $n$ nodes, maximum degree $\Delta$, and $q=2\alpha\Delta \ge 9\Delta$ colors,
+Given neighborhood query access to a graph $G$ with $n$ nodes, maximum degree $\Delta$, and $q=3\alpha\Delta \ge 9\Delta$ colors,
 we can generate the color of any given node from a distribution of color assignments that is $\epsilon$-close (in $L_1$ distance)
 to the uniform distribution over all valid colorings of $G$, in a consistent manner,
-using only $\mathcal O((n/\epsilon)^{3.06/\alpha}\Delta\log (n/\epsilon))$ time, probes, and public random bits per query.
+using only $\mathcal O((n/\epsilon)^{4/\alpha}\Delta\log (n/\epsilon))$ time, probes, and public random bits per query.
 \end{restatable}
+This run-time is sub-linear when $\alpha > 4 \iff q > 12\Delta$.
 
 
 
