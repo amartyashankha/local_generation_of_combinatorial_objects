@@ -10,7 +10,7 @@ The implementation can also access a tape of public random bits $\vec R$.
 Moreover, multiple independent instances of $\func{Color}$ that are given access to the same public tape of random bits $\vec R$,
 should output color values consistent with a single $\vec X$, regardless of the order and content of the queries received.
 Unlike our previous results, the choice of $\vec X$ only depends on $\vec R$,
-and the \func{Color} implementations do not need to use any additional memory to maintain consistency.
+and the \func{Color} implementations do not need any additional memory to maintain consistency.
 For a formal description of this model, see Definition~\ref{def:local_access_LCA}.
 This model is essentially a generalization of \emph{Local Computation Algorithms} \cite{LCA}.
 Given a computation problem with input $x$ and a set of valid outputs $F(x)$,
@@ -38,9 +38,7 @@ implying that the distribution of resulting colors is $\epsilon$ close to the un
 \subsection{Modified Glauber Dynamics based on a Distributed Algorithm}%
 \label{sec:modified_glauber_dynamics}
 
-Now we define a modified Markov chain as a special case of the \emph{Local Glauber Dynamics} presented in \cite{ghaffari_fischer}
-(also in \cite{yitong}).
-The modified Markov chain proceeds in epochs.
+Now we define a modified Markov Chain that proceeds in epochs.
 We denote the initial coloring of the graph by the vector $\vec X^0$ and the state of the coloring after the $k^{th}$ epoch by $\vec X^k$.
 In the $k^{th}$ epoch, every node attempts to recolor itself simultaneously in a conservative manner, as described below:
 \begin{itemize}
@@ -55,17 +53,13 @@ In the $k^{th}$ epoch, every node attempts to recolor itself simultaneously in a
         None of the neighboring proposals $c_w$ conflict with current color of $v$.
     \end{enumerate}
 \end{itemize}
-
-This procedure is a special case of the \emph{Local Glauber Dynamics},
-which was presented in \cite{ghaffari_fischer} as a distributed algorithm for sampling a random coloring.\footnote{
-Note that \cite{ghaffari_fischer} also uses a marking probability $\gamma$,
+This Markov Chain was introduced as the \emph{LocalMetropolis} algorithm by \cite{what_local}, in the context of distributed algorithms.
+It produces a random valid coloring when $q > (2+\sqrt 2)\Delta$.
+The bound on $q$ was further improved in \cite{yitong, ghaffari_fischer} by using a marking probability $\gamma$,
 which indicates the likelihood of any vertex participating in a given round.
-For our purposes, it suffices to set $\gamma = 1$.}
-This Markov Chain was also discovered independently in \cite{yitong}.
-In the distributed setting, our epochs correspond to synchronous rounds, where many vertices recolor themselves simultaneously.
+In the distributed setting, our epochs correspond to synchronous rounds, where many vertices re-color themselves simultaneously.
 
-In order to bound the mixing time of this Markov chain,
-\cite{ghaffari_fischer} uses the standard technique of \emph{path coupling}, introduced in \cite{path_coupling}.
+In order to bound the mixing time of this Markov chain, we use the standard technique of \emph{path coupling}, introduced in \cite{path_coupling}.
 The argument begins by considering two initial states of the Markov Chains, say two colorings $\vec X^0$ and $\vec Y^0$,
 that differ at only one vertex.
 Formally, we can define the distance between two colorings $d(\vec X,\vec Y)$ as the number of vertices $v$ such that $\vec X_v\not= \vec Y_v$,
@@ -84,7 +78,7 @@ have the same transition probabilities as the original Markov Chain.
     %then the $\vec X$ chain picks the color $c_i$ and the $\vec Y$ chain picks the other color.
     %\item Otherwise, both chains pick the same color $c_i$ for the vertex $v_i$.
 %\end{itemize}
-We can directly use the result from the coupling defined in \cite{ghaffari_fischer}.
+We can directly use the following main result from \cite{ghaffari_fischer} (setting $\gamma = 1$).
 \begin{lemma}
 \label{lem:ghaffari_fischer_single_epoch_distance}
 If $q = 3\alpha\Delta$, then there exists a coupling $(\vec X^0,\vec Y^0)\rightarrow(\vec X^1,\vec Y^1)$, such that if $d(\vec X^0, \vec Y^0) = 1$,
@@ -215,7 +209,7 @@ If no conflict is seen, we proceed to check the remaining conditions: $\vec c_v\
                 \If {$\vec C_w^t = \vec c_v$} \label{alg:line:check_immediate_conflict}
                     \Comment{\parbox[t]{.6\linewidth}{\small Check for conflict with neighbor's current proposal}}
                     \State \Return $\ZERO$
-                        \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict2}}
+                        \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict}}
                 \EndIf
                 \For{$t' \gets [t, t-1, t-2, \cdots, 1, 0]$} \label{alg:line:iterate_backwards}
                 \Comment{\parbox[t]{.5\linewidth}{Check conflict with neighbor's prior color}}
@@ -231,7 +225,7 @@ If no conflict is seen, we proceed to check the remaining conditions: $\vec c_v\
                         \EndFor
                         \If {\textbf{not} $overwritten$}
                         \State \Return $\ZERO$
-                            \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict}}
+                            \Comment{\parbox[t]{.5\linewidth}{Conflict! This proposal is \textbf{not} accepted} \label{alg:line:conflict1}}
                         \EndIf
                         \State \textbf{break}
                    \EndIf
