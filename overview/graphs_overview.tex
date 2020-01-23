@@ -3,7 +3,7 @@
 We consider the generic class of \emph{undirected graphs} with {\em independent edge probabilities} $\left\{ p_{uv} \right\}_{u,v\in V}$,
 (where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$),
 from which the results can be applied to Erd\"os-R\'enyi random graphs and the Stochastic Block Model.
-Throughout, we identify our vertices via their unique IDs from $1$ to $n$, namely $V = [n]$.
+Throughout, we identify our vertices via their unique IDs from $1$ to $n$.
 In this model, \func{Vertex-Pair} queries by themselves can be implemented trivially,
 since the existence of any edge $(u,v)$ is an independent Bernoulli random variable,
 but it becomes harder to maintain consistency when implementing them in conjunction with the other queries.
@@ -41,7 +41,7 @@ and also to provide deterministic resource usage guarantee (Section~\ref{sec:ER-
 \label{par:random_neighbor_queries}
 We implement \func{Random-Neighbor} queries (Section~\ref{sec:blocks}) using $\poly(\log n)$ resources.
 The ability to do so is surprising since:
-(1) Sampling the degree of vertex, may not be viable for \emph{sub-linear} implementations, because this quantity alone
+(1) Sampling the degree of vertex, may not be viable in \emph{sub-linear} time, because this quantity alone
 imposes dependence on the existence of \emph{all} of its potential incident edges and consequently on the rest of the graph (since it is undirected).
 Thus, our implementation needs to return a random neighbor, with probability reciprocal to the query vertex's degree,
 without resorting to \emph{determining} its degree.
@@ -54,12 +54,12 @@ so that the conditional probability of the remaining $\Theta(n)$ edges should no
 
 We formulate an approach which samples many consecutive edges simultaneously,
 in such a way that the conditional probabilities of the unsampled edges remain independent and ``well-behaved'' during subsequent queries.
-For each vertex $v$, we divide the potential neighbors of $v$ into consecutive ranges $\{B^{(i)}_v\}$ called blocks,
+For each vertex $v$, we divide the potential neighbors of $v$ into contiguous ranges $\{B^{(i)}_v\}$ called blocks,
 so that each $B^{(i)}_v$ contains $\Theta(1)$ neighbors in expectation (i.e. $\sum_{u\in B_i} p_{vu} = \Theta(1)$).
 The subroutine of \func{Next-Neighbor} is applied to sample the neighbors within a block in expected $\mathcal{\widetilde O}(1)$ time.
-We can now obtain a neighbor of $v$ by picking a random neighbor from a random block,
+We can now find a neighbor of $v$ by picking a random neighbor from a random block,
 but this introduces a bias because all blocks may not have the same number of neighbors.
-We remove this bias by rejecting samples from block $B^{(i)}_v$ with probability proportional to the number of neighbors in $B^{(i)}_v$.
+We remove this bias by rejecting samples with probability proportional to the number of neighbors in the block.
 
 
 
@@ -107,7 +107,7 @@ For $r$ communities, this yields an implementation with $ \mathcal{O}(r\cdot \po
 \subsection{Directed Graphs}
 \label{sec:directed_graphs}
 Lastly, we consider Kleinberg's Small World model (\cite{kleinberg, klein}) in Section~\ref{sec:small_world}.
-While small world models are proposed to capture properties of observed data such as small shortest-path
+While small world models are proposed to capture properties such as small shortest-path
 distances and large clustering coefficients \cite{watts1998collective},
 this important special case of Kleinberg's model, defined on two-dimensional grids, demonstrates the underlying geographical structures of networks.
 

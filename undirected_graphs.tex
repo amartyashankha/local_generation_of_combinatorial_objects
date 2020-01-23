@@ -143,12 +143,13 @@ Note that once the process terminates at some $u$, we make no implications on th
 
 \subparagraph*{Obstacles for extending beyond \func{Next-Neighbor} queries:}
 There are two main issues that prevent this method from supporting \func{Random-Neighbor} queries.
-Firstly, while one might consider applying \func{Next-Neighbor} starting from some random location $u$ to find the minimum $u' \geq u$
+Firstly, while one might consider applying \func{Next-Neighbor} starting from some random location $u$, to find the minimum $u' \geq u$
 where $\ADJ[v][u']=\ONE$, the probability of choosing $u'$ will depend on the probabilities $p_{vu}$'s, and is generally not uniform.
 Secondly, in Section~\ref{sec:nn-ds}, we observe that $\LAST[v]$ and $P_v$ together provide a succinct representation of $\ADJ[v][u] = \ZERO$
 only for contiguous cells $\ADJ[v][u]$ where $u \leq \LAST[v]$ or $v \leq \LAST[u]$: they cannot handle $\ZERO$ anywhere else.
-Unfortunately, in order to support \func{Random-Neighbor} queries, we will likely need to assign $\ADJ[v][u]$ to $\ZERO$ in random locations
-beyond $\LAST[v]$ or $\LAST[u]$, which cannot be captured by the current data structure.
+Unfortunately, in order to support \func{Random-Neighbor} queries, we would need to assign $\ADJ[v][u]$ to $\ZERO$ in random locations
+beyond $\LAST[v]$ or $\LAST[u]$.
+This cannot be done by the current data structure.
 Specifically, to speed-up the sampling process for small $p_{vu}$'s, we must generate many random non-neighbors at once,
-but we cannot afford to spend time linear in the number of created $\ZERO$'s to update our data structure.
+but we cannot afford to spend time linear in the number of $\ZERO$'s to update our data structure.
 We remedy these issues via the following approach.

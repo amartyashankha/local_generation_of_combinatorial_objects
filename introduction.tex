@@ -64,7 +64,7 @@ We implement the aforementioned queries for the generic class of \emph{undirecte
 $\left\{ p_{uv} \right\}_{u,v\in V}$, where $p_{uv}$ denotes the probability that there is an edge between $u$ and $v$.
 Under reasonable assumptions on the ability to compute certain values pertaining to consecutive edge probabilities,
 our implementations support \func{Vertex-Pair}, \func{Next-Neighbor}, and \func{Random-Neighbor} queries\footref{foot:graph_queries},
-using $\mathcal{O}(\poly(\log n))$ time, space, and random bits.
+using $\mathcal{O}(\poly(\log n))$ resources.
 Note that in this setting, $\func{Vertex-Pair}$ queries are trivial by themselves,
 since the existence of an edge depends on an independent random variable.
 However, maintaining all three types of queries simultaneously is much harder.

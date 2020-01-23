@@ -16,7 +16,7 @@ Over the course of the execution, our algorithm will determine the height of a r
 (with $x_i<x_{i+1}$), both directly as a result of user given $\func{Height}$ queries, and indirectly through recursive calls to $\func{Height}$.
 These positions divide the sequence into contiguous \emph{intervals} $[x_i,x_{i+1}]$,
 where the height of the endpoints $y_i, y_{i+1}$ have been determined, but none of the intermediate heights are known.
-The important observation is that the unknown section of the path within an \emph{interval}
+An important observation is that the unknown section of the path within an \emph{interval}
 is entirely determined by the positions and heights of the endpoints, and in particular is completely independent of all other \emph{intervals}.
 So, each interval $[x_i,x_{i+1}]$ along with corresponding heights $\{y_i,y_{i+1}\}$,
 represents a generalized Dyck problem with $U$ up steps, $D$ down steps,
@@ -69,7 +69,7 @@ by binary searching on the possible boundary locations using an appropriate CDF 
 To find an intermediate position touching this boundary, we parameterize the position with $d$,
 and find the distribution $\{p_d\}$ associated with the various possibilities.
 Since we cannot directly sample from this complicated distribution, we define a \emph{piecewise continuous} probability distribution
-$\hat q(\delta)$ such that $\hat q(\delta)$ approximates $p_{\floor\delta}$ (Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
+$\hat q(\delta)$ that approximates $p_{\floor\delta}$ (Section~\ref{sec:sampling_first_position_touching_mandatory_boundary}).
 We then use this to define a discrete distribution $\{q_d\}$ where $q_d = \int_d^{d+1}\hat q(\delta)$,
 where we can efficiently compute the CDF of $\{q_d\}$ by integrating the piecewise continuous $\hat q(\delta)$.
 The challenge here is to construct an appropriate $\hat q(\delta)$ that only has $\mathcal O(\log^{\mathcal O(1)} n)$ continuous pieces.

@@ -6,10 +6,15 @@ Our first implementation focuses on the well known Erd\"{o}s-R\'{e}nyi model -- 
 %It is quite simple to calculate the CDF for uniform probabilities.
 %{\color{red} Should we still be explicitly mentioning the CDFs? now that we have two ``assumptions'' (product and sum) maybe we should tone this section as actually computing them (rather than just providing CDFs). also did we actually mention sums?}
 
-Next, we focus on the Stochastic Block model with randomly-assigned communities.
-Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random, according to some given distribution $\mathsf{R}$ over the communities. We formulate a method of sampling community assignments locally.
+Next, we focus on the Stochastic Block model with randomly assigned communities.
+Our implementation assigns each vertex to a community in $\{C_1, \ldots, C_r\}$ identically and independently at random,
+according to some given distribution $\mathsf{R}$ over the communities.
+We formulate a method of sampling community assignments locally.
 This essentially allows us to sample from the \emph{multivariate hypergeometric distribution},
-using $\poly(\log n)$ random bits, which may be of independent interest. We remark that, as our first step, we sample for the number of vertices of each community. That is, our construction can alternatively support the community assignment where the number of vertices of each community is given, under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
+using $\tilde{\mathcal O}(1)$ random bits, which may be of independent interest.
+We remark that, as our first step, we sample the number of vertices of each community.
+That is, our construction can alternatively support a community assignment where the number of vertices of each community is given,
+under the assumption that the \emph{partition} of the vertex set into communities is chosen uniformly at random.
 
 \subsubsection{Erd\"{o}s-R\'{e}nyi Model}
 \label{sec:app_er}
